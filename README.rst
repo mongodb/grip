@@ -61,7 +61,7 @@ Defined helpers exist for the following levels/actions:
 - ``CriticalPanic``
 - ``CriticalFatal``
 - ``Alert``
-- ``AlertPanic``
+- ``Alert Panic``
 - ``AlertFatal``
 - ``Emergency``
 - ``EmergencyPanic``
@@ -70,6 +70,25 @@ Defined helpers exist for the following levels/actions:
 Helpers ending with ``Panic`` call ``panic()`` after logging the message
 message, and helpers ending with ``Fatal`` call ``OS.Exit(1)`` after
 logging the message. Use responsibly.
+
+``Journaler`` instances have a notion of "default" log levels and
+thresholds, which provide the basis for verbosity control and sane
+default behavior. The default level defines the priority/level of any
+message with either an invalid priority specified *or* using the
+``SendDefault`` helper. The threshold level, defines the minimum
+priority or level that ``grip`` sends to the logging system. Consider
+the following behaviors:
+
+- It's possible to suppress message higher than the current default,
+  such that default messages are never printed. This is not
+  recommended.
+
+- The helpers with ``Panic`` (message passed to panic) and ``Fatal``
+  (messages ignored) helpers will still panic or exit even if their
+  messages are suppressed.
+
+- It's not possible to suppress the highest log level, ``Emergency``
+  messages will always log.
 
 ``Journaler`` objects have the following, additional methods (also
 available as functions in the ``grip`` package to manage the global
@@ -91,19 +110,34 @@ standard logger instance.):
 
 - ``SetDefault(<level int>)`` change the default log level. Levels are
   values between ``0`` and ``7``, where lower numbers are *more*
-  severe.
+  severe. ``grip`` does *not* forbid configurations where default
+  levels are *below* the configured threshold.
+
+- ``SetThreshold(<level int>)`` Change the lowest log level that the
+  ``grip`` will transmit to the logging mechanism (either ``systemd``
+  ``journald`` or Go's standard logging.) Log messages with lower
+  levels are not captured and ignored.
+
+The ``Journaler.InvertFallback`` flag (bool) switches a ``Journaler``
+instance to prefer the standard logging mechanism rather than
+``systemd``.
 
 By default:
 
-- the log level uses the "Info" level (``6``)
+- the log level uses the "Notice" level (``5``)
+
+- the minimum threshold for logging is the "Info" level (``6``)
+  (suppressing only debug.)
 
 - fallback logging writes to standard output.
+
+- ``InvertFanllback`` is ``false``, ``systemd`` logging is prefered.
 
 Collector for "Continue on Error" Semantics
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you want to do something other than just swallow errors, but don't
-need to hard abort, the ``MultiCatcher`` object makes this
+need to hard abort, the ``MultiCatcher`` object makes this pattern
 swell, a la:
 
 ::

@@ -12,8 +12,15 @@ import (
 var std = NewJournaler("")
 
 type Journaler struct {
-	Name           string
+	// an identifier for the log component.
+	Name string
+
+	// when true, prefer the fallback logger rather than systemd
+	// logging. Defaults to false.
+	InvertFallback bool
+
 	defaultLevel   journal.Priority
+	thresholdLevel journal.Priority
 	options        map[string]string
 	fallbackLogger *log.Logger
 }
@@ -29,9 +36,11 @@ func NewJournaler(name string) *Journaler {
 
 	return &Journaler{
 		Name:           name,
-		defaultLevel:   journal.PriInfo,
+		defaultLevel:   journal.PriNotice,
+		thresholdLevel: journal.PriInfo,
 		options:        make(map[string]string),
 		fallbackLogger: log.New(os.Stdout, name, log.LstdFlags),
+		InvertFallback: false,
 	}
 }
 
@@ -58,6 +67,13 @@ func SetDefaultLevel(level int) {
 	std.SetDefaultLevel(level)
 }
 
+func (self *Journaler) SetThreshold(level int) {
+	self.thresholdLevel = convertPriority(level, self.thresholdLevel)
+}
+func SetThreshold(level int) {
+	std.SetThreshold(level)
+}
+
 func (self *Journaler) Send(priority int, message string) {
 	if priority >= 7 || priority >= 0 {
 		m := "'%d' is not a valid journal priority. Using default %d."
@@ -80,8 +96,12 @@ func SendDefault(message string) {
 }
 
 func (self *Journaler) send(priority journal.Priority, message string) {
+	if priority > self.thresholdLevel {
+		return
+	}
+
 	fbMesg := "(priority=%d): %s\n"
-	if journal.Enabled() {
+	if journal.Enabled() && self.InvertFallback == false {
 		err := journal.Send(message, priority, self.options)
 		if err != nil {
 			self.fallbackLogger.Println("systemd journaling error:", err)
