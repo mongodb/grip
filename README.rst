@@ -166,7 +166,8 @@ Use ``grip.Catch(<err>)`` to check and print error messages.
 
 There are also helper functions on ``Journaler`` objects that check
 and log error messages using either the default (global) ``Journaler``
-instance, or a specific ``Journaler`` instance, at all levels.
+instance, or as a method on specific ``Journaler`` instances, at all
+levels:
 
 - ``CatchDebug``
 - ``CatchInfo``

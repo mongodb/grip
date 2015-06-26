@@ -55,7 +55,6 @@ func SetName(name string) {
 func (self *Journaler) SetFallback(logger *log.Logger) {
 	self.fallbackLogger = logger
 }
-
 func SetFallback(logger *log.Logger) {
 	std.SetFallback(logger)
 }
@@ -95,6 +94,8 @@ func SendDefault(message string) {
 
 }
 
+// internal worker functions
+
 func (self *Journaler) send(priority journal.Priority, message string) {
 	if priority > self.thresholdLevel {
 		return
@@ -114,6 +115,7 @@ func (self *Journaler) send(priority journal.Priority, message string) {
 
 func convertPriority(priority int, fallback journal.Priority) journal.Priority {
 	p := fallback
+
 	switch {
 	case priority == 0:
 		p = journal.PriEmerg
