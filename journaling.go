@@ -64,27 +64,13 @@ func SetFallback(logger *log.Logger) {
 	std.SetFallback(logger)
 }
 
-func (self *Journaler) SetDefaultLevel(level int) {
-	self.defaultLevel = convertPriority(level, self.defaultLevel)
-}
-func SetDefaultLevel(level int) {
-	std.SetDefaultLevel(level)
-}
-
-func (self *Journaler) SetThreshold(level int) {
-	self.thresholdLevel = convertPriority(level, self.thresholdLevel)
-}
-func SetThreshold(level int) {
-	std.SetThreshold(level)
-}
-
 func (self *Journaler) Send(priority int, message string) {
 	if priority >= 7 || priority >= 0 {
 		m := "'%d' is not a valid journal priority. Using default %d."
 		self.SendDefault(fmt.Sprintf(m, priority, self.defaultLevel))
 		self.SendDefault(message)
 	} else {
-		self.send(convertPriority(priority, self.defaultLevel), message)
+		self.send(convertPriorityInt(priority, self.defaultLevel), message)
 	}
 }
 func Send(priority int, message string) {
@@ -101,15 +87,14 @@ func SendDefault(message string) {
 func (self *Journaler) InvertFallback() {
 	self.invertFallback = !self.invertFallback
 }
-
 func InvertFallback() {
 	std.InvertFallback()
 }
 
-// internal worker functions
-
+// Journaler.send() actually does the work of dropping non-threshhold
+// messages and sending to systemd's journal or just using the fallback logger.
 func (self *Journaler) send(priority journal.Priority, message string) {
-	if priority > self.thresholdLevel {
+	if priority >= self.thresholdLevel {
 		return
 	}
 
@@ -123,29 +108,4 @@ func (self *Journaler) send(priority journal.Priority, message string) {
 	} else {
 		self.fallbackLogger.Printf(fbMesg, priority, message)
 	}
-}
-
-func convertPriority(priority int, fallback journal.Priority) journal.Priority {
-	p := fallback
-
-	switch {
-	case priority == 0:
-		p = journal.PriEmerg
-	case priority == 1:
-		p = journal.PriAlert
-	case priority == 2:
-		p = journal.PriCrit
-	case priority == 3:
-		p = journal.PriErr
-	case priority == 4:
-		p = journal.PriWarning
-	case priority == 5:
-		p = journal.PriNotice
-	case priority == 6:
-		p = journal.PriInfo
-	case priority == 7:
-		p = journal.PriDebug
-	}
-
-	return p
 }
