@@ -15,14 +15,14 @@ type Journaler struct {
 	// an identifier for the log component.
 	Name string
 
-	// when true, prefer the fallback logger rather than systemd
-	// logging. Defaults to false.
-	InvertFallback bool
-
 	defaultLevel   journal.Priority
 	thresholdLevel journal.Priority
 	options        map[string]string
 	fallbackLogger *log.Logger
+
+	// when true, prefer the fallback logger rather than systemd
+	// logging. Defaults to false.
+	invertFallback bool
 }
 
 func NewJournaler(name string) *Journaler {
@@ -34,19 +34,24 @@ func NewJournaler(name string) *Journaler {
 		}
 	}
 
-	return &Journaler{
-		Name:           name,
+	j := &Journaler{
 		defaultLevel:   journal.PriNotice,
 		thresholdLevel: journal.PriInfo,
 		options:        make(map[string]string),
-		fallbackLogger: log.New(os.Stdout, name, log.LstdFlags),
-		InvertFallback: false,
+		invertFallback: false,
 	}
+
+	// intializes the fallback logger as well.
+	j.SetName(name)
+
+	return j
 }
 
 func (self *Journaler) SetName(name string) {
+	fbName := strings.Join([]string{"[", name, "] "}, "")
+
 	self.Name = name
-	self.fallbackLogger = log.New(os.Stdout, name, log.LstdFlags)
+	self.fallbackLogger = log.New(os.Stdout, fbName, log.LstdFlags)
 }
 func SetName(name string) {
 	std.SetName(name)
@@ -91,7 +96,14 @@ func (self *Journaler) SendDefault(message string) {
 }
 func SendDefault(message string) {
 	std.SendDefault(message)
+}
 
+func (self *Journaler) InvertFallback() {
+	self.invertFallback = !self.invertFallback
+}
+
+func InvertFallback() {
+	std.InvertFallback()
 }
 
 // internal worker functions
@@ -101,8 +113,8 @@ func (self *Journaler) send(priority journal.Priority, message string) {
 		return
 	}
 
-	fbMesg := "(priority=%d): %s\n"
-	if journal.Enabled() && self.InvertFallback == false {
+	fbMesg := "[p=%d]: %s\n"
+	if journal.Enabled() && self.invertFallback == false {
 		err := journal.Send(message, priority, self.options)
 		if err != nil {
 			self.fallbackLogger.Println("systemd journaling error:", err)
