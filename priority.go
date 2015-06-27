@@ -9,10 +9,10 @@ func SetDefaultLevel(level interface{}) {
 	std.SetDefaultLevel(level)
 }
 
-func (self *Journaler) SetThreshold(level int) {
+func (self *Journaler) SetThreshold(level interface{}) {
 	self.thresholdLevel = convertPriority(level, self.thresholdLevel)
 }
-func SetThreshold(level int) {
+func SetThreshold(level interface{}) {
 	std.SetThreshold(level)
 }
 
@@ -46,7 +46,7 @@ func (self *Journaler) GetThresholdLevelString() string {
 	}
 }
 func GetThresholdLevelString() string {
-	return int(std.GetThresholdLevelString())
+	return std.GetThresholdLevelString()
 }
 
 func convertPriority(priority interface{}, fallback journal.Priority) journal.Priority {
