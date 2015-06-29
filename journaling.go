@@ -72,7 +72,7 @@ func SetPreferFallback(setting bool) {
 }
 
 func (self *Journaler) Send(priority int, message string) {
-	if priority >= 7 || priority <= 0 {
+	if priority >= 7 || priority < 0 {
 		m := "'%d' is not a valid journal priority. Using default %d."
 		self.SendDefault(fmt.Sprintf(m, priority, self.defaultLevel))
 		self.SendDefault(message)
@@ -94,7 +94,7 @@ func SendDefault(message string) {
 // Journaler.send() actually does the work of dropping non-threshhold
 // messages and sending to systemd's journal or just using the fallback logger.
 func (self *Journaler) send(priority journal.Priority, message string) {
-	if priority >= self.thresholdLevel {
+	if priority > self.thresholdLevel {
 		return
 	}
 
