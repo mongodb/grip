@@ -65,7 +65,7 @@ func SetFallback(logger *log.Logger) {
 }
 
 func (self *Journaler) Send(priority int, message string) {
-	if priority >= 7 || priority >= 0 {
+	if priority >= 7 || priority <= 0 {
 		m := "'%d' is not a valid journal priority. Using default %d."
 		self.SendDefault(fmt.Sprintf(m, priority, self.defaultLevel))
 		self.SendDefault(message)
