@@ -38,13 +38,36 @@ func NewJournaler(name string) *Journaler {
 		defaultLevel:   journal.PriNotice,
 		thresholdLevel: journal.PriInfo,
 		options:        make(map[string]string),
-		PreferFallback: false,
 	}
 
 	// intializes the fallback logger as well.
 	j.SetName(name)
 
+	if envSaysUseStdout() == true {
+		j.PreferFallback = true
+	} else if envSaysUseJournal() == true {
+		// this is the default anyway,
+		// but being explicit here.
+		j.PreferFallback = false
+	}
+
 	return j
+}
+
+func envSaysUseJournal() bool {
+	if ev := os.Getenv("GRIP_USE_JOURNALD"); ev != "" {
+		return true
+	} else {
+		return false
+	}
+}
+
+func envSaysUseStdout() bool {
+	if ev := os.Getenv("GRIP_USE_STDOUT"); ev != "" {
+		return true
+	} else {
+		return false
+	}
 }
 
 func (self *Journaler) SetName(name string) {
