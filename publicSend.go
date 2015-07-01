@@ -18,17 +18,17 @@ func Send(priority int, message string) {
 // special methods for formating and line printing.
 
 func (self *Journaler) Sendf(priority int, message string, a ...interface{}) {
-	self.sendf(priority, message, a...)
+	self.Sendf(priority, message, a...)
 }
 func Sendf(priority int, message string, a ...interface{}) {
 	std.Sendf(priority, message, a...)
 }
 
 func (self *Journaler) Sendln(priority int, message string, a ...interface{}) {
-	self.sendln(priority, message, a...)
+	self.Sendln(priority, message, a...)
 }
 func Sendln(priority int, message string, a ...interface{}) {
-	std.Sendln(priority, message, a)
+	std.Sendln(priority, message, a...)
 }
 
 // default methods for sending messages at the default level, whatever it is.
@@ -40,14 +40,14 @@ func SendDefault(message string) {
 	std.SendDefault(message)
 }
 func (self *Journaler) SendDefaultf(message string, a ...interface{}) {
-	self.sendf(self.defaultLevel, message, a...)
+	self.sendf(self.defaultLevel, message, a)
 }
 func SendDefaultf(message string, a ...interface{}) {
-	std.SendDefaultf(message, a)
+	std.SendDefaultf(message, a...)
 }
-func (self *Journaler) SendDefaultln(message, a ...interface{}) {
-	self.sendln(self.defaultLevel, message, a...)
+func (self *Journaler) SendDefaultln(a ...interface{}) {
+	self.sendln(self.defaultLevel, a)
 }
-func SendDefaultln(message, a ...interface{}) {
-	std.SendDefaultln(message, a...)
+func SendDefaultln(a ...interface{}) {
+	std.SendDefaultln(a...)
 }

@@ -89,10 +89,10 @@ func (self *Journaler) send(priority journal.Priority, message string) {
 	}
 }
 
-func (self *Journal) sendf(priority journal.Priority, message string, a ...interface{}) {
-	self.send(priority, fmt.Sprintf(message, a))
+func (self *Journaler) sendf(priority journal.Priority, message string, a []interface{}) {
+	self.send(priority, fmt.Sprintf(message, a...))
 }
 
-func (self *Journal) sendln(priority journal.Priority, message string, a ...interface{}) {
-	self.send(priority, fmt.Sprintln(message, a))
+func (self *Journaler) sendln(priority journal.Priority, a []interface{}) {
+	self.send(priority, fmt.Sprintln(a...))
 }
