@@ -70,50 +70,6 @@ func envSaysUseStdout() bool {
 	}
 }
 
-func (self *Journaler) SetName(name string) {
-	fbName := strings.Join([]string{"[", name, "] "}, "")
-
-	self.Name = name
-	self.fallbackLogger = log.New(os.Stdout, fbName, log.LstdFlags)
-}
-func SetName(name string) {
-	std.SetName(name)
-}
-
-func (self *Journaler) SetFallback(logger *log.Logger) {
-	self.fallbackLogger = logger
-}
-func SetFallback(logger *log.Logger) {
-	std.SetFallback(logger)
-}
-
-func PrefersFallback() bool {
-	return std.PreferFallback
-}
-func SetPreferFallback(setting bool) {
-	std.PreferFallback = setting
-}
-
-func (self *Journaler) Send(priority int, message string) {
-	if priority >= 7 || priority < 0 {
-		m := "'%d' is not a valid journal priority. Using default %d."
-		self.SendDefault(fmt.Sprintf(m, priority, self.defaultLevel))
-		self.SendDefault(message)
-	} else {
-		self.send(convertPriorityInt(priority, self.defaultLevel), message)
-	}
-}
-func Send(priority int, message string) {
-	std.Send(priority, message)
-}
-
-func (self *Journaler) SendDefault(message string) {
-	self.send(self.defaultLevel, message)
-}
-func SendDefault(message string) {
-	std.SendDefault(message)
-}
-
 // Journaler.send() actually does the work of dropping non-threshhold
 // messages and sending to systemd's journal or just using the fallback logger.
 func (self *Journaler) send(priority journal.Priority, message string) {
@@ -131,4 +87,12 @@ func (self *Journaler) send(priority journal.Priority, message string) {
 	} else {
 		self.fallbackLogger.Printf(fbMesg, priority, message)
 	}
+}
+
+func (self *Journal) sendf(priority journal.Priority, message string, a ...interface{}) {
+	self.send(priority, fmt.Sprintf(message, a))
+}
+
+func (self *Journal) sendln(priority journal.Priority, message string, a ...interface{}) {
+	self.send(priority, fmt.Sprintln(message, a))
 }
