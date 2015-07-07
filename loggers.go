@@ -249,6 +249,13 @@ func (self *Journaler) ErrorPanicf(message string, a ...interface{}) {
 func ErrorPanicf(message string, a ...interface{}) {
 	std.ErrorPanicf(message, a...)
 }
+func (self *Journaler) ErrorPanicln(a ...interface{}) {
+	self.sendln(journal.PriErr, a)
+	panicln(a)
+}
+func ErrorPanicln(a ...interface{}) {
+	std.ErrorPanicln(a)
+}
 
 func (self *Journaler) ErrorFatal(message string) {
 	self.send(journal.PriErr, message)
@@ -263,6 +270,13 @@ func (self *Journaler) ErrorFatalf(message string, a ...interface{}) {
 }
 func ErrorFatalf(message string, a ...interface{}) {
 	std.ErrorFatalf(message, a...)
+}
+func (self *Journaler) ErrorFatalln(a ...interface{}) {
+	self.sendln(journal.PriErr, a)
+	os.Exit(1)
+}
+func ErrorFatalln(a ...interface{}) {
+	std.ErrorPanicln(a)
 }
 
 func (self *Journaler) Warning(message string) {
@@ -281,7 +295,7 @@ func (self *Journaler) Warningln(a ...interface{}) {
 	self.sendln(journal.PriWarning, a)
 }
 func Warningln(a ...interface{}) {
-	std.Warningln(a...)
+	std.Warningln(a)
 }
 
 func (self *Journaler) Notice(message string) {
@@ -296,12 +310,11 @@ func (self *Journaler) Noticef(message string, a ...interface{}) {
 func Noticef(message string, a ...interface{}) {
 	std.Noticef(message, a...)
 }
-
 func (self *Journaler) Noticeln(a ...interface{}) {
 	self.sendln(journal.PriNotice, a)
 }
 func Noticeln(a ...interface{}) {
-	std.Noticeln(a...)
+	std.Noticeln(a)
 }
 
 func (self *Journaler) Info(message string) {

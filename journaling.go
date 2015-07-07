@@ -94,5 +94,5 @@ func (self *Journaler) sendf(priority journal.Priority, message string, a []inte
 }
 
 func (self *Journaler) sendln(priority journal.Priority, a []interface{}) {
-	self.send(priority, fmt.Sprintln(a...))
+	self.send(priority, strings.Trim(fmt.Sprintln(a...), "\n"))
 }
