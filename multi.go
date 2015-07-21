@@ -25,13 +25,17 @@ func (self *MultiCatcher) Add(err error) {
 	}
 }
 
+func (self *MultiCatcher) String() string {
+	return strings.Join(self.errs, ", ")
+}
+
 func (self *MultiCatcher) Resolve() (err error) {
 	if self.count == 0 {
 		err = nil
 	} else if self.count == 1 {
 		err = errors.New(self.errs[0])
 	} else {
-		err = errors.New(strings.Join(self.errs, ", "))
+		err = errors.New(self.String())
 	}
 
 	self = NewCatcher()
