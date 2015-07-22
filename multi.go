@@ -25,6 +25,18 @@ func (self *MultiCatcher) Add(err error) {
 	}
 }
 
+func (self *MultiCatcher) Len() int {
+	return self.count
+}
+
+func (self *MultiCatcher) HasErrors() bool {
+	if self.Len() == 0 {
+		return false
+	} else {
+		return true
+	}
+}
+
 func (self *MultiCatcher) String() string {
 	return strings.Join(self.errs, ", ")
 }
