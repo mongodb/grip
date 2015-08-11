@@ -3,7 +3,7 @@ package grip
 import "github.com/coreos/go-systemd/journal"
 
 type MessageComposer interface {
-	Send() string
+	Resolve() string
 }
 
 func (self *Journaler) composeSend(priority journal.Priority, m MessageComposer) {
@@ -11,7 +11,7 @@ func (self *Journaler) composeSend(priority journal.Priority, m MessageComposer)
 		return
 	}
 
-	msg := m.Send()
+	msg := m.Resolve()
 	if msg != "" {
 		self.send(priority, msg)
 	}
