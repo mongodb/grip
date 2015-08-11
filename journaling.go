@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 	"runtime"
+	"strings"
 
 	"github.com/coreos/go-systemd/journal"
 )
@@ -68,7 +68,11 @@ func envSaysUseJournal() bool {
 }
 
 func envSaysUseStdout() bool {
-	if runtime.GOOS == "linux" && ev := os.Getenv("GRIP_USE_STDOUT"); ev != "" {
+	if runtime.GOOS != "linux" {
+		return true
+	}
+
+	if ev := os.Getenv("GRIP_USE_STDOUT"); ev != "" {
 		return true
 	} else {
 		return false
