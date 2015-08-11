@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"runtime"
 
 	"github.com/coreos/go-systemd/journal"
 )
@@ -55,6 +56,10 @@ func NewJournaler(name string) *Journaler {
 }
 
 func envSaysUseJournal() bool {
+	if runtime.GOOS != "linux" {
+		return false
+	}
+
 	if ev := os.Getenv("GRIP_USE_JOURNALD"); ev != "" {
 		return true
 	} else {
@@ -63,7 +68,7 @@ func envSaysUseJournal() bool {
 }
 
 func envSaysUseStdout() bool {
-	if ev := os.Getenv("GRIP_USE_STDOUT"); ev != "" {
+	if runtime.GOOS == "linux" && ev := os.Getenv("GRIP_USE_STDOUT"); ev != "" {
 		return true
 	} else {
 		return false
@@ -74,6 +79,7 @@ func envSaysUseStdout() bool {
 // messages and sending to systemd's journal or just using the fallback logger.
 func (self *Journaler) send(priority journal.Priority, message string) {
 	if priority > self.thresholdLevel {
+		// prorities are ordered from emergency (0) .. -> .. debug (8)
 		return
 	}
 
@@ -90,9 +96,17 @@ func (self *Journaler) send(priority journal.Priority, message string) {
 }
 
 func (self *Journaler) sendf(priority journal.Priority, message string, a ...interface{}) {
+	if priority > self.thresholdLevel {
+		return
+	}
+
 	self.send(priority, fmt.Sprintf(message, a...))
 }
 
 func (self *Journaler) sendln(priority journal.Priority, a ...interface{}) {
+	if priority > self.thresholdLevel {
+		return
+	}
+
 	self.send(priority, strings.Trim(fmt.Sprintln(a...), "\n"))
 }

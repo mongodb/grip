@@ -17,6 +17,13 @@ func (self *Journaler) composeSend(priority journal.Priority, m MessageComposer)
 	}
 }
 
+func (self *Journaler) ComposeDefault(m MessageComposer) {
+	self.composeSend(self.defaultLevel, m)
+}
+func ComposeDefault(m MessageComposer) {
+	std.ComposeDefault(m)
+}
+
 func (self *Journaler) ComposeEmergency(m MessageComposer) {
 	self.composeSend(journal.PriEmerg, m)
 }

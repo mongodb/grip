@@ -22,6 +22,16 @@ func Catch(err error) {
 // Alert + (fatal/panic)
 // Emergency + (fatal/panic)
 
+func (self *Journaler) CatchDefault(err error) {
+	if err != nil {
+		self.SendDefault(err.Error())
+	}
+}
+
+func CatchDefault(err error) {
+	std.CatchDefault(err)
+}
+
 // Level Debug Catcher Logging Helpers
 
 func (self *Journaler) CatchDebug(err error) {
@@ -30,9 +40,7 @@ func (self *Journaler) CatchDebug(err error) {
 	}
 }
 func CatchDebug(err error) {
-	if err != nil {
-		std.Debug(err.Error())
-	}
+	std.CatchDebug(err)
 }
 
 // Level Info Catcher Logging Helpers
@@ -43,9 +51,7 @@ func (self *Journaler) CatchInfo(err error) {
 	}
 }
 func CatchInfo(err error) {
-	if err != nil {
-		std.Info(err.Error())
-	}
+	std.CatchInfo(err)
 }
 
 // Level Notice Catcher Logging Helpers
@@ -56,9 +62,7 @@ func (self *Journaler) CatchNotice(err error) {
 	}
 }
 func CatchNotice(err error) {
-	if err != nil {
-		std.Notice(err.Error())
-	}
+	std.CatchNotice(err)
 }
 
 // Level Warning Catcher Logging Helpers
@@ -69,9 +73,7 @@ func (self *Journaler) CatchWarning(err error) {
 	}
 }
 func CatchWarning(err error) {
-	if err != nil {
-		std.Warning(err.Error())
-	}
+	std.CatchWarning(err)
 }
 
 // Level Error Catcher Logging Helpers
@@ -82,9 +84,7 @@ func (self *Journaler) CatchError(err error) {
 	}
 }
 func CatchError(err error) {
-	if err != nil {
-		std.Error(err.Error())
-	}
+	std.CatchError(err)
 }
 func (self *Journaler) CatchErrorPanic(err error) {
 	if err != nil {
@@ -92,9 +92,7 @@ func (self *Journaler) CatchErrorPanic(err error) {
 	}
 }
 func CatchErrorPanic(err error) {
-	if err != nil {
-		std.ErrorPanic(err.Error())
-	}
+	std.CatchErrorPanic(err)
 }
 func (self *Journaler) CatchErrorFatal(err error) {
 	if err != nil {
@@ -102,9 +100,7 @@ func (self *Journaler) CatchErrorFatal(err error) {
 	}
 }
 func CatchErrorFatal(err error) {
-	if err != nil {
-		std.ErrorFatal(err.Error())
-	}
+	std.CatchErrorFatal(err)
 }
 
 // Level Critical Catcher Logging Helpers
@@ -115,9 +111,7 @@ func (self *Journaler) CatchCritical(err error) {
 	}
 }
 func CatchCritical(err error) {
-	if err != nil {
-		std.Critical(err.Error())
-	}
+	std.CatchCritical(err)
 }
 func (self *Journaler) CatchCriticalPanic(err error) {
 	if err != nil {
@@ -125,9 +119,7 @@ func (self *Journaler) CatchCriticalPanic(err error) {
 	}
 }
 func CatchCriticalPanic(err error) {
-	if err != nil {
-		std.CriticalPanic(err.Error())
-	}
+	std.CatchCriticalPanic(err)
 }
 func (self *Journaler) CatchCriticalFatal(err error) {
 	if err != nil {
@@ -135,9 +127,7 @@ func (self *Journaler) CatchCriticalFatal(err error) {
 	}
 }
 func CatchCriticalFatal(err error) {
-	if err != nil {
-		std.CriticalFatal(err.Error())
-	}
+	std.CatchCriticalFatal(err)
 }
 
 // Level Alert Catcher Logging Helpers
@@ -148,9 +138,7 @@ func (self *Journaler) CatchAlert(err error) {
 	}
 }
 func CatchAlert(err error) {
-	if err != nil {
-		std.Alert(err.Error())
-	}
+	std.CatchAlert(err)
 }
 func (self *Journaler) CatchAlertPanic(err error) {
 	if err != nil {
@@ -158,9 +146,7 @@ func (self *Journaler) CatchAlertPanic(err error) {
 	}
 }
 func CatchAlertPanic(err error) {
-	if err != nil {
-		std.AlertPanic(err.Error())
-	}
+	std.CatchAlertPanic(err)
 }
 func (self *Journaler) CatchAlertFatal(err error) {
 	if err != nil {
@@ -168,9 +154,7 @@ func (self *Journaler) CatchAlertFatal(err error) {
 	}
 }
 func CatchAlertFatal(err error) {
-	if err != nil {
-		std.AlertFatal(err.Error())
-	}
+	std.CatchAlertFatal(err)
 }
 
 // Level Emergency Catcher Logging Helpers
@@ -181,9 +165,7 @@ func (self *Journaler) CatchEmergency(err error) {
 	}
 }
 func CatchEmergency(err error) {
-	if err != nil {
-		std.Emergency(err.Error())
-	}
+	std.CatchEmergency(err)
 }
 func (self *Journaler) CatchEmergencyPanic(err error) {
 	if err != nil {
@@ -191,9 +173,7 @@ func (self *Journaler) CatchEmergencyPanic(err error) {
 	}
 }
 func CatchEmergencyPanic(err error) {
-	if err != nil {
-		std.EmergencyPanic(err.Error())
-	}
+	std.CatchEmergency(err)
 }
 func (self *Journaler) CatchEmergencyFatal(err error) {
 	if err != nil {
@@ -201,7 +181,5 @@ func (self *Journaler) CatchEmergencyFatal(err error) {
 	}
 }
 func CatchEmergencyFatal(err error) {
-	if err != nil {
-		std.EmergencyFatal(err.Error())
-	}
+	std.CatchEmergencyFatal(err)
 }
