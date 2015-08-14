@@ -40,13 +40,13 @@ func SendDefault(message string) {
 	std.SendDefault(message)
 }
 func (self *Journaler) SendDefaultf(message string, a ...interface{}) {
-	self.sendf(self.defaultLevel, message, a)
+	self.sendf(self.defaultLevel, message, a...)
 }
 func SendDefaultf(message string, a ...interface{}) {
 	std.SendDefaultf(message, a...)
 }
 func (self *Journaler) SendDefaultln(a ...interface{}) {
-	self.sendln(self.defaultLevel, a)
+	self.sendln(self.defaultLevel, a...)
 }
 func SendDefaultln(a ...interface{}) {
 	std.SendDefaultln(a...)

@@ -11,6 +11,7 @@ func SetDefaultLevel(level interface{}) {
 
 func (self *Journaler) SetThreshold(level interface{}) {
 	self.thresholdLevel = convertPriority(level, self.thresholdLevel)
+
 }
 func SetThreshold(level interface{}) {
 	std.SetThreshold(level)
@@ -103,7 +104,7 @@ func convertPriorityString(priority string, fallback journal.Priority) journal.P
 		p = journal.PriNotice
 	case priority == "info":
 		p = journal.PriInfo
-	case priority == "debig":
+	case priority == "debug":
 		p = journal.PriDebug
 	}
 
