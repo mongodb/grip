@@ -185,3 +185,30 @@ levels:
 - ``CatchEmergency``
 - ``CatchEmergencyPanic``
 - ``CatchEmergencyFatal``
+
+Conditional Logging
+~~~~~~~~~~~~~~~~~~~
+
+``grip`` incldues support for conditional logging, so that you can
+only log a message in certain situations, by adding a Boolean argument
+to the logging call. Use this to implement "log sometimes" messages to
+minimize verbosity without complicating the calling code around the
+logging.
+
+Composed Logging
+~~~~~~~~~~~~~~~~
+
+If the production of the log message is resource intensive or
+complicated, you may wish to use a "composed logging," which delays
+the generation of the log message from the logging call site to the
+message propagation, to avoid generating the log message. Rather than
+passing the log message as a string, pass the logging function an
+instance of a type that implements the ``MessageComposer`` interface:
+::
+
+   type MessageComposer interface {
+        Resolve() string
+   }
+
+Composed logging may be useful for some debugging logging that depends
+on additional database or API queries or data serialization.
