@@ -7,7 +7,8 @@ import (
 	"github.com/coreos/go-systemd/journal"
 )
 
-// Takes an error object and prints a message if the err is non-nil.
+// Takes an error object and prints an error a message if the err is
+// non-nil. Does *not* depend on any logging infrastructure.
 func Catch(err error) {
 	if err != nil {
 		fmt.Println("ERROR:", err)
@@ -17,6 +18,8 @@ func Catch(err error) {
 // Logging helpers for catching and logging error messages. Helpers exist
 // for the following levels, with helpers defined both globally for the
 // global logger and for Journaler logging objects.
+//
+// Avalible levels and operations:
 //
 // Debug
 // Info

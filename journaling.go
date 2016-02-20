@@ -31,7 +31,7 @@ func NewJournaler(name string) *Journaler {
 		if !strings.Contains(os.Args[0], "go-build") {
 			name = os.Args[0]
 		} else {
-			name = "go-grip-default-logger"
+			name = "grip-default"
 		}
 	}
 

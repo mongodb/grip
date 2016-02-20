@@ -201,10 +201,10 @@ Composed Logging
 If the production of the log message is resource intensive or
 complicated, you may wish to use a "composed logging," which delays
 the generation of the log message from the logging call site to the
-message propagation, to avoid generating the log message. Rather than
-passing the log message as a string, pass the logging function an
-instance of a type that implements the ``MessageComposer`` interface:
-::
+message propagation, to avoid generating the log message unless
+neccessary. Rather than passing the log message as a string, pass the
+logging function an instance of a type that implements the
+``MessageComposer`` interface: ::
 
    type MessageComposer interface {
         Resolve() string

@@ -2,6 +2,11 @@ package grip
 
 import "github.com/coreos/go-systemd/journal"
 
+// Conditional logging methods, which take two arguments, a boolean,
+// and a message argument. Messages can be strings, Objects that
+// implement the MessageComposter interface or errors. If the
+// threshold level is met, and the message to log is not an empty
+// string, then it logs the resolved message.
 func (self *Journaler) conditionalSend(priority journal.Priority, conditional bool, message interface{}) {
 	if priority > self.thresholdLevel {
 		return
