@@ -1,17 +1,18 @@
 package grip
 
-import "github.com/coreos/go-systemd/journal"
+import (
+	"os"
+
+	"github.com/coreos/go-systemd/journal"
+)
 
 // Conditional logging methods, which take two arguments, a boolean,
 // and a message argument. Messages can be strings, Objects that
 // implement the MessageComposter interface or errors. If the
 // threshold level is met, and the message to log is not an empty
 // string, then it logs the resolved message.
-func (self *Journaler) conditionalSend(priority journal.Priority, conditional bool, message interface{}) {
-	if priority > self.thresholdLevel {
-		return
-	}
 
+func (self *Journaler) genericSend(priority journal.Priority, message interface{}) string {
 	var msg string
 
 	switch message := message.(type) {
@@ -23,12 +24,42 @@ func (self *Journaler) conditionalSend(priority journal.Priority, conditional bo
 		msg = message.Error()
 	default:
 		// if we can't deal with the type, then we should fail here.
-		return
+		return msg
 	}
 
 	if msg != "" {
 		self.send(priority, msg)
 	}
+
+	return msg
+}
+
+func (self *Journaler) conditionalSend(priority journal.Priority, conditional bool, message interface{}) {
+	if !conditional || priority > self.thresholdLevel {
+		return
+	}
+
+	self.genericSend(priority, message)
+	return
+
+}
+
+func (self *Journaler) conditionalSendPanic(priority journal.Priority, conditional bool, message interface{}) {
+	if !conditional || priority > self.thresholdLevel {
+		return
+	}
+
+	msg := self.genericSend(priority, message)
+	panic(msg)
+}
+
+func (self *Journaler) conditionalSendFatal(priority journal.Priority, conditional bool, message interface{}) {
+	if !conditional || priority > self.thresholdLevel {
+		return
+	}
+
+	self.genericSend(priority, message)
+	os.Exit(1)
 }
 
 func (self *Journaler) DefaultWhen(conditional bool, message interface{}) {
@@ -68,8 +99,44 @@ func (self *Journaler) EmergencyWhenf(conditional bool, msg string, args ...inte
 func EmergencyWhenf(conditional bool, msg string, args ...interface{}) {
 	std.EmergencyWhenf(conditional, msg, args...)
 }
+func (self *Journaler) EmergencyPanicWhen(conditional bool, msg interface{}) {
+	self.conditionalSendPanic(journal.PriEmerg, conditional, msg)
+}
+func (self *Journaler) EmergencyPanicWhenln(conditional bool, msg ...interface{}) {
+	self.conditionalSendPanic(journal.PriEmerg, conditional, NewDefaultMessage(msg))
+}
+func (self *Journaler) EmergencyPanicWhenf(conditional bool, msg string, args ...interface{}) {
+	self.conditionalSendPanic(journal.PriEmerg, conditional, NewFormatedMessage(msg, args))
+}
+func (self *Journaler) EmergencyFatalWhen(conditional bool, msg interface{}) {
+	self.conditionalSendFatal(journal.PriEmerg, conditional, msg)
+}
+func (self *Journaler) EmergencyFatalWhenln(conditional bool, msg ...interface{}) {
+	self.conditionalSendFatal(journal.PriEmerg, conditional, NewDefaultMessage(msg))
+}
+func (self *Journaler) EmergencyFatalWhenf(conditional bool, msg string, args ...interface{}) {
+	self.conditionalSendFatal(journal.PriEmerg, conditional, NewFormatedMessage(msg, args))
+}
+func EmergencyPanicWhen(conditional bool, msg interface{}) {
+	std.conditionalSendPanic(journal.PriEmerg, conditional, msg)
+}
+func EmergencyPanicWhenln(conditional bool, msg ...interface{}) {
+	std.conditionalSendPanic(journal.PriEmerg, conditional, NewDefaultMessage(msg))
+}
+func EmergencyPanicWhenf(conditional bool, msg string, args ...interface{}) {
+	std.conditionalSendPanic(journal.PriEmerg, conditional, NewFormatedMessage(msg, args))
+}
+func EmergencyFatalWhen(conditional bool, msg interface{}) {
+	std.conditionalSendFatal(journal.PriEmerg, conditional, msg)
+}
+func EmergencyFatalWhenln(conditional bool, msg ...interface{}) {
+	std.conditionalSendFatal(journal.PriEmerg, conditional, NewDefaultMessage(msg))
+}
+func EmergencyFatalWhenf(conditional bool, msg string, args ...interface{}) {
+	std.conditionalSendFatal(journal.PriEmerg, conditional, NewFormatedMessage(msg, args))
+}
 
-func (self *Journaler) AlertWhen(conditional bool, message interface{}) {
+func (self *Journaler) AlertWhen(condit4ional bool, message interface{}) {
 	self.conditionalSend(journal.PriAlert, conditional, message)
 }
 func AlertWhen(conditional bool, message interface{}) {
@@ -86,6 +153,42 @@ func (self *Journaler) AlertWhenf(conditional bool, msg string, args ...interfac
 }
 func AlertWhenf(conditional bool, msg string, args ...interface{}) {
 	std.AlertWhenf(conditional, msg, args...)
+}
+func (self *Journaler) AlertPanicWhen(conditional bool, msg interface{}) {
+	self.conditionalSendPanic(journal.PriAlert, conditional, msg)
+}
+func (self *Journaler) AlertPanicWhenln(conditional bool, msg ...interface{}) {
+	self.conditionalSendPanic(journal.PriAlert, conditional, NewDefaultMessage(msg))
+}
+func (self *Journaler) AlertPanicWhenf(conditional bool, msg string, args ...interface{}) {
+	self.conditionalSendPanic(journal.PriAlert, conditional, NewFormatedMessage(msg, args))
+}
+func (self *Journaler) AlertFatalWhen(conditional bool, msg interface{}) {
+	self.conditionalSendFatal(journal.PriAlert, conditional, msg)
+}
+func (self *Journaler) AlertFatalWhenln(conditional bool, msg ...interface{}) {
+	self.conditionalSendFatal(journal.PriAlert, conditional, NewDefaultMessage(msg))
+}
+func (self *Journaler) AlertFatalWhenf(conditional bool, msg string, args ...interface{}) {
+	self.conditionalSendFatal(journal.PriAlert, conditional, NewFormatedMessage(msg, args))
+}
+func AlertPanicWhen(conditional bool, msg interface{}) {
+	std.conditionalSendPanic(journal.PriAlert, conditional, msg)
+}
+func AlertPanicWhenln(conditional bool, msg ...interface{}) {
+	std.conditionalSendPanic(journal.PriAlert, conditional, NewDefaultMessage(msg))
+}
+func AlertPanicWhenf(conditional bool, msg string, args ...interface{}) {
+	std.conditionalSendPanic(journal.PriAlert, conditional, NewFormatedMessage(msg, args))
+}
+func AlertFatalWhen(conditional bool, msg interface{}) {
+	std.conditionalSendFatal(journal.PriAlert, conditional, msg)
+}
+func AlertFatalWhenln(conditional bool, msg ...interface{}) {
+	std.conditionalSendFatal(journal.PriAlert, conditional, NewDefaultMessage(msg))
+}
+func AlertFatalWhenf(conditional bool, msg string, args ...interface{}) {
+	std.conditionalSendFatal(journal.PriAlert, conditional, NewFormatedMessage(msg, args))
 }
 
 func (self *Journaler) CriticalWhen(conditional bool, message interface{}) {
@@ -106,6 +209,42 @@ func (self *Journaler) CriticalWhenf(conditional bool, msg string, args ...inter
 func CriticalWhenf(conditional bool, msg string, args ...interface{}) {
 	std.CriticalWhenf(conditional, msg, args...)
 }
+func (self *Journaler) CriticalPanicWhen(conditional bool, msg interface{}) {
+	self.conditionalSendPanic(journal.PriCrit, conditional, msg)
+}
+func (self *Journaler) CriticalPanicWhenln(conditional bool, msg ...interface{}) {
+	self.conditionalSendPanic(journal.PriCrit, conditional, NewDefaultMessage(msg))
+}
+func (self *Journaler) CriticalPanicWhenf(conditional bool, msg string, args ...interface{}) {
+	self.conditionalSendPanic(journal.PriCrit, conditional, NewFormatedMessage(msg, args))
+}
+func (self *Journaler) CriticalFatalWhen(conditional bool, msg interface{}) {
+	self.conditionalSendFatal(journal.PriCrit, conditional, msg)
+}
+func (self *Journaler) CriticalFatalWhenln(conditional bool, msg ...interface{}) {
+	self.conditionalSendFatal(journal.PriCrit, conditional, NewDefaultMessage(msg))
+}
+func (self *Journaler) CriticalFatalWhenf(conditional bool, msg string, args ...interface{}) {
+	self.conditionalSendFatal(journal.PriCrit, conditional, NewFormatedMessage(msg, args))
+}
+func CriticalPanicWhen(conditional bool, msg interface{}) {
+	std.conditionalSendPanic(journal.PriCrit, conditional, msg)
+}
+func CriticalPanicWhenln(conditional bool, msg ...interface{}) {
+	std.conditionalSendPanic(journal.PriCrit, conditional, NewDefaultMessage(msg))
+}
+func CriticalPanicWhenf(conditional bool, msg string, args ...interface{}) {
+	std.conditionalSendPanic(journal.PriCrit, conditional, NewFormatedMessage(msg, args))
+}
+func CriticalFatalWhen(conditional bool, msg interface{}) {
+	std.conditionalSendFatal(journal.PriCrit, conditional, msg)
+}
+func CriticalFatalWhenln(conditional bool, msg ...interface{}) {
+	std.conditionalSendFatal(journal.PriCrit, conditional, NewDefaultMessage(msg))
+}
+func CriticalFatalWhenf(conditional bool, msg string, args ...interface{}) {
+	std.conditionalSendFatal(journal.PriCrit, conditional, NewFormatedMessage(msg, args))
+}
 
 func (self *Journaler) ErrorWhen(conditional bool, message interface{}) {
 	self.conditionalSend(journal.PriErr, conditional, message)
@@ -124,6 +263,42 @@ func (self *Journaler) ErrorWhenf(conditional bool, msg string, args ...interfac
 }
 func ErrorWhenf(conditional bool, msg string, args ...interface{}) {
 	std.ErrorWhenf(conditional, msg, args...)
+}
+func (self *Journaler) ErrorPanicWhen(conditional bool, msg interface{}) {
+	self.conditionalSendPanic(journal.PriErr, conditional, msg)
+}
+func (self *Journaler) ErrorPanicWhenln(conditional bool, msg ...interface{}) {
+	self.conditionalSendPanic(journal.PriErr, conditional, NewDefaultMessage(msg))
+}
+func (self *Journaler) ErrorPanicWhenf(conditional bool, msg string, args ...interface{}) {
+	self.conditionalSendPanic(journal.PriErr, conditional, NewFormatedMessage(msg, args))
+}
+func (self *Journaler) ErrorFatalWhen(conditional bool, msg interface{}) {
+	self.conditionalSendFatal(journal.PriErr, conditional, msg)
+}
+func (self *Journaler) ErrorFatalWhenln(conditional bool, msg ...interface{}) {
+	self.conditionalSendFatal(journal.PriErr, conditional, NewDefaultMessage(msg))
+}
+func (self *Journaler) ErrorFatalWhenf(conditional bool, msg string, args ...interface{}) {
+	self.conditionalSendFatal(journal.PriErr, conditional, NewFormatedMessage(msg, args))
+}
+func ErrorPanicWhen(conditional bool, msg interface{}) {
+	std.conditionalSendPanic(journal.PriErr, conditional, msg)
+}
+func ErrorPanicWhenln(conditional bool, msg ...interface{}) {
+	std.conditionalSendPanic(journal.PriErr, conditional, NewDefaultMessage(msg))
+}
+func ErrorPanicWhenf(conditional bool, msg string, args ...interface{}) {
+	std.conditionalSendPanic(journal.PriErr, conditional, NewFormatedMessage(msg, args))
+}
+func ErrorFatalWhen(conditional bool, msg interface{}) {
+	std.conditionalSendFatal(journal.PriErr, conditional, msg)
+}
+func ErrorFatalWhenln(conditional bool, msg ...interface{}) {
+	std.conditionalSendFatal(journal.PriErr, conditional, NewDefaultMessage(msg))
+}
+func ErrorFatalWhenf(conditional bool, msg string, args ...interface{}) {
+	std.conditionalSendFatal(journal.PriErr, conditional, NewFormatedMessage(msg, args))
 }
 
 func (self *Journaler) WarningWhen(conditional bool, message interface{}) {

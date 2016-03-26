@@ -1,18 +1,14 @@
 package grip
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/coreos/go-systemd/journal"
 )
 
-// Takes an error object and prints an error a message if the err is
-// non-nil. Does *not* depend on any logging infrastructure.
+// Deprecated. Takes an error object and prints a message if the err is non-nil.
 func Catch(err error) {
-	if err != nil {
-		fmt.Println("ERROR:", err)
-	}
+	CatchDefault(err)
 }
 
 // Logging helpers for catching and logging error messages. Helpers exist
