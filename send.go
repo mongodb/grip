@@ -1,5 +1,70 @@
 package grip
 
+import (
+	"fmt"
+	"strings"
+
+	"github.com/coreos/go-systemd/journal"
+)
+
+// Journaler.send() actually does the work of dropping non-threshhold
+// messages and sending to systemd's journal or just using the fallback logger.
+func (self *Journaler) send(priority journal.Priority, message string) {
+	if priority > self.thresholdLevel {
+		// prorities are ordered from emergency (0) .. -> .. debug (8)
+		return
+	}
+
+	fbMesg := "[p=%d]: %s\n"
+	if journal.Enabled() && self.PreferFallback == false {
+		err := journal.Send(message, priority, self.options)
+		if err != nil {
+			self.fallbackLogger.Println("systemd journaling error:", err)
+			self.fallbackLogger.Printf(fbMesg, priority, message)
+		}
+	} else {
+		self.fallbackLogger.Printf(fbMesg, priority, message)
+	}
+}
+
+func (self *Journaler) sendf(priority journal.Priority, message string, a ...interface{}) {
+	if priority > self.thresholdLevel {
+		return
+	}
+
+	self.send(priority, fmt.Sprintf(message, a...))
+}
+
+func (self *Journaler) sendln(priority journal.Priority, a ...interface{}) {
+	if priority > self.thresholdLevel {
+		return
+	}
+
+	self.send(priority, strings.Trim(fmt.Sprintln(a...), "\n"))
+}
+
+func (self *Journaler) genericSend(priority journal.Priority, message interface{}) string {
+	var msg string
+
+	switch message := message.(type) {
+	case MessageComposer:
+		msg = message.Resolve()
+	case string:
+		msg = message
+	case error:
+		msg = message.Error()
+	default:
+		// if we can't deal with the type, then we should fail here.
+		return msg
+	}
+
+	if msg != "" {
+		self.send(priority, msg)
+	}
+
+	return msg
+}
+
 // generic base method for sending messages.
 
 func (self *Journaler) Send(priority int, message string) {

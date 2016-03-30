@@ -1,7 +1,6 @@
 package grip
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"runtime"
@@ -77,40 +76,4 @@ func envSaysUseStdout() bool {
 	} else {
 		return false
 	}
-}
-
-// Journaler.send() actually does the work of dropping non-threshhold
-// messages and sending to systemd's journal or just using the fallback logger.
-func (self *Journaler) send(priority journal.Priority, message string) {
-	if priority > self.thresholdLevel {
-		// prorities are ordered from emergency (0) .. -> .. debug (8)
-		return
-	}
-
-	fbMesg := "[p=%d]: %s\n"
-	if journal.Enabled() && self.PreferFallback == false {
-		err := journal.Send(message, priority, self.options)
-		if err != nil {
-			self.fallbackLogger.Println("systemd journaling error:", err)
-			self.fallbackLogger.Printf(fbMesg, priority, message)
-		}
-	} else {
-		self.fallbackLogger.Printf(fbMesg, priority, message)
-	}
-}
-
-func (self *Journaler) sendf(priority journal.Priority, message string, a ...interface{}) {
-	if priority > self.thresholdLevel {
-		return
-	}
-
-	self.send(priority, fmt.Sprintf(message, a...))
-}
-
-func (self *Journaler) sendln(priority journal.Priority, a ...interface{}) {
-	if priority > self.thresholdLevel {
-		return
-	}
-
-	self.send(priority, strings.Trim(fmt.Sprintln(a...), "\n"))
 }

@@ -12,28 +12,6 @@ import (
 // threshold level is met, and the message to log is not an empty
 // string, then it logs the resolved message.
 
-func (self *Journaler) genericSend(priority journal.Priority, message interface{}) string {
-	var msg string
-
-	switch message := message.(type) {
-	case MessageComposer:
-		msg = message.Resolve()
-	case string:
-		msg = message
-	case error:
-		msg = message.Error()
-	default:
-		// if we can't deal with the type, then we should fail here.
-		return msg
-	}
-
-	if msg != "" {
-		self.send(priority, msg)
-	}
-
-	return msg
-}
-
 func (self *Journaler) conditionalSend(priority journal.Priority, conditional bool, message interface{}) {
 	if !conditional || priority > self.thresholdLevel {
 		return
