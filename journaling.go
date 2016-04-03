@@ -1,42 +1,12 @@
 package grip
 
 import (
-	"errors"
 	"os"
-	"runtime"
 	"strings"
 
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/send"
 )
-
-var std = NewJournaler("")
-
-func init() {
-	if envSaysUseStdout() {
-		err := std.UseNativeLogger()
-		std.CatchAlert(err)
-	} else if envSaysUseStdout() {
-		err := std.UseSystemdLogger()
-		std.CatchAlert(err)
-	} else {
-		std.CatchAlert(errors.New("sender Interface not defined"))
-	}
-
-	if std.sender.Name() == "bootstrap" {
-		if runtime.GOOS == "linux" {
-			err := std.UseSystemdLogger()
-			std.CatchAlert(err)
-			if err != nil {
-				// native logger can't/shouldn't throw
-				// and there's no good fallback
-				_ = std.UseNativeLogger()
-			}
-		} else {
-			_ = std.UseNativeLogger()
-		}
-	}
-}
 
 type Journaler struct {
 	// an identifier for the log component.
@@ -80,24 +50,4 @@ func (self *Journaler) UseSystemdLogger() error {
 }
 func UseSystemdLogger() error {
 	return std.UseSystemdLogger()
-}
-
-func envSaysUseJournal() bool {
-	if runtime.GOOS != "linux" {
-		return false
-	}
-
-	if ev := os.Getenv("GRIP_USE_JOURNALD"); ev != "" {
-		return true
-	} else {
-		return false
-	}
-}
-
-func envSaysUseStdout() bool {
-	if ev := os.Getenv("GRIP_USE_STDOUT"); ev != "" {
-		return true
-	} else {
-		return false
-	}
 }
