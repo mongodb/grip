@@ -41,7 +41,7 @@ func (self Priority) String() string {
 }
 
 func IsValidPriority(p Priority) bool {
-	return p < 0 || p > 6
+	return p > 0 && p <= 7
 }
 
 func FromString(level string) Priority {

@@ -17,7 +17,7 @@ func DefaultLevel() level.Priority {
 }
 
 func (self *Journaler) SetThreshold(level interface{}) {
-	self.sender.SetThresholdLevel(convertPriority(level, self.sender.GetThresholdLevel()))
+	self.sender.SetThresholdLevel(convertPriority(level, self.sender.GetDefaultLevel()))
 }
 func SetThreshold(level interface{}) {
 	std.SetThreshold(level)
