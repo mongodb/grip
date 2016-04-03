@@ -2,7 +2,6 @@ package grip
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/coreos/go-systemd/journal"
 )
@@ -28,41 +27,34 @@ func (self *Journaler) send(priority journal.Priority, message string) {
 }
 
 func (self *Journaler) sendf(priority journal.Priority, message string, a ...interface{}) {
-	if priority > self.thresholdLevel {
-		return
-	}
-
-	self.send(priority, fmt.Sprintf(message, a...))
+	self.composeSend(priority, NewFormatedMessage(message, a))
 }
 
 func (self *Journaler) sendln(priority journal.Priority, a ...interface{}) {
-	if priority > self.thresholdLevel {
+	self.composeSend(priority, NewDefaultMessage(a...))
+}
+
+func convertToMessageComposer(message interface{}) MessageComposer {
+	switch message := message.(type) {
+	case MessageComposer:
+		return message
+	case string:
+		// we make some weird assumptions here to a level in
+		// this conversion, might be messy
+		return NewDefaultMessage(message)
+	case error:
+		return NewDefaultMessage(message.Error())
+	default:
+		return NewDefaultMessage(fmt.Sprintf("%v", message))
+	}
+}
+
+func (self *Journaler) composeSend(priority journal.Priority, m MessageComposer) {
+	if priority > self.thresholdLevel || !m.Loggable() {
 		return
 	}
 
-	self.send(priority, strings.Trim(fmt.Sprintln(a...), "\n"))
-}
-
-func (self *Journaler) genericSend(priority journal.Priority, message interface{}) string {
-	var msg string
-
-	switch message := message.(type) {
-	case MessageComposer:
-		msg = message.Resolve()
-	case string:
-		msg = message
-	case error:
-		msg = message.Error()
-	default:
-		// if we can't deal with the type, then we should fail here.
-		return msg
-	}
-
-	if msg != "" {
-		self.send(priority, msg)
-	}
-
-	return msg
+	self.send(priority, m.Resolve())
 }
 
 // generic base method for sending messages.

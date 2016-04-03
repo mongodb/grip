@@ -1,6 +1,9 @@
 package grip
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type lineMessenger struct {
 	lines []interface{}
@@ -11,11 +14,21 @@ type lineMessenger struct {
 // the constructor during the Resolve() operation. Use in combination
 // with Compose[*] logging methods.
 func NewDefaultMessage(args ...interface{}) *lineMessenger {
-	return &lineMessenger{args}
+	return &lineMessenger{
+		lines: args,
+	}
+}
+
+func (l *lineMessenger) Loggable() bool {
+	if len(l.lines) > 0 {
+		return true
+	}
+
+	return false
 }
 
 func (l *lineMessenger) Resolve() string {
-	return fmt.Sprintln(l.lines)
+	return strings.Trim(fmt.Sprintln(l.lines), "\n")
 }
 
 type formatMessenger struct {
@@ -33,4 +46,11 @@ func NewFormatedMessage(base string, args ...interface{}) *formatMessenger {
 
 func (f *formatMessenger) Resolve() string {
 	return fmt.Sprintf(f.base, f.args...)
+}
+
+func (f *formatMessenger) Loggable() bool {
+	if f.base == "" {
+		return false
+	}
+	return true
 }

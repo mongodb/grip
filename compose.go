@@ -24,17 +24,7 @@ import "github.com/coreos/go-systemd/journal"
 // Emergency + (fatal/panic)
 type MessageComposer interface {
 	Resolve() string
-}
-
-func (self *Journaler) composeSend(priority journal.Priority, m MessageComposer) {
-	if priority > self.thresholdLevel {
-		return
-	}
-
-	msg := m.Resolve()
-	if msg != "" {
-		self.send(priority, msg)
-	}
+	Loggable() bool
 }
 
 func (self *Journaler) ComposeDefault(m MessageComposer) {

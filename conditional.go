@@ -17,9 +17,8 @@ func (self *Journaler) conditionalSend(priority journal.Priority, conditional bo
 		return
 	}
 
-	self.genericSend(priority, message)
+	self.composeSend(priority, convertToMessageComposer(message))
 	return
-
 }
 
 func (self *Journaler) conditionalSendPanic(priority journal.Priority, conditional bool, message interface{}) {
@@ -27,8 +26,9 @@ func (self *Journaler) conditionalSendPanic(priority journal.Priority, condition
 		return
 	}
 
-	msg := self.genericSend(priority, message)
-	panic(msg)
+	msg := convertToMessageComposer(message)
+	self.composeSend(priority, msg)
+	panic(msg.Resolve())
 }
 
 func (self *Journaler) conditionalSendFatal(priority journal.Priority, conditional bool, message interface{}) {
@@ -36,7 +36,7 @@ func (self *Journaler) conditionalSendFatal(priority journal.Priority, condition
 		return
 	}
 
-	self.genericSend(priority, message)
+	self.composeSend(priority, convertToMessageComposer(message))
 	os.Exit(1)
 }
 
@@ -114,7 +114,7 @@ func EmergencyFatalWhenf(conditional bool, msg string, args ...interface{}) {
 	std.conditionalSendFatal(journal.PriEmerg, conditional, NewFormatedMessage(msg, args))
 }
 
-func (self *Journaler) AlertWhen(condit4ional bool, message interface{}) {
+func (self *Journaler) AlertWhen(conditional bool, message interface{}) {
 	self.conditionalSend(journal.PriAlert, conditional, message)
 }
 func AlertWhen(conditional bool, message interface{}) {

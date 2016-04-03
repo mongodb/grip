@@ -96,6 +96,29 @@ func convertPriorityInt(priority int, fallback journal.Priority) journal.Priorit
 	}
 }
 
+func convertIntPriority(priority journal.Priority) int {
+	switch {
+	case priority == journal.PriEmerg:
+		return 0
+	case priority == journal.PriAlert:
+		return 1
+	case priority == journal.PriCrit:
+		return 2
+	case priority == journal.PriErr:
+		return 3
+	case priority == journal.PriWarning:
+		return 4
+	case priority == journal.PriNotice:
+		return 5
+	case priority == journal.PriInfo:
+		return 6
+	case priority == journal.PriDebug:
+		return 7
+	}
+
+	return -1
+}
+
 func convertPriorityString(priority string, fallback journal.Priority) journal.Priority {
 	switch {
 	case priority == "emergency":
