@@ -20,3 +20,11 @@ func (self *Journaler) SetSender(s send.Sender) {
 func SetSender(s send.Sender) {
 	std.SetSender(s)
 }
+
+func (self *Journaler) Sender() send.Sender {
+	return self.sender
+}
+
+func Sender() send.Sender {
+	return std.sender
+}

@@ -12,10 +12,35 @@ import (
 
 var std = NewJournaler("")
 
+func init() {
+	if envSaysUseStdout() {
+		err := std.UseNativeLogger()
+		std.CatchAlert(err)
+	} else if envSaysUseStdout() {
+		err := std.UseSystemdLogger()
+		std.CatchAlert(err)
+	} else {
+		std.CatchAlert(errors.New("sender Interface not defined"))
+	}
+
+	if std.sender.Name() == "bootstrap" {
+		if runtime.GOOS == "linux" {
+			err := std.UseSystemdLogger()
+			std.CatchAlert(err)
+			if err != nil {
+				// native logger can't/shouldn't throw
+				// and there's no good fallback
+				_ = std.UseNativeLogger()
+			}
+		} else {
+			_ = std.UseNativeLogger()
+		}
+	}
+}
+
 type Journaler struct {
 	// an identifier for the log component.
-	Name string
-
+	Name   string
 	sender send.Sender
 }
 
@@ -28,26 +53,17 @@ func NewJournaler(name string) *Journaler {
 		}
 	}
 
-	// name, threshold, default
 	j := &Journaler{
-		Name:   name,
+		Name: name,
+		// sender: threshold, default
 		sender: send.NewBootstrapLogger(level.Info, level.Notice),
-	}
-
-	if envSaysUseStdout() {
-		err := j.UseNativeLogger()
-		j.CatchAlert(err)
-	} else if envSaysUseStdout() {
-		err := j.UseSystemdLogger()
-		j.CatchAlert(err)
-	} else {
-		j.CatchAlert(errors.New("sender Interface not defined"))
 	}
 
 	return j
 }
 
 func (self *Journaler) UseNativeLogger() error {
+	// name, threshold, default
 	sender, err := send.NewNativeLogger(self.Name, self.sender.GetThresholdLevel(), self.sender.GetDefaultLevel())
 	self.sender = sender
 	return err
@@ -57,6 +73,7 @@ func UseNativeLogger() error {
 }
 
 func (self *Journaler) UseSystemdLogger() error {
+	// name, threshold, default
 	sender, err := send.NewJournaldLogger(self.Name, self.sender.GetThresholdLevel(), self.sender.GetDefaultLevel())
 	self.sender = sender
 	return err
