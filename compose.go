@@ -1,6 +1,6 @@
 package grip
 
-import "github.com/coreos/go-systemd/journal"
+import "github.com/tychoish/grip/level"
 
 // MessageComposer defines an interface with a single public
 // "Resolve()" method. Objects that implement this interface, in
@@ -28,14 +28,14 @@ type MessageComposer interface {
 }
 
 func (self *Journaler) ComposeDefault(m MessageComposer) {
-	self.composeSend(self.defaultLevel, m)
+	self.composeSend(self.sender.GetDefaultLevel(), m)
 }
 func ComposeDefault(m MessageComposer) {
 	std.ComposeDefault(m)
 }
 
 func (self *Journaler) ComposeEmergency(m MessageComposer) {
-	self.composeSend(journal.PriEmerg, m)
+	self.composeSend(level.Emergency, m)
 }
 
 func ComposeEmergency(m MessageComposer) {
@@ -43,7 +43,7 @@ func ComposeEmergency(m MessageComposer) {
 }
 
 func (self *Journaler) ComposeAlert(m MessageComposer) {
-	self.composeSend(journal.PriAlert, m)
+	self.composeSend(level.Alert, m)
 }
 
 func ComposeAlert(m MessageComposer) {
@@ -51,7 +51,7 @@ func ComposeAlert(m MessageComposer) {
 }
 
 func (self *Journaler) ComposeCritical(m MessageComposer) {
-	self.composeSend(journal.PriCrit, m)
+	self.composeSend(level.Critical, m)
 }
 
 func ComposeCritical(m MessageComposer) {
@@ -59,7 +59,7 @@ func ComposeCritical(m MessageComposer) {
 }
 
 func (self *Journaler) ComposeError(m MessageComposer) {
-	self.composeSend(journal.PriErr, m)
+	self.composeSend(level.Error, m)
 }
 
 func ComposeError(m MessageComposer) {
@@ -67,7 +67,7 @@ func ComposeError(m MessageComposer) {
 }
 
 func (self *Journaler) ComposeWarning(m MessageComposer) {
-	self.composeSend(journal.PriWarning, m)
+	self.composeSend(level.Warning, m)
 }
 
 func ComposeWarning(m MessageComposer) {
@@ -75,7 +75,7 @@ func ComposeWarning(m MessageComposer) {
 }
 
 func (self *Journaler) ComposeNotice(m MessageComposer) {
-	self.composeSend(journal.PriNotice, m)
+	self.composeSend(level.Notice, m)
 }
 
 func ComposeNotice(m MessageComposer) {
@@ -83,7 +83,7 @@ func ComposeNotice(m MessageComposer) {
 }
 
 func (self *Journaler) ComposeInfo(m MessageComposer) {
-	self.composeSend(journal.PriInfo, m)
+	self.composeSend(level.Info, m)
 }
 
 func ComposeInfo(m MessageComposer) {
@@ -91,7 +91,7 @@ func ComposeInfo(m MessageComposer) {
 }
 
 func (self *Journaler) ComposeDebug(m MessageComposer) {
-	self.composeSend(journal.PriDebug, m)
+	self.composeSend(level.Debug, m)
 }
 
 func ComposeDebug(m MessageComposer) {

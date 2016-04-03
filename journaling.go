@@ -1,12 +1,13 @@
 package grip
 
 import (
-	"log"
+	"errors"
 	"os"
 	"runtime"
 	"strings"
 
-	"github.com/coreos/go-systemd/journal"
+	"github.com/tychoish/grip/level"
+	"github.com/tychoish/grip/send"
 )
 
 var std = NewJournaler("")
@@ -15,14 +16,7 @@ type Journaler struct {
 	// an identifier for the log component.
 	Name string
 
-	defaultLevel   journal.Priority
-	thresholdLevel journal.Priority
-	options        map[string]string
-	fallbackLogger *log.Logger
-
-	// when true, prefer the fallback logger rather than systemd
-	// logging. Defaults to false.
-	PreferFallback bool
+	sender send.Sender
 }
 
 func NewJournaler(name string) *Journaler {
@@ -34,24 +28,41 @@ func NewJournaler(name string) *Journaler {
 		}
 	}
 
+	// name, threshold, default
 	j := &Journaler{
-		defaultLevel:   journal.PriNotice,
-		thresholdLevel: journal.PriInfo,
-		options:        make(map[string]string),
+		Name:   name,
+		sender: send.NewBootstrapLogger(level.Info, level.Notice),
 	}
 
-	// intializes the fallback logger as well.
-	j.SetName(name)
-
-	if envSaysUseStdout() == true {
-		j.PreferFallback = true
-	} else if envSaysUseJournal() == true {
-		// this is the default anyway,
-		// but being explicit here.
-		j.PreferFallback = false
+	if envSaysUseStdout() {
+		err := j.UseNativeLogger()
+		j.CatchAlert(err)
+	} else if envSaysUseStdout() {
+		err := j.UseSystemdLogger()
+		j.CatchAlert(err)
+	} else {
+		j.CatchAlert(errors.New("sender Interface not defined"))
 	}
 
 	return j
+}
+
+func (self *Journaler) UseNativeLogger() error {
+	sender, err := send.NewNativeLogger(self.Name, self.sender.GetThresholdLevel(), self.sender.GetDefaultLevel())
+	self.sender = sender
+	return err
+}
+func UseNativeLogger() error {
+	return std.UseNativeLogger()
+}
+
+func (self *Journaler) UseSystemdLogger() error {
+	sender, err := send.NewJournaldLogger(self.Name, self.sender.GetThresholdLevel(), self.sender.GetDefaultLevel())
+	self.sender = sender
+	return err
+}
+func UseSystemdLogger() error {
+	return std.UseSystemdLogger()
 }
 
 func envSaysUseJournal() bool {
@@ -67,10 +78,6 @@ func envSaysUseJournal() bool {
 }
 
 func envSaysUseStdout() bool {
-	if runtime.GOOS != "linux" {
-		return true
-	}
-
 	if ev := os.Getenv("GRIP_USE_STDOUT"); ev != "" {
 		return true
 	} else {

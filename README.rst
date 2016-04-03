@@ -94,10 +94,6 @@ the following behaviors:
 available as functions in the ``grip`` package to manage the global
 standard logger instance.):
 
-- ``Send(<level int>, <message string>)`` to manually send a
-  message. Levels are values between ``0`` and ``7``, where lower
-  numbers are *more* severe.
-
 - ``SendDefault(<message string>)`` to log using the default level.
 
 - ``SetName(<string>)`` to reset the name of the logger and fallback
