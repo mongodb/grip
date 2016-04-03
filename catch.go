@@ -6,7 +6,7 @@ import (
 	"github.com/coreos/go-systemd/journal"
 )
 
-// Deprecated. Takes an error object and prints a message if the err is non-nil.
+// Deprecated Takes an error object and prints a message if the err is non-nil.
 func Catch(err error) {
 	CatchDefault(err)
 }
@@ -27,21 +27,28 @@ func Catch(err error) {
 // Emergency + (fatal/panic)
 
 func (self *Journaler) catchSend(err error, priority journal.Priority) {
-	if err != nil {
-		self.send(priority, err.Error())
+	if err == nil || priority > self.thresholdLevel {
+		return
 	}
+
+	self.composeSend(priority, NewErrorMessage(err))
 }
+
 func (self *Journaler) catchSendPanic(err error, priority journal.Priority) {
-	if err != nil {
-		self.send(priority, err.Error())
-		panic(err.Error())
+	if err == nil || priority > self.thresholdLevel {
+		return
 	}
+
+	self.composeSend(priority, NewErrorMessage(err))
+	panic(err.Error())
 }
 func (self *Journaler) catchSendFatal(err error, priority journal.Priority) {
-	if err != nil {
-		self.send(priority, err.Error())
-		os.Exit(1)
+	if err == nil || priority > self.thresholdLevel {
+		return
 	}
+
+	self.composeSend(priority, NewErrorMessage(err))
+	os.Exit(1)
 }
 
 func (self *Journaler) CatchDefault(err error) {
