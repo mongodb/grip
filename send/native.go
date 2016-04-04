@@ -23,8 +23,8 @@ func NewNativeLogger(name string, thresholdLevel, defaultLevel level.Priority) (
 		name:           name,
 		thresholdLevel: thresholdLevel,
 		defaultLevel:   defaultLevel,
+		template:       "[p=%d]: %s\n",
 	}
-	l.template = "[p=%d]: %s\n"
 	l.createLogger()
 
 	return l, nil
@@ -68,11 +68,15 @@ func (s *nativeLogger) SetDefaultLevel(p level.Priority) error {
 	}
 }
 
-func (s *nativeLogger) SetThresholdLevel(p level.Priority) error {
+func (n *nativeLogger) SetThresholdLevel(p level.Priority) error {
 	if level.IsValidPriority(p) {
-		s.thresholdLevel = p
+		n.thresholdLevel = p
 		return nil
 	} else {
 		return fmt.Errorf("%s (%d) is not a valid priority value (0-6)", p, int(p))
 	}
+}
+
+func (n *nativeLogger) Close() {
+	return
 }

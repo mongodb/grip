@@ -59,3 +59,7 @@ func (b *bootstrapLogger) GetDefaultLevel() level.Priority {
 func (b *bootstrapLogger) GetThresholdLevel() level.Priority {
 	return b.thresholdLevel
 }
+
+func (b *bootstrapLogger) Close() {
+	return
+}

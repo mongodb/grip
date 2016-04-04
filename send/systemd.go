@@ -112,3 +112,7 @@ func (s *systemdJournal) convertPrioritySystemd(p level.Priority) journal.Priori
 		return s.defaultLevel
 	}
 }
+
+func (s *systemdJournal) Close() {
+	return
+}

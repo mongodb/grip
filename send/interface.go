@@ -15,4 +15,6 @@ type Sender interface {
 	GetThresholdLevel() level.Priority
 
 	AddOption(string, string)
+
+	Close()
 }
