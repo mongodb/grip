@@ -12,10 +12,18 @@ type bootstrapLogger struct {
 }
 
 func NewBootstrapLogger(thresholdLevel, defaultLevel level.Priority) *bootstrapLogger {
-	return &bootstrapLogger{
-		defaultLevel:   defaultLevel,
-		thresholdLevel: thresholdLevel,
+	b := &bootstrapLogger{}
+	err := b.SetDefaultLevel(defaultLevel)
+	if err != nil {
+		fmt.Println(err.Error())
 	}
+
+	err = b.SetThresholdLevel(thresholdLevel)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	return b
 }
 
 func (b *bootstrapLogger) Name() string {

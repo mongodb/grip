@@ -24,11 +24,9 @@ type fileLogger struct {
 
 func NewFileLogger(name, filePath string, thresholdLevel, defaultLevel level.Priority) (Sender, error) {
 	l := &fileLogger{
-		name:           name,
-		thresholdLevel: thresholdLevel,
-		defaultLevel:   defaultLevel,
-		options:        make(map[string]string),
-		template:       "[p=%d]: %s\n",
+		name:     name,
+		options:  make(map[string]string),
+		template: "[p=%d]: %s\n",
 	}
 
 	f, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
@@ -36,9 +34,18 @@ func NewFileLogger(name, filePath string, thresholdLevel, defaultLevel level.Pri
 		l, _ := NewNativeLogger(name, thresholdLevel, defaultLevel)
 		return l, fmt.Errorf("error opening logging file, %s, falling back to stdOut logging", err.Error())
 	}
-
 	l.fileObj = f
 	l.createLogger()
+
+	err = l.SetDefaultLevel(defaultLevel)
+	if err != nil {
+		return l, err
+	}
+
+	err = l.SetThresholdLevel(thresholdLevel)
+	if err != nil {
+		return l, err
+	}
 
 	return l, nil
 }

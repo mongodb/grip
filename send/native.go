@@ -20,12 +20,19 @@ type nativeLogger struct {
 
 func NewNativeLogger(name string, thresholdLevel, defaultLevel level.Priority) (*nativeLogger, error) {
 	l := &nativeLogger{
-		name:           name,
-		thresholdLevel: thresholdLevel,
-		defaultLevel:   defaultLevel,
-		template:       "[p=%d]: %s\n",
+		name:     name,
+		template: "[p=%d]: %s\n",
 	}
 	l.createLogger()
+	err := l.SetDefaultLevel(defaultLevel)
+	if err != nil {
+		return l, err
+	}
+
+	err = l.SetThresholdLevel(thresholdLevel)
+	if err != nil {
+		return l, err
+	}
 
 	return l, nil
 }
