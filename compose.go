@@ -5,12 +5,16 @@ import (
 	"github.com/tychoish/grip/message"
 )
 
+// Default Composer Methods
+
 func (self *Journaler) ComposeDefault(m message.Composer) {
 	self.sender.Send(self.sender.GetDefaultLevel(), m)
 }
 func ComposeDefault(m message.Composer) {
 	std.ComposeDefault(m)
 }
+
+// Emergency Composer Methods
 
 func (self *Journaler) ComposeEmergency(m message.Composer) {
 	self.sender.Send(level.Emergency, m)
@@ -31,6 +35,8 @@ func ComposeEmergencyFatal(m message.Composer) {
 	std.ComposeEmergencyFatal(m)
 }
 
+// Alert Composer Methods
+
 func (self *Journaler) ComposeAlert(m message.Composer) {
 	self.sender.Send(level.Alert, m)
 }
@@ -49,6 +55,8 @@ func ComposeAlertPanic(m message.Composer) {
 func ComposeAlertFatal(m message.Composer) {
 	std.ComposeAlertFatal(m)
 }
+
+// Critical Composer Methods
 
 func (self *Journaler) ComposeCritical(m message.Composer) {
 	self.sender.Send(level.Critical, m)
@@ -69,6 +77,8 @@ func ComposeCriticalFatal(m message.Composer) {
 	std.ComposeCriticalFatal(m)
 }
 
+// Error Composer Methods
+
 func (self *Journaler) ComposeError(m message.Composer) {
 	self.sender.Send(level.Error, m)
 }
@@ -88,6 +98,8 @@ func ComposeErrorFatal(m message.Composer) {
 	std.ComposeErrorFatal(m)
 }
 
+// Warning Composer Methods
+
 func (self *Journaler) ComposeWarning(m message.Composer) {
 	self.sender.Send(level.Warning, m)
 }
@@ -102,12 +114,16 @@ func ComposeNotice(m message.Composer) {
 	std.ComposeNotice(m)
 }
 
+// Info Composer
+
 func (self *Journaler) ComposeInfo(m message.Composer) {
 	self.sender.Send(level.Info, m)
 }
 func ComposeInfo(m message.Composer) {
 	std.ComposeInfo(m)
 }
+
+// Debug Composer
 
 func (self *Journaler) ComposeDebug(m message.Composer) {
 	self.sender.Send(level.Debug, m)

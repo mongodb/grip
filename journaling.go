@@ -51,6 +51,7 @@ import (
 	"os"
 
 	"github.com/tychoish/grip/level"
+	"github.com/tychoish/grip/message"
 	"github.com/tychoish/grip/send"
 )
 
