@@ -27,7 +27,7 @@ type Sender interface {
 	// priority (at this time).
 	//
 	// In the future sender's Send() methods may take messages in
-	// the form of "MessageComposer" objects rather than strings,
+	// the form of "message.Composer" objects rather than strings,
 	// at which point, Sender could be responsbile for filtering
 	// messages.
 	Send(level.Priority, string)

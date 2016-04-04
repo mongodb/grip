@@ -1,6 +1,9 @@
 package grip
 
-import "github.com/tychoish/grip/level"
+import (
+	"github.com/tychoish/grip/level"
+	"github.com/tychoish/grip/message"
+)
 
 // Loging helpers exist for the following levels (using logging
 // instances, and the standard global logging, following the convention
@@ -15,305 +18,305 @@ import "github.com/tychoish/grip/level"
 // Info
 // Debug
 
-func (self *Journaler) Emergency(message string) {
-	self.send(level.Emergency, NewDefaultMessage(message))
+func (self *Journaler) Emergency(msg string) {
+	self.send(level.Emergency, message.NewDefaultMessage(msg))
 }
-func Emergency(message string) {
-	std.Emergency(message)
+func Emergency(msg string) {
+	std.Emergency(msg)
 }
-func (self *Journaler) Emergencyf(message string, a ...interface{}) {
-	self.send(level.Emergency, NewFormatedMessage(message, a))
+func (self *Journaler) Emergencyf(msg string, a ...interface{}) {
+	self.send(level.Emergency, message.NewFormatedMessage(msg, a))
 }
-func Emergencyf(message string, a ...interface{}) {
-	std.Emergencyf(message, a...)
+func Emergencyf(msg string, a ...interface{}) {
+	std.Emergencyf(msg, a...)
 }
 func (self *Journaler) Emergencyln(a ...interface{}) {
-	self.send(level.Emergency, NewLinesMessage(a...))
+	self.send(level.Emergency, message.NewLinesMessage(a...))
 }
 func Emergencyln(a ...interface{}) {
 	std.Emergencyln(a...)
 }
 
-func (self *Journaler) EmergencyPanic(message string) {
-	self.sendPanic(level.Emergency, NewDefaultMessage(message))
+func (self *Journaler) EmergencyPanic(msg string) {
+	self.sendPanic(level.Emergency, message.NewDefaultMessage(msg))
 }
-func EmergencyPanic(message string) {
-	std.EmergencyPanic(message)
+func EmergencyPanic(msg string) {
+	std.EmergencyPanic(msg)
 }
-func (self *Journaler) EmergencyPanicf(message string, a ...interface{}) {
-	self.sendPanic(level.Emergency, NewFormatedMessage(message, a))
+func (self *Journaler) EmergencyPanicf(msg string, a ...interface{}) {
+	self.sendPanic(level.Emergency, message.NewFormatedMessage(msg, a))
 }
-func EmergencyPanicf(message string, a ...interface{}) {
-	std.EmergencyPanicf(message, a...)
+func EmergencyPanicf(msg string, a ...interface{}) {
+	std.EmergencyPanicf(msg, a...)
 }
 func (self *Journaler) EmergencyPanicln(a ...interface{}) {
-	self.sendPanic(level.Emergency, NewLinesMessage(a...))
+	self.sendPanic(level.Emergency, message.NewLinesMessage(a...))
 }
 func EmergencyPanicln(a ...interface{}) {
 	std.EmergencyPanicln(a...)
 }
 
-func (self *Journaler) EmergencyFatal(message string) {
-	self.sendFatal(level.Emergency, NewDefaultMessage(message))
+func (self *Journaler) EmergencyFatal(msg string) {
+	self.sendFatal(level.Emergency, message.NewDefaultMessage(msg))
 }
-func EmergencyFatal(message string) {
-	std.EmergencyFatal(message)
+func EmergencyFatal(msg string) {
+	std.EmergencyFatal(msg)
 }
-func (self *Journaler) EmergencyFatalf(message string, a ...interface{}) {
-	self.sendFatal(level.Emergency, NewFormatedMessage(message, a))
+func (self *Journaler) EmergencyFatalf(msg string, a ...interface{}) {
+	self.sendFatal(level.Emergency, message.NewFormatedMessage(msg, a))
 }
-func EmergencyFatalf(message string, a ...interface{}) {
-	std.EmergencyFatalf(message, a...)
+func EmergencyFatalf(msg string, a ...interface{}) {
+	std.EmergencyFatalf(msg, a...)
 }
 func (self *Journaler) EmergencyFatalln(a ...interface{}) {
-	self.sendFatal(level.Emergency, NewLinesMessage(a...))
+	self.sendFatal(level.Emergency, message.NewLinesMessage(a...))
 }
 func EmergencyFatalln(a ...interface{}) {
 	std.EmergencyFatalln(a...)
 }
 
-func (self *Journaler) Alert(message string) {
-	self.send(level.Alert, NewDefaultMessage(message))
+func (self *Journaler) Alert(msg string) {
+	self.send(level.Alert, message.NewDefaultMessage(msg))
 }
-func Alert(message string) {
-	std.Alert(message)
+func Alert(msg string) {
+	std.Alert(msg)
 }
-func (self *Journaler) Alertf(message string, a ...interface{}) {
-	self.send(level.Alert, NewFormatedMessage(message, a))
+func (self *Journaler) Alertf(msg string, a ...interface{}) {
+	self.send(level.Alert, message.NewFormatedMessage(msg, a))
 }
-func Alertf(message string, a ...interface{}) {
-	std.Alertf(message, a...)
+func Alertf(msg string, a ...interface{}) {
+	std.Alertf(msg, a...)
 }
 func (self *Journaler) Alertln(a ...interface{}) {
-	self.send(level.Alert, NewLinesMessage(a...))
+	self.send(level.Alert, message.NewLinesMessage(a...))
 }
 func Alertln(a ...interface{}) {
 	std.Alertln(a...)
 }
 
-func (self *Journaler) AlertPanic(message string) {
-	self.sendFatal(level.Alert, NewDefaultMessage(message))
+func (self *Journaler) AlertPanic(msg string) {
+	self.sendFatal(level.Alert, message.NewDefaultMessage(msg))
 }
-func AlertPanic(message string) {
-	std.AlertPanic(message)
+func AlertPanic(msg string) {
+	std.AlertPanic(msg)
 }
-func (self *Journaler) AlertPanicf(message string, a ...interface{}) {
-	self.sendPanic(level.Alert, NewFormatedMessage(message, a))
+func (self *Journaler) AlertPanicf(msg string, a ...interface{}) {
+	self.sendPanic(level.Alert, message.NewFormatedMessage(msg, a))
 }
-func AlertPanicf(message string, a ...interface{}) {
-	std.AlertPanicf(message, a...)
+func AlertPanicf(msg string, a ...interface{}) {
+	std.AlertPanicf(msg, a...)
 }
 func (self *Journaler) AlertPanicln(a ...interface{}) {
-	self.sendPanic(level.Alert, NewLinesMessage(a...))
+	self.sendPanic(level.Alert, message.NewLinesMessage(a...))
 }
 func AlertPanicln(a ...interface{}) {
 	std.AlertPanicln(a...)
 }
 
-func (self *Journaler) AlertFatal(message string) {
-	self.sendFatal(level.Alert, NewDefaultMessage(message))
+func (self *Journaler) AlertFatal(msg string) {
+	self.sendFatal(level.Alert, message.NewDefaultMessage(msg))
 }
-func AlertFatal(message string) {
-	std.AlertFatal(message)
+func AlertFatal(msg string) {
+	std.AlertFatal(msg)
 }
-func (self *Journaler) AlertFatalf(message string, a ...interface{}) {
-	self.sendFatal(level.Alert, NewFormatedMessage(message, a))
+func (self *Journaler) AlertFatalf(msg string, a ...interface{}) {
+	self.sendFatal(level.Alert, message.NewFormatedMessage(msg, a))
 }
-func AlertFatalf(message string, a ...interface{}) {
-	std.AlertFatalf(message, a...)
+func AlertFatalf(msg string, a ...interface{}) {
+	std.AlertFatalf(msg, a...)
 }
 func (self *Journaler) AlertFatalln(a ...interface{}) {
-	self.sendFatal(level.Alert, NewLinesMessage(a...))
+	self.sendFatal(level.Alert, message.NewLinesMessage(a...))
 }
 func AlertFatalln(a ...interface{}) {
 	std.AlertFatalln(a...)
 }
 
-func (self *Journaler) Critical(message string) {
-	self.send(level.Critical, NewDefaultMessage(message))
+func (self *Journaler) Critical(msg string) {
+	self.send(level.Critical, message.NewDefaultMessage(msg))
 }
-func Critical(message string) {
-	std.Critical(message)
+func Critical(msg string) {
+	std.Critical(msg)
 }
-func (self *Journaler) Criticalf(message string, a ...interface{}) {
-	self.send(level.Critical, NewFormatedMessage(message, a))
+func (self *Journaler) Criticalf(msg string, a ...interface{}) {
+	self.send(level.Critical, message.NewFormatedMessage(msg, a))
 }
-func Criticalf(message string, a ...interface{}) {
-	std.Criticalf(message, a...)
+func Criticalf(msg string, a ...interface{}) {
+	std.Criticalf(msg, a...)
 }
 func (self *Journaler) Criticalln(a ...interface{}) {
-	self.send(level.Critical, NewLinesMessage(a...))
+	self.send(level.Critical, message.NewLinesMessage(a...))
 }
 func Criticalln(a ...interface{}) {
 	std.Criticalln(a...)
 }
 
-func (self *Journaler) CriticalFatal(message string) {
-	self.sendFatal(level.Critical, NewDefaultMessage(message))
+func (self *Journaler) CriticalFatal(msg string) {
+	self.sendFatal(level.Critical, message.NewDefaultMessage(msg))
 }
-func CriticalFatal(message string) {
-	std.CriticalFatal(message)
+func CriticalFatal(msg string) {
+	std.CriticalFatal(msg)
 }
-func (self *Journaler) CriticalFatalf(message string, a ...interface{}) {
-	self.send(level.Critical, NewFormatedMessage(message, a))
+func (self *Journaler) CriticalFatalf(msg string, a ...interface{}) {
+	self.send(level.Critical, message.NewFormatedMessage(msg, a))
 }
-func CriticalFatalf(message string, a ...interface{}) {
-	std.CriticalFatalf(message, a...)
+func CriticalFatalf(msg string, a ...interface{}) {
+	std.CriticalFatalf(msg, a...)
 }
 func (self *Journaler) CriticalFatalln(a ...interface{}) {
-	self.sendFatal(level.Critical, NewLinesMessage(a...))
+	self.sendFatal(level.Critical, message.NewLinesMessage(a...))
 }
 func CriticalFatalln(a ...interface{}) {
 	std.CriticalFatalln(a...)
 }
 
-func (self *Journaler) CriticalPanic(message string) {
-	self.sendPanic(level.Critical, NewDefaultMessage(message))
+func (self *Journaler) CriticalPanic(msg string) {
+	self.sendPanic(level.Critical, message.NewDefaultMessage(msg))
 }
-func CriticalPanic(message string) {
-	std.CriticalPanic(message)
+func CriticalPanic(msg string) {
+	std.CriticalPanic(msg)
 }
-func (self *Journaler) CriticalPanicf(message string, a ...interface{}) {
-	self.sendPanic(level.Critical, NewFormatedMessage(message, a))
+func (self *Journaler) CriticalPanicf(msg string, a ...interface{}) {
+	self.sendPanic(level.Critical, message.NewFormatedMessage(msg, a))
 }
-func CriticalPanicf(message string, a ...interface{}) {
-	std.CriticalPanicf(message, a...)
+func CriticalPanicf(msg string, a ...interface{}) {
+	std.CriticalPanicf(msg, a...)
 }
 func (self *Journaler) CriticalPanicln(a ...interface{}) {
-	self.sendPanic(level.Critical, NewLinesMessage(a...))
+	self.sendPanic(level.Critical, message.NewLinesMessage(a...))
 }
 func CriticalPanicln(a ...interface{}) {
 	std.CriticalPanicln(a...)
 }
 
-func (self *Journaler) Error(message string) {
-	self.send(level.Error, NewDefaultMessage(message))
+func (self *Journaler) Error(msg string) {
+	self.send(level.Error, message.NewDefaultMessage(msg))
 }
-func Error(message string) {
-	std.Error(message)
+func Error(msg string) {
+	std.Error(msg)
 }
-func (self *Journaler) Errorf(message string, a ...interface{}) {
-	self.send(level.Error, NewFormatedMessage(message, a))
+func (self *Journaler) Errorf(msg string, a ...interface{}) {
+	self.send(level.Error, message.NewFormatedMessage(msg, a))
 }
-func Errorf(message string, a ...interface{}) {
-	std.Errorf(message, a...)
+func Errorf(msg string, a ...interface{}) {
+	std.Errorf(msg, a...)
 }
 func (self *Journaler) Errorln(a ...interface{}) {
-	self.send(level.Error, NewLinesMessage(a...))
+	self.send(level.Error, message.NewLinesMessage(a...))
 }
 func Errorln(a ...interface{}) {
 	std.Errorln(a...)
 }
 
-func (self *Journaler) ErrorPanic(message string) {
-	self.sendFatal(level.Error, NewDefaultMessage(message))
+func (self *Journaler) ErrorPanic(msg string) {
+	self.sendFatal(level.Error, message.NewDefaultMessage(msg))
 }
-func ErrorPanic(message string) {
-	std.ErrorPanic(message)
+func ErrorPanic(msg string) {
+	std.ErrorPanic(msg)
 }
-func (self *Journaler) ErrorPanicf(message string, a ...interface{}) {
-	self.sendPanic(level.Error, NewFormatedMessage(message, a))
+func (self *Journaler) ErrorPanicf(msg string, a ...interface{}) {
+	self.sendPanic(level.Error, message.NewFormatedMessage(msg, a))
 }
-func ErrorPanicf(message string, a ...interface{}) {
-	std.ErrorPanicf(message, a...)
+func ErrorPanicf(msg string, a ...interface{}) {
+	std.ErrorPanicf(msg, a...)
 }
 func (self *Journaler) ErrorPanicln(a ...interface{}) {
-	self.sendPanic(level.Error, NewLinesMessage(a...))
+	self.sendPanic(level.Error, message.NewLinesMessage(a...))
 }
 func ErrorPanicln(a ...interface{}) {
 	std.ErrorPanicln(a...)
 }
 
-func (self *Journaler) ErrorFatal(message string) {
-	self.sendFatal(level.Error, NewDefaultMessage(message))
+func (self *Journaler) ErrorFatal(msg string) {
+	self.sendFatal(level.Error, message.NewDefaultMessage(msg))
 }
-func ErrorFatal(message string) {
-	std.ErrorFatal(message)
+func ErrorFatal(msg string) {
+	std.ErrorFatal(msg)
 }
-func (self *Journaler) ErrorFatalf(message string, a ...interface{}) {
-	self.sendFatal(level.Error, NewFormatedMessage(message, a))
+func (self *Journaler) ErrorFatalf(msg string, a ...interface{}) {
+	self.sendFatal(level.Error, message.NewFormatedMessage(msg, a))
 }
-func ErrorFatalf(message string, a ...interface{}) {
-	std.ErrorFatalf(message, a...)
+func ErrorFatalf(msg string, a ...interface{}) {
+	std.ErrorFatalf(msg, a...)
 }
 func (self *Journaler) ErrorFatalln(a ...interface{}) {
-	self.sendFatal(level.Error, NewLinesMessage(a...))
+	self.sendFatal(level.Error, message.NewLinesMessage(a...))
 }
 func ErrorFatalln(a ...interface{}) {
 	std.ErrorPanicln(a...)
 }
 
-func (self *Journaler) Warning(message string) {
-	self.send(level.Warning, NewDefaultMessage(message))
+func (self *Journaler) Warning(msg string) {
+	self.send(level.Warning, message.NewDefaultMessage(msg))
 }
-func Warning(message string) {
-	std.Warning(message)
+func Warning(msg string) {
+	std.Warning(msg)
 }
-func (self *Journaler) Warningf(message string, a ...interface{}) {
-	self.send(level.Warning, NewFormatedMessage(message, a))
+func (self *Journaler) Warningf(msg string, a ...interface{}) {
+	self.send(level.Warning, message.NewFormatedMessage(msg, a))
 }
-func Warningf(message string, a ...interface{}) {
-	std.Warningf(message, a...)
+func Warningf(msg string, a ...interface{}) {
+	std.Warningf(msg, a...)
 }
 func (self *Journaler) Warningln(a ...interface{}) {
-	self.send(level.Warning, NewLinesMessage(a...))
+	self.send(level.Warning, message.NewLinesMessage(a...))
 }
 func Warningln(a ...interface{}) {
 	std.Warningln(a...)
 }
 
-func (self *Journaler) Notice(message string) {
-	self.send(level.Notice, NewDefaultMessage(message))
+func (self *Journaler) Notice(msg string) {
+	self.send(level.Notice, message.NewDefaultMessage(msg))
 }
-func Notice(message string) {
-	std.Notice(message)
+func Notice(msg string) {
+	std.Notice(msg)
 }
-func (self *Journaler) Noticef(message string, a ...interface{}) {
-	self.send(level.Notice, NewFormatedMessage(message, a))
+func (self *Journaler) Noticef(msg string, a ...interface{}) {
+	self.send(level.Notice, message.NewFormatedMessage(msg, a))
 }
-func Noticef(message string, a ...interface{}) {
-	std.Noticef(message, a...)
+func Noticef(msg string, a ...interface{}) {
+	std.Noticef(msg, a...)
 }
 func (self *Journaler) Noticeln(a ...interface{}) {
-	self.send(level.Notice, NewLinesMessage(a...))
+	self.send(level.Notice, message.NewLinesMessage(a...))
 }
 func Noticeln(a ...interface{}) {
 	std.Noticeln(a...)
 }
 
-func (self *Journaler) Info(message string) {
-	self.send(level.Info, NewDefaultMessage(message))
+func (self *Journaler) Info(msg string) {
+	self.send(level.Info, message.NewDefaultMessage(msg))
 }
-func Info(message string) {
-	std.Info(message)
+func Info(msg string) {
+	std.Info(msg)
 }
-func (self *Journaler) Infof(message string, a ...interface{}) {
-	self.send(level.Info, NewFormatedMessage(message, a))
+func (self *Journaler) Infof(msg string, a ...interface{}) {
+	self.send(level.Info, message.NewFormatedMessage(msg, a))
 }
-func Infof(message string, a ...interface{}) {
-	std.Infof(message, a...)
+func Infof(msg string, a ...interface{}) {
+	std.Infof(msg, a...)
 }
 func (self *Journaler) Infoln(a ...interface{}) {
-	self.send(level.Info, NewLinesMessage(a...))
+	self.send(level.Info, message.NewLinesMessage(a...))
 }
 func Infoln(a ...interface{}) {
 	std.Infoln(a...)
 }
 
-func (self *Journaler) Debug(message string) {
-	self.send(level.Debug, NewDefaultMessage(message))
+func (self *Journaler) Debug(msg string) {
+	self.send(level.Debug, message.NewDefaultMessage(msg))
 }
-func Debug(message string) {
-	std.Debug(message)
+func Debug(msg string) {
+	std.Debug(msg)
 }
-func (self *Journaler) Debugf(message string, a ...interface{}) {
-	self.send(level.Debug, NewFormatedMessage(message, a))
+func (self *Journaler) Debugf(msg string, a ...interface{}) {
+	self.send(level.Debug, message.NewFormatedMessage(msg, a))
 }
-func Debugf(message string, a ...interface{}) {
-	std.Debugf(message, a...)
+func Debugf(msg string, a ...interface{}) {
+	std.Debugf(msg, a...)
 }
 func (self *Journaler) Debugln(a ...interface{}) {
-	self.send(level.Debug, NewLinesMessage(a...))
+	self.send(level.Debug, message.NewLinesMessage(a...))
 }
 func Debugln(a ...interface{}) {
 	std.Debugln(a...)

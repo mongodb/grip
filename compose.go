@@ -1,74 +1,77 @@
 package grip
 
-import "github.com/tychoish/grip/level"
+import (
+	"github.com/tychoish/grip/level"
+	"github.com/tychoish/grip/message"
+)
 
-func (self *Journaler) ComposeDefault(m MessageComposer) {
+func (self *Journaler) ComposeDefault(m message.Composer) {
 	self.send(self.sender.GetDefaultLevel(), m)
 }
-func ComposeDefault(m MessageComposer) {
+func ComposeDefault(m message.Composer) {
 	std.ComposeDefault(m)
 }
 
-func (self *Journaler) ComposeEmergency(m MessageComposer) {
+func (self *Journaler) ComposeEmergency(m message.Composer) {
 	self.send(level.Emergency, m)
 }
 
-func ComposeEmergency(m MessageComposer) {
+func ComposeEmergency(m message.Composer) {
 	std.ComposeEmergency(m)
 }
 
-func (self *Journaler) ComposeAlert(m MessageComposer) {
+func (self *Journaler) ComposeAlert(m message.Composer) {
 	self.send(level.Alert, m)
 }
 
-func ComposeAlert(m MessageComposer) {
+func ComposeAlert(m message.Composer) {
 	std.ComposeAlert(m)
 }
 
-func (self *Journaler) ComposeCritical(m MessageComposer) {
+func (self *Journaler) ComposeCritical(m message.Composer) {
 	self.send(level.Critical, m)
 }
 
-func ComposeCritical(m MessageComposer) {
+func ComposeCritical(m message.Composer) {
 	std.ComposeCritical(m)
 }
 
-func (self *Journaler) ComposeError(m MessageComposer) {
+func (self *Journaler) ComposeError(m message.Composer) {
 	self.send(level.Error, m)
 }
 
-func ComposeError(m MessageComposer) {
+func ComposeError(m message.Composer) {
 	std.ComposeError(m)
 }
 
-func (self *Journaler) ComposeWarning(m MessageComposer) {
+func (self *Journaler) ComposeWarning(m message.Composer) {
 	self.send(level.Warning, m)
 }
 
-func ComposeWarning(m MessageComposer) {
+func ComposeWarning(m message.Composer) {
 	std.ComposeWarning(m)
 }
 
-func (self *Journaler) ComposeNotice(m MessageComposer) {
+func (self *Journaler) ComposeNotice(m message.Composer) {
 	self.send(level.Notice, m)
 }
 
-func ComposeNotice(m MessageComposer) {
+func ComposeNotice(m message.Composer) {
 	std.ComposeNotice(m)
 }
 
-func (self *Journaler) ComposeInfo(m MessageComposer) {
+func (self *Journaler) ComposeInfo(m message.Composer) {
 	self.send(level.Info, m)
 }
 
-func ComposeInfo(m MessageComposer) {
+func ComposeInfo(m message.Composer) {
 	std.ComposeInfo(m)
 }
 
-func (self *Journaler) ComposeDebug(m MessageComposer) {
+func (self *Journaler) ComposeDebug(m message.Composer) {
 	self.send(level.Debug, m)
 }
 
-func ComposeDebug(m MessageComposer) {
+func ComposeDebug(m message.Composer) {
 	std.ComposeDebug(m)
 }

@@ -6,13 +6,11 @@ import (
 	"strings"
 )
 
-var std = NewJournaler("")
+var std = NewJournaler("grip")
 
 func init() {
 	if !strings.Contains(os.Args[0], "go-build") {
 		std.Name = os.Args[0]
-	} else {
-		std.Name = "grip"
 	}
 
 	if ev := os.Getenv("GRIP_USE_STDOUT"); ev != "" {

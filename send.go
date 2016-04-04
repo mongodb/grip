@@ -4,9 +4,10 @@ import (
 	"os"
 
 	"github.com/tychoish/grip/level"
+	"github.com/tychoish/grip/message"
 )
 
-func (self *Journaler) send(priority level.Priority, m MessageComposer) {
+func (self *Journaler) send(priority level.Priority, m message.Composer) {
 	if priority > self.sender.GetThresholdLevel() || !m.Loggable() {
 		// priorities are ordered from emergency (0) .. -> .. debug (8)
 		return
@@ -15,7 +16,7 @@ func (self *Journaler) send(priority level.Priority, m MessageComposer) {
 	self.sender.Send(priority, m.Resolve())
 }
 
-func (self *Journaler) sendPanic(priority level.Priority, m MessageComposer) {
+func (self *Journaler) sendPanic(priority level.Priority, m message.Composer) {
 	if priority > self.sender.GetThresholdLevel() || !m.Loggable() {
 		// priorities are ordered from emergency (0) .. -> .. debug (8)
 		return
@@ -26,7 +27,7 @@ func (self *Journaler) sendPanic(priority level.Priority, m MessageComposer) {
 	panic(msg)
 }
 
-func (self *Journaler) sendFatal(priority level.Priority, m MessageComposer) {
+func (self *Journaler) sendFatal(priority level.Priority, m message.Composer) {
 	if priority > self.sender.GetThresholdLevel() || !m.Loggable() {
 		// priorities are ordered from emergency (0) .. -> .. debug (8)
 		return
@@ -37,20 +38,20 @@ func (self *Journaler) sendFatal(priority level.Priority, m MessageComposer) {
 }
 
 // default methods for sending messages at the default level, whatever it is.
-func (self *Journaler) SendDefault(message string) {
-	self.send(self.sender.GetDefaultLevel(), NewDefaultMessage(message))
+func (self *Journaler) SendDefault(msg string) {
+	self.send(self.sender.GetDefaultLevel(), message.NewDefaultMessage(msg))
 }
-func SendDefault(message string) {
-	std.SendDefault(message)
+func SendDefault(msg string) {
+	std.SendDefault(msg)
 }
-func (self *Journaler) SendDefaultf(message string, a ...interface{}) {
-	self.send(self.sender.GetDefaultLevel(), NewFormatedMessage(message, a...))
+func (self *Journaler) SendDefaultf(msg string, a ...interface{}) {
+	self.send(self.sender.GetDefaultLevel(), message.NewFormatedMessage(msg, a...))
 }
-func SendDefaultf(message string, a ...interface{}) {
-	std.SendDefaultf(message, a...)
+func SendDefaultf(msg string, a ...interface{}) {
+	std.SendDefaultf(msg, a...)
 }
 func (self *Journaler) SendDefaultln(a ...interface{}) {
-	self.send(self.sender.GetDefaultLevel(), NewLinesMessage(a...))
+	self.send(self.sender.GetDefaultLevel(), message.NewLinesMessage(a...))
 }
 func SendDefaultln(a ...interface{}) {
 	std.SendDefaultln(a...)

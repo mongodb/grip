@@ -34,7 +34,7 @@ There are logging methods that allow a number of different idioms:
 2. "Catch" loggers, which take an error object, and log messages when
    the error is non-nil.
 
-3. Composed messages which, using the MessageComposer interface, allow
+3. Composed messages which, using the message.Composer interface, allow
    grip to defer processing message content until after determining if
    the message is going to be logged. (e.g. for logging objects that
    require a serialization process before logging.)
