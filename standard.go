@@ -4,11 +4,18 @@ import (
 	"errors"
 	"os"
 	"runtime"
+	"strings"
 )
 
 var std = NewJournaler("")
 
 func init() {
+	if !strings.Contains(os.Args[0], "go-build") {
+		std.name = os.Args[0]
+	} else {
+		std.name = "grip"
+	}
+
 	if ev := os.Getenv("GRIP_USE_STDOUT"); ev != "" {
 		err := std.UseNativeLogger()
 		std.CatchAlert(err)
