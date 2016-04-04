@@ -13,6 +13,12 @@ import "fmt"
 type Composer interface {
 	Resolve() string
 	Loggable() bool
+
+	// A "raw" format of the logging output for use by some Sender
+	// implementations that write logged items to interfaces that
+	// accept JSON or another structured.
+
+	//	Raw() interface{}
 }
 
 func ConvertToComposer(message interface{}) Composer {

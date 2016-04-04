@@ -6,7 +6,7 @@ import (
 )
 
 type lineMessenger struct {
-	lines []interface{}
+	Lines []interface{} `yaml:"lines",json:"lines",bson:"lines"`
 }
 
 // message.NewLinesMessage() is a basic constructor for a type that, given a
@@ -15,12 +15,12 @@ type lineMessenger struct {
 // with Compose[*] logging methods.
 func NewLinesMessage(args ...interface{}) *lineMessenger {
 	return &lineMessenger{
-		lines: args,
+		Lines: args,
 	}
 }
 
 func (l *lineMessenger) Loggable() bool {
-	if len(l.lines) > 0 {
+	if len(l.Lines) > 0 {
 		return true
 	}
 
@@ -28,5 +28,9 @@ func (l *lineMessenger) Loggable() bool {
 }
 
 func (l *lineMessenger) Resolve() string {
-	return strings.Trim(fmt.Sprintln(l.lines), "\n")
+	return strings.Trim(fmt.Sprintln(l.Lines), "\n")
+}
+
+func (l *lineMessenger) Raw() interface{} {
+	return l
 }
