@@ -18,6 +18,28 @@ import (
 // Info
 // Debug
 
+// default methods for sending messages at the default level, whatever it is.
+func (self *Journaler) Default(msg string) {
+	self.sender.Send(self.sender.GetDefaultLevel(), message.NewDefaultMessage(msg))
+}
+func Default(msg string) {
+	std.SendDefault(msg)
+}
+func (self *Journaler) Defaultf(msg string, a ...interface{}) {
+	self.sender.Send(self.sender.GetDefaultLevel(), message.NewFormatedMessage(msg, a...))
+}
+func Defaultf(msg string, a ...interface{}) {
+	std.Defaultf(msg, a...)
+}
+func (self *Journaler) Defaultln(a ...interface{}) {
+	self.sender.Send(self.sender.GetDefaultLevel(), message.NewLinesMessage(a...))
+}
+func Defaultln(a ...interface{}) {
+	std.SendDefaultln(a...)
+}
+
+// Leveled Logging Methods
+
 func (self *Journaler) Emergency(msg string) {
 	self.sender.Send(level.Emergency, message.NewDefaultMessage(msg))
 }

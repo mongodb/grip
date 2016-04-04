@@ -48,6 +48,8 @@ There are logging methods that allow a number of different idioms:
 package grip
 
 import (
+	"os"
+
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/send"
 )
@@ -90,4 +92,30 @@ func (self *Journaler) SetName(name string) {
 // SetName provides a wrapper for setting the name of the global logger.
 func SetName(name string) {
 	std.SetName(name)
+}
+
+// For sending logging messages, in most cases, use the
+// Journaler.sender.Send() method, but we have a couple of methods to
+// use for the Panic/Fatal helpers.
+
+func (self *Journaler) sendPanic(priority level.Priority, m message.Composer) {
+	// the Send method in the Sender interface will perform this
+	// check but to add fatal methods we need to do this here.
+	if !send.ShouldLogMessage(self.sender, priority, m) {
+		return
+	}
+
+	self.sender.Send(priority, m)
+	panic(m.Resolve())
+}
+
+func (self *Journaler) sendFatal(priority level.Priority, m message.Composer) {
+	// the Send method in the Sender interface will perform this
+	// check but to add fatal methods we need to do this here.
+	if !send.ShouldLogMessage(self.sender, priority, m) {
+		return
+	}
+
+	self.sender.Send(priority, m)
+	os.Exit(1)
 }
