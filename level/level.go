@@ -1,3 +1,9 @@
+/*
+Defines a Priority type and some conversion methods for a 7-tiered
+logging level schema, which mirror systemd's logging levels.
+
+Levels range from Emergency (0) to Debug (7).
+*/
 package level
 
 import "strings"
@@ -41,7 +47,7 @@ func (self Priority) String() string {
 }
 
 func IsValidPriority(p Priority) bool {
-	return p > 0 && p <= 7
+	return p >= 0 && p <= 7
 }
 
 func FromString(level string) Priority {

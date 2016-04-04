@@ -2,31 +2,6 @@ package grip
 
 import "github.com/tychoish/grip/level"
 
-// MessageComposer defines an interface with a single public
-// "Resolve()" method. Objects that implement this interface, in
-// combination to the Compose[*] operations, the Resolve() method is
-// only caled if the priority of the method is greater than the
-// threshold priority. This makes it possible to defer building log
-// messages (that may be somewhat expensive to generate) until it's
-// certain that we're going to be outputting the message.
-//
-// Avalible levels and operations:
-//
-// Default (the default logging level, should always display)
-//
-// Debug
-// Info
-// Notice
-// Warning
-// Error + (fatal/panic)
-// Critical + (fatal/panic)
-// Alert + (fatal/panic)
-// Emergency + (fatal/panic)
-type MessageComposer interface {
-	Resolve() string
-	Loggable() bool
-}
-
 func (self *Journaler) ComposeDefault(m MessageComposer) {
 	self.send(self.sender.GetDefaultLevel(), m)
 }

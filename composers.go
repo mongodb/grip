@@ -5,6 +5,19 @@ import (
 	"strings"
 )
 
+// MessageComposer defines an interface with a "Resolve()" method that
+// returns the message in string format. Objects that implement this
+// interface, in combination to the Compose[*] operations, the
+// Resolve() method is only caled if the priority of the method is
+// greater than the threshold priority. This makes it possible to
+// defer building log messages (that may be somewhat expensive to
+// generate) until it's certain that we're going to be outputting the
+// message.
+type MessageComposer interface {
+	Resolve() string
+	Loggable() bool
+}
+
 func convertToMessageComposer(message interface{}) MessageComposer {
 	switch message := message.(type) {
 	case MessageComposer:

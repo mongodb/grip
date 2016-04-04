@@ -1,10 +1,6 @@
 package grip
 
-import (
-	"os"
-
-	"github.com/tychoish/grip/level"
-)
+import "github.com/tychoish/grip/level"
 
 // Conditional logging methods, which take two arguments, a boolean,
 // and a message argument. Messages can be strings, Objects that
@@ -26,9 +22,7 @@ func (self *Journaler) conditionalSendPanic(priority level.Priority, conditional
 		return
 	}
 
-	msg := convertToMessageComposer(message)
-	self.send(priority, msg)
-	panic(msg.Resolve())
+	self.sendPanic(priority, convertToMessageComposer(message))
 }
 
 func (self *Journaler) conditionalSendFatal(priority level.Priority, conditional bool, message interface{}) {
@@ -36,8 +30,7 @@ func (self *Journaler) conditionalSendFatal(priority level.Priority, conditional
 		return
 	}
 
-	self.send(priority, convertToMessageComposer(message))
-	os.Exit(1)
+	self.sendFatal(priority, convertToMessageComposer(message))
 }
 
 func (self *Journaler) DefaultWhen(conditional bool, message interface{}) {

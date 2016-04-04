@@ -36,7 +36,6 @@ func (self *Journaler) sendFatal(priority level.Priority, m MessageComposer) {
 	os.Exit(1)
 }
 
-// special methods for formating and line printing.
 // default methods for sending messages at the default level, whatever it is.
 func (self *Journaler) SendDefault(message string) {
 	self.send(self.sender.GetDefaultLevel(), NewDefaultMessage(message))
