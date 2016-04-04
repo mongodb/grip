@@ -6,7 +6,7 @@ import (
 )
 
 type lineMessenger struct {
-	Lines []interface{} `yaml:"lines",json:"lines",bson:"lines"`
+	Lines []interface{} `yaml:"lines" json:"lines" bson:"lines"`
 }
 
 // message.NewLinesMessage() is a basic constructor for a type that, given a

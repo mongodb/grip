@@ -1,19 +1,28 @@
 package message
 
+type errorMessage struct {
+	Err error `json:"error" bson:"error" yaml:"error"`
+}
+
 func NewErrorMessage(err error) *errorMessage {
 	return &errorMessage{err}
 }
+
 func (e *errorMessage) Resolve() string {
-	if e.err == nil {
+	if e.Err == nil {
 		return ""
 	}
-	return e.err.Error()
+	return e.Err.Error()
 }
 
 func (e *errorMessage) Loggable() bool {
-	if e.err == nil {
+	if e.Err == nil {
 		return false
 	}
 	return true
 
+}
+
+func (e *errorMessage) Raw() interface{} {
+	return e
 }

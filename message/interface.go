@@ -17,8 +17,7 @@ type Composer interface {
 	// A "raw" format of the logging output for use by some Sender
 	// implementations that write logged items to interfaces that
 	// accept JSON or another structured.
-
-	//	Raw() interface{}
+	Raw() interface{}
 }
 
 func ConvertToComposer(message interface{}) Composer {

@@ -26,6 +26,12 @@ func (f *formatMessenger) Loggable() bool {
 	return true
 }
 
-type errorMessage struct {
-	err error
+func (f *formatMessenger) Raw() interface{} {
+	return &struct {
+		Message  string `json:"message" bson:"message" yaml:"message"`
+		Loggable bool   `json:"loggable" bson:"loggable" yaml:"loggable"`
+	}{
+		Message:  f.Resolve(),
+		Loggable: f.Loggable(),
+	}
 }
