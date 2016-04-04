@@ -5,35 +5,32 @@ import (
 
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
+	"github.com/tychoish/grip/send"
 )
 
 func (self *Journaler) send(priority level.Priority, m message.Composer) {
-	if priority > self.sender.GetThresholdLevel() || !m.Loggable() {
-		// priorities are ordered from emergency (0) .. -> .. debug (8)
-		return
-	}
-
-	self.sender.Send(priority, m.Resolve())
+	self.sender.Send(priority, m)
 }
 
 func (self *Journaler) sendPanic(priority level.Priority, m message.Composer) {
-	if priority > self.sender.GetThresholdLevel() || !m.Loggable() {
-		// priorities are ordered from emergency (0) .. -> .. debug (8)
+	// the Send method in the Sender interface will perform this
+	// check but to add fatal methods we need to do this here.
+	if !send.ShouldLogMessage(self.sender, priority, m) {
 		return
 	}
 
-	msg := m.Resolve()
-	self.sender.Send(priority, msg)
-	panic(msg)
+	self.sender.Send(priority, m)
+	panic(m.Resolve())
 }
 
 func (self *Journaler) sendFatal(priority level.Priority, m message.Composer) {
-	if priority > self.sender.GetThresholdLevel() || !m.Loggable() {
-		// priorities are ordered from emergency (0) .. -> .. debug (8)
+	// the Send method in the Sender interface will perform this
+	// check but to add fatal methods we need to do this here.
+	if !send.ShouldLogMessage(self.sender, priority, m) {
 		return
 	}
 
-	self.sender.Send(priority, m.Resolve())
+	self.sender.Send(priority, m)
 	os.Exit(1)
 }
 

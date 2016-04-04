@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/tychoish/grip/level"
+	"github.com/tychoish/grip/message"
 )
 
 type fileLogger struct {
@@ -58,8 +59,12 @@ func (f *fileLogger) Close() {
 	f.fileObj.Close()
 }
 
-func (f *fileLogger) Send(p level.Priority, m string) {
-	f.logger.Printf(f.template, int(p), m)
+func (f *fileLogger) Send(p level.Priority, m message.Composer) {
+	if !ShouldLogMessage(f, p, m) {
+		return
+	}
+
+	f.logger.Printf(f.template, int(p), m.Resolve())
 }
 
 func (f *fileLogger) Name() string {

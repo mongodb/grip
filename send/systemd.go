@@ -8,6 +8,7 @@ import (
 
 	"github.com/coreos/go-systemd/journal"
 	"github.com/tychoish/grip/level"
+	"github.com/tychoish/grip/message"
 )
 
 type systemdJournal struct {
@@ -51,11 +52,16 @@ func (s *systemdJournal) SetName(name string) {
 	s.createFallback()
 }
 
-func (s *systemdJournal) Send(p level.Priority, message string) {
-	err := journal.Send(message, s.convertPrioritySystemd(p), s.options)
+func (s *systemdJournal) Send(p level.Priority, m message.Composer) {
+	if !ShouldLogMessage(s, p, m) {
+		return
+	}
+
+	msg := m.Resolve()
+	err := journal.Send(msg, s.convertPrioritySystemd(p), s.options)
 	if err != nil {
 		s.fallback.Println("systemd journaling error:", err.Error())
-		s.fallback.Printf("[p=%d]: %s\n", int(p), message)
+		s.fallback.Printf("[p=%d]: %s\n", int(p), msg)
 	}
 }
 

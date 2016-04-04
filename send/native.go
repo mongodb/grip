@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/tychoish/grip/level"
+	"github.com/tychoish/grip/message"
 )
 
 type nativeLogger struct {
@@ -41,8 +42,12 @@ func (n *nativeLogger) createLogger() {
 	n.logger = log.New(os.Stdout, strings.Join([]string{"[", n.name, "] "}, ""), log.LstdFlags)
 }
 
-func (n *nativeLogger) Send(p level.Priority, m string) {
-	n.logger.Printf(n.template, int(p), m)
+func (n *nativeLogger) Send(p level.Priority, m message.Composer) {
+	if !ShouldLogMessage(n, p, m) {
+		return
+	}
+
+	n.logger.Printf(n.template, int(p), m.Resolve())
 }
 
 func (n *nativeLogger) Name() string {

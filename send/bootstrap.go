@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/tychoish/grip/level"
+	"github.com/tychoish/grip/message"
 )
 
 type bootstrapLogger struct {
@@ -30,7 +31,7 @@ func (b *bootstrapLogger) Name() string {
 	return "bootstrap"
 }
 
-func (b *bootstrapLogger) Send(_ level.Priority, _ string) {
+func (b *bootstrapLogger) Send(_ level.Priority, _ message.Composer) {
 	return
 }
 
