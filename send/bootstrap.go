@@ -61,11 +61,11 @@ func (b *bootstrapLogger) SetThresholdLevel(l level.Priority) error {
 	}
 }
 
-func (b *bootstrapLogger) GetDefaultLevel() level.Priority {
+func (b *bootstrapLogger) DefaultLevel() level.Priority {
 	return b.defaultLevel
 }
 
-func (b *bootstrapLogger) GetThresholdLevel() level.Priority {
+func (b *bootstrapLogger) ThresholdLevel() level.Priority {
 	return b.thresholdLevel
 }
 

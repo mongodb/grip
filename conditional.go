@@ -41,7 +41,7 @@ func (self *Journaler) conditionalSendFatal(priority level.Priority, conditional
 // Default-level Conditional Methods
 
 func (self *Journaler) DefaultWhen(conditional bool, m interface{}) {
-	self.conditionalSend(self.sender.GetDefaultLevel(), conditional, m)
+	self.conditionalSend(self.sender.DefaultLevel(), conditional, m)
 }
 func (self *Journaler) DefaultWhenln(conditional bool, msg ...interface{}) {
 	self.DefaultWhen(conditional, message.NewLinesMessage(msg...))

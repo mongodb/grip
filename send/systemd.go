@@ -84,11 +84,11 @@ func (s *systemdJournal) SetThresholdLevel(p level.Priority) error {
 
 }
 
-func (s *systemdJournal) GetDefaultLevel() level.Priority {
+func (s *systemdJournal) DefaultLevel() level.Priority {
 	return level.Priority(s.defaultLevel)
 }
 
-func (s *systemdJournal) GetThresholdLevel() level.Priority {
+func (s *systemdJournal) ThresholdLevel() level.Priority {
 	return level.Priority(s.thresholdLevel)
 }
 

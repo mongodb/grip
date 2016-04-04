@@ -3,31 +3,31 @@ package grip
 import "github.com/tychoish/grip/level"
 
 func (self *Journaler) SetDefaultLevel(level interface{}) {
-	self.sender.SetDefaultLevel(convertPriority(level, self.sender.GetDefaultLevel()))
+	self.sender.SetDefaultLevel(convertPriority(level, self.sender.DefaultLevel()))
 }
 func SetDefaultLevel(level interface{}) {
 	std.SetDefaultLevel(level)
 }
 
 func (self *Journaler) DefaultLevel() level.Priority {
-	return self.sender.GetDefaultLevel()
+	return self.sender.DefaultLevel()
 }
 func DefaultLevel() level.Priority {
 	return std.DefaultLevel()
 }
 
 func (self *Journaler) SetThreshold(level interface{}) {
-	self.sender.SetThresholdLevel(convertPriority(level, self.sender.GetDefaultLevel()))
+	self.sender.SetThresholdLevel(convertPriority(level, self.sender.DefaultLevel()))
 }
 func SetThreshold(level interface{}) {
 	std.SetThreshold(level)
 }
 
-func (self *Journaler) GetThresholdLevel() level.Priority {
-	return self.sender.GetThresholdLevel()
+func (self *Journaler) ThresholdLevel() level.Priority {
+	return self.sender.ThresholdLevel()
 }
-func GetThresholdLevel() level.Priority {
-	return std.GetThresholdLevel()
+func ThresholdLevel() level.Priority {
+	return std.ThresholdLevel()
 }
 
 func convertPriority(priority interface{}, fallback level.Priority) level.Priority {

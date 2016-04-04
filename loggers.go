@@ -20,13 +20,13 @@ import (
 
 // default methods for sending messages at the default level.
 func (self *Journaler) Default(msg string) {
-	self.sender.Send(self.sender.GetDefaultLevel(), message.NewDefaultMessage(msg))
+	self.sender.Send(self.sender.DefaultLevel(), message.NewDefaultMessage(msg))
 }
 func (self *Journaler) Defaultf(msg string, a ...interface{}) {
-	self.sender.Send(self.sender.GetDefaultLevel(), message.NewFormatedMessage(msg, a...))
+	self.sender.Send(self.sender.DefaultLevel(), message.NewFormatedMessage(msg, a...))
 }
 func (self *Journaler) Defaultln(a ...interface{}) {
-	self.sender.Send(self.sender.GetDefaultLevel(), message.NewLinesMessage(a...))
+	self.sender.Send(self.sender.DefaultLevel(), message.NewLinesMessage(a...))
 }
 func Default(msg string) {
 	std.Default(msg)

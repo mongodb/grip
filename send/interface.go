@@ -28,13 +28,13 @@ type Sender interface {
 	// priority should be dropped.
 	SetThresholdLevel(level.Priority) error
 	// Retrieves the threshold level for the logger.
-	GetThresholdLevel() level.Priority
+	ThresholdLevel() level.Priority
 
 	// Sets the default level, which is used in conversion of
 	// logging types, and for "default" logging methods.
 	SetDefaultLevel(level.Priority) error
 	// Retreives the default level for the logger.
-	GetDefaultLevel() level.Priority
+	DefaultLevel() level.Priority
 
 	// Takes a key/value pair and stores the values in a mapping
 	// structure in the Sender interface. Used, primarily, by the
@@ -52,7 +52,7 @@ type Sender interface {
 func ShouldLogMessage(s Sender, p level.Priority, m message.Composer) bool {
 	// higher p numbers are "lower priority" than lower ones
 	// (e.g. Emergency=0, Debug=7)
-	if p > s.GetThresholdLevel() {
+	if p > s.ThresholdLevel() {
 		return false
 	}
 	if !m.Loggable() {

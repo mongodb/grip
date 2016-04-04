@@ -8,7 +8,7 @@ import (
 // Default Composer Methods
 
 func (self *Journaler) ComposeDefault(m message.Composer) {
-	self.sender.Send(self.sender.GetDefaultLevel(), m)
+	self.sender.Send(self.sender.DefaultLevel(), m)
 }
 func ComposeDefault(m message.Composer) {
 	std.ComposeDefault(m)

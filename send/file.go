@@ -80,11 +80,11 @@ func (f *fileLogger) AddOption(key, value string) {
 	f.options[key] = value
 }
 
-func (f *fileLogger) GetDefaultLevel() level.Priority {
+func (f *fileLogger) DefaultLevel() level.Priority {
 	return f.defaultLevel
 }
 
-func (f *fileLogger) GetThresholdLevel() level.Priority {
+func (f *fileLogger) ThresholdLevel() level.Priority {
 	return f.thresholdLevel
 }
 

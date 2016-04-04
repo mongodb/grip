@@ -63,11 +63,11 @@ func (n *nativeLogger) AddOption(key, value string) {
 	n.options[key] = value
 }
 
-func (n *nativeLogger) GetDefaultLevel() level.Priority {
+func (n *nativeLogger) DefaultLevel() level.Priority {
 	return n.defaultLevel
 }
 
-func (n *nativeLogger) GetThresholdLevel() level.Priority {
+func (n *nativeLogger) ThresholdLevel() level.Priority {
 	return n.thresholdLevel
 }
 
