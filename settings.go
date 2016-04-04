@@ -15,6 +15,7 @@ func SetName(name string) {
 }
 
 func (self *Journaler) SetSender(s send.Sender) {
+	self.sender.Close()
 	self.sender = s
 }
 func SetSender(s send.Sender) {
