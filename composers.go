@@ -16,7 +16,7 @@ func convertToMessageComposer(message interface{}) MessageComposer {
 	case error:
 		return NewErrorMessage(message)
 	default:
-		return NewLinesMessage(fmt.Sprintf("%v", message))
+		return NewDefaultMessage(fmt.Sprintf("%v", message))
 	}
 }
 
