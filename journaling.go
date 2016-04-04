@@ -75,3 +75,15 @@ func NewJournaler(name string) *Journaler {
 		sender: send.NewBootstrapLogger(level.Info, level.Notice),
 	}
 }
+
+// SetName declare a name string for the logger, including in the logging
+// message. Typically this is included on the output of the command.
+func (self *Journaler) SetName(name string) {
+	self.Name = name
+	self.sender.SetName(name)
+}
+
+// SetName provides a wrapper for setting the name of the global logger.
+func SetName(name string) {
+	std.SetName(name)
+}

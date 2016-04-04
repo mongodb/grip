@@ -2,10 +2,26 @@ package grip
 
 import "github.com/tychoish/grip/send"
 
+func (self *Journaler) SetSender(s send.Sender) {
+	self.sender.Close()
+	self.sender = s
+}
+func SetSender(s send.Sender) {
+	std.SetSender(s)
+}
+
+func (self *Journaler) Sender() send.Sender {
+	return self.sender
+}
+
+func Sender() send.Sender {
+	return std.sender
+}
+
 func (self *Journaler) UseNativeLogger() error {
 	// name, threshold, default
 	sender, err := send.NewNativeLogger(self.Name, self.sender.GetThresholdLevel(), self.sender.GetDefaultLevel())
-	self.sender = sender
+	self.SetSender(sender)
 	return err
 }
 func UseNativeLogger() error {
@@ -17,11 +33,11 @@ func (self *Journaler) UseSystemdLogger() error {
 	sender, err := send.NewJournaldLogger(self.Name, self.sender.GetThresholdLevel(), self.sender.GetDefaultLevel())
 	if err != nil {
 		if self.Sender().Name() == "bootstrap" {
-			self.sender = sender
+			self.SetSender(sender)
 		}
 		return err
 	}
-	self.sender = sender
+	self.SetSender(sender)
 	return nil
 }
 func UseSystemdLogger() error {
@@ -32,11 +48,11 @@ func (self *Journaler) UserFileLogger(filename string) error {
 	s, err := send.NewFileLogger(self.Name, filename, self.sender.GetThresholdLevel(), self.sender.GetDefaultLevel())
 	if err != nil {
 		if self.Sender().Name() == "bootstrap" {
-			self.sender = s
+			self.SetSender(s)
 		}
 		return err
 	}
-	self.sender = s
+	self.SetSender(s)
 	return nil
 }
 
