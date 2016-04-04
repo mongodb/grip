@@ -1,7 +1,6 @@
 package grip
 
 import (
-	"errors"
 	"os"
 	"runtime"
 	"strings"
@@ -22,8 +21,6 @@ func init() {
 	} else if ev := os.Getenv("GRIP_USE_JOURNALD"); ev != "" {
 		err := std.UseSystemdLogger()
 		std.CatchAlert(err)
-	} else {
-		std.CatchAlert(errors.New("sender Interface not defined"))
 	}
 
 	if std.sender.Name() == "bootstrap" {

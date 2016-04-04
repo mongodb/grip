@@ -45,7 +45,6 @@ There are logging methods that allow a number of different idioms:
    potentially expensive or vebose logging calls. (e.g. "Log
    Sometimes" or "Log Rarely")
 */
-
 package grip
 
 import (
