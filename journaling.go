@@ -31,23 +31,3 @@ func NewJournaler(name string) *Journaler {
 
 	return j
 }
-
-func (self *Journaler) UseNativeLogger() error {
-	// name, threshold, default
-	sender, err := send.NewNativeLogger(self.Name, self.sender.GetThresholdLevel(), self.sender.GetDefaultLevel())
-	self.sender = sender
-	return err
-}
-func UseNativeLogger() error {
-	return std.UseNativeLogger()
-}
-
-func (self *Journaler) UseSystemdLogger() error {
-	// name, threshold, default
-	sender, err := send.NewJournaldLogger(self.Name, self.sender.GetThresholdLevel(), self.sender.GetDefaultLevel())
-	self.sender = sender
-	return err
-}
-func UseSystemdLogger() error {
-	return std.UseSystemdLogger()
-}
