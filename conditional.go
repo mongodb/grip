@@ -17,7 +17,7 @@ func (self *Journaler) conditionalSend(priority level.Priority, conditional bool
 		return
 	}
 
-	self.composeSend(priority, convertToMessageComposer(message))
+	self.send(priority, convertToMessageComposer(message))
 	return
 }
 
@@ -27,7 +27,7 @@ func (self *Journaler) conditionalSendPanic(priority level.Priority, conditional
 	}
 
 	msg := convertToMessageComposer(message)
-	self.composeSend(priority, msg)
+	self.send(priority, msg)
 	panic(msg.Resolve())
 }
 
@@ -36,7 +36,7 @@ func (self *Journaler) conditionalSendFatal(priority level.Priority, conditional
 		return
 	}
 
-	self.composeSend(priority, convertToMessageComposer(message))
+	self.send(priority, convertToMessageComposer(message))
 	os.Exit(1)
 }
 

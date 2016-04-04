@@ -1,5 +1,7 @@
 package grip
 
+import "github.com/tychoish/grip/send"
+
 func (self *Journaler) UseNativeLogger() error {
 	// name, threshold, default
 	sender, err := send.NewNativeLogger(self.Name, self.sender.GetThresholdLevel(), self.sender.GetDefaultLevel())

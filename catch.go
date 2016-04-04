@@ -1,10 +1,6 @@
 package grip
 
-import (
-	"os"
-
-	"github.com/tychoish/grip/level"
-)
+import "github.com/tychoish/grip/level"
 
 // Deprecated Takes an error object and prints a message if the err is non-nil.
 func Catch(err error) {
@@ -26,33 +22,8 @@ func Catch(err error) {
 // Alert + (fatal/panic)
 // Emergency + (fatal/panic)
 
-func (self *Journaler) catchSend(err error, priority level.Priority) {
-	if err == nil {
-		return
-	}
-
-	self.composeSend(priority, NewErrorMessage(err))
-}
-
-func (self *Journaler) catchSendPanic(err error, priority level.Priority) {
-	if err == nil {
-		return
-	}
-
-	self.composeSend(priority, NewErrorMessage(err))
-	panic(err.Error())
-}
-func (self *Journaler) catchSendFatal(err error, priority level.Priority) {
-	if err == nil {
-		return
-	}
-
-	self.composeSend(priority, NewErrorMessage(err))
-	os.Exit(1)
-}
-
 func (self *Journaler) CatchDefault(err error) {
-	self.catchSend(err, self.DefaultLevel())
+	self.send(self.DefaultLevel(), NewErrorMessage(err))
 }
 func CatchDefault(err error) {
 	std.CatchDefault(err)
@@ -61,7 +32,7 @@ func CatchDefault(err error) {
 // Level Debug Catcher Logging Helpers
 
 func (self *Journaler) CatchDebug(err error) {
-	self.catchSend(err, level.Debug)
+	self.send(level.Debug, NewErrorMessage(err))
 }
 func CatchDebug(err error) {
 	std.CatchDebug(err)
@@ -70,7 +41,7 @@ func CatchDebug(err error) {
 // Level Info Catcher Logging Helpers
 
 func (self *Journaler) CatchInfo(err error) {
-	self.catchSend(err, level.Info)
+	self.send(level.Info, NewErrorMessage(err))
 }
 func CatchInfo(err error) {
 	std.CatchInfo(err)
@@ -79,7 +50,7 @@ func CatchInfo(err error) {
 // Level Notice Catcher Logging Helpers
 
 func (self *Journaler) CatchNotice(err error) {
-	self.catchSend(err, level.Notice)
+	self.send(level.Notice, NewErrorMessage(err))
 }
 func CatchNotice(err error) {
 	std.CatchNotice(err)
@@ -88,7 +59,7 @@ func CatchNotice(err error) {
 // Level Warning Catcher Logging Helpers
 
 func (self *Journaler) CatchWarning(err error) {
-	self.catchSend(err, level.Warning)
+	self.send(level.Warning, NewErrorMessage(err))
 }
 func CatchWarning(err error) {
 	std.CatchWarning(err)
@@ -97,20 +68,20 @@ func CatchWarning(err error) {
 // Level Error Catcher Logging Helpers
 
 func (self *Journaler) CatchError(err error) {
-	self.catchSend(err, level.Error)
+	self.send(level.Error, NewErrorMessage(err))
 }
 func CatchError(err error) {
 	std.CatchError(err)
 }
 func (self *Journaler) CatchErrorPanic(err error) {
-	self.catchSendPanic(err, level.Error)
+	self.sendPanic(level.Error, NewErrorMessage(err))
 
 }
 func CatchErrorPanic(err error) {
 	std.CatchErrorPanic(err)
 }
 func (self *Journaler) CatchErrorFatal(err error) {
-	self.catchSendFatal(err, level.Error)
+	self.sendFatal(level.Error, NewErrorMessage(err))
 }
 func CatchErrorFatal(err error) {
 	std.CatchErrorFatal(err)
@@ -119,19 +90,19 @@ func CatchErrorFatal(err error) {
 // Level Critical Catcher Logging Helpers
 
 func (self *Journaler) CatchCritical(err error) {
-	self.catchSend(err, level.Critical)
+	self.send(level.Critical, NewErrorMessage(err))
 }
 func CatchCritical(err error) {
 	std.CatchCritical(err)
 }
 func (self *Journaler) CatchCriticalPanic(err error) {
-	self.catchSendPanic(err, level.Critical)
+	self.sendPanic(level.Critical, NewErrorMessage(err))
 }
 func CatchCriticalPanic(err error) {
 	std.CatchCriticalPanic(err)
 }
 func (self *Journaler) CatchCriticalFatal(err error) {
-	self.catchSendFatal(err, level.Critical)
+	self.sendFatal(level.Critical, NewErrorMessage(err))
 }
 func CatchCriticalFatal(err error) {
 	std.CatchCriticalFatal(err)
@@ -140,19 +111,19 @@ func CatchCriticalFatal(err error) {
 // Level Alert Catcher Logging Helpers
 
 func (self *Journaler) CatchAlert(err error) {
-	self.catchSend(err, level.Alert)
+	self.send(level.Alert, NewErrorMessage(err))
 }
 func CatchAlert(err error) {
 	std.CatchAlert(err)
 }
 func (self *Journaler) CatchAlertPanic(err error) {
-	self.catchSendPanic(err, level.Alert)
+	self.sendPanic(level.Alert, NewErrorMessage(err))
 }
 func CatchAlertPanic(err error) {
 	std.CatchAlertPanic(err)
 }
 func (self *Journaler) CatchAlertFatal(err error) {
-	self.catchSendFatal(err, level.Alert)
+	self.sendFatal(level.Alert, NewErrorMessage(err))
 }
 func CatchAlertFatal(err error) {
 	std.CatchAlertFatal(err)
@@ -161,19 +132,19 @@ func CatchAlertFatal(err error) {
 // Level Emergency Catcher Logging Helpers
 
 func (self *Journaler) CatchEmergency(err error) {
-	self.catchSend(err, level.Emergency)
+	self.send(level.Emergency, NewErrorMessage(err))
 }
 func CatchEmergency(err error) {
 	std.CatchEmergency(err)
 }
 func (self *Journaler) CatchEmergencyPanic(err error) {
-	self.catchSendPanic(err, level.Emergency)
+	self.sendPanic(level.Emergency, NewErrorMessage(err))
 }
 func CatchEmergencyPanic(err error) {
 	std.CatchEmergency(err)
 }
 func (self *Journaler) CatchEmergencyFatal(err error) {
-	self.catchSendFatal(err, level.Emergency)
+	self.sendFatal(level.Emergency, NewErrorMessage(err))
 }
 func CatchEmergencyFatal(err error) {
 	std.CatchEmergencyFatal(err)

@@ -28,14 +28,14 @@ type MessageComposer interface {
 }
 
 func (self *Journaler) ComposeDefault(m MessageComposer) {
-	self.composeSend(self.sender.GetDefaultLevel(), m)
+	self.send(self.sender.GetDefaultLevel(), m)
 }
 func ComposeDefault(m MessageComposer) {
 	std.ComposeDefault(m)
 }
 
 func (self *Journaler) ComposeEmergency(m MessageComposer) {
-	self.composeSend(level.Emergency, m)
+	self.send(level.Emergency, m)
 }
 
 func ComposeEmergency(m MessageComposer) {
@@ -43,7 +43,7 @@ func ComposeEmergency(m MessageComposer) {
 }
 
 func (self *Journaler) ComposeAlert(m MessageComposer) {
-	self.composeSend(level.Alert, m)
+	self.send(level.Alert, m)
 }
 
 func ComposeAlert(m MessageComposer) {
@@ -51,7 +51,7 @@ func ComposeAlert(m MessageComposer) {
 }
 
 func (self *Journaler) ComposeCritical(m MessageComposer) {
-	self.composeSend(level.Critical, m)
+	self.send(level.Critical, m)
 }
 
 func ComposeCritical(m MessageComposer) {
@@ -59,7 +59,7 @@ func ComposeCritical(m MessageComposer) {
 }
 
 func (self *Journaler) ComposeError(m MessageComposer) {
-	self.composeSend(level.Error, m)
+	self.send(level.Error, m)
 }
 
 func ComposeError(m MessageComposer) {
@@ -67,7 +67,7 @@ func ComposeError(m MessageComposer) {
 }
 
 func (self *Journaler) ComposeWarning(m MessageComposer) {
-	self.composeSend(level.Warning, m)
+	self.send(level.Warning, m)
 }
 
 func ComposeWarning(m MessageComposer) {
@@ -75,7 +75,7 @@ func ComposeWarning(m MessageComposer) {
 }
 
 func (self *Journaler) ComposeNotice(m MessageComposer) {
-	self.composeSend(level.Notice, m)
+	self.send(level.Notice, m)
 }
 
 func ComposeNotice(m MessageComposer) {
@@ -83,7 +83,7 @@ func ComposeNotice(m MessageComposer) {
 }
 
 func (self *Journaler) ComposeInfo(m MessageComposer) {
-	self.composeSend(level.Info, m)
+	self.send(level.Info, m)
 }
 
 func ComposeInfo(m MessageComposer) {
@@ -91,7 +91,7 @@ func ComposeInfo(m MessageComposer) {
 }
 
 func (self *Journaler) ComposeDebug(m MessageComposer) {
-	self.composeSend(level.Debug, m)
+	self.send(level.Debug, m)
 }
 
 func ComposeDebug(m MessageComposer) {
