@@ -26,7 +26,7 @@ func Catch(err error) {
 // Emergency + (fatal/panic)
 
 func (self *Journaler) CatchDefault(err error) {
-	self.send(self.DefaultLevel(), message.NewErrorMessage(err))
+	self.sender.Send(self.DefaultLevel(), message.NewErrorMessage(err))
 }
 func CatchDefault(err error) {
 	std.CatchDefault(err)
@@ -35,7 +35,7 @@ func CatchDefault(err error) {
 // Level Debug Catcher Logging Helpers
 
 func (self *Journaler) CatchDebug(err error) {
-	self.send(level.Debug, message.NewErrorMessage(err))
+	self.sender.Send(level.Debug, message.NewErrorMessage(err))
 }
 func CatchDebug(err error) {
 	std.CatchDebug(err)
@@ -44,7 +44,7 @@ func CatchDebug(err error) {
 // Level Info Catcher Logging Helpers
 
 func (self *Journaler) CatchInfo(err error) {
-	self.send(level.Info, message.NewErrorMessage(err))
+	self.sender.Send(level.Info, message.NewErrorMessage(err))
 }
 func CatchInfo(err error) {
 	std.CatchInfo(err)
@@ -53,7 +53,7 @@ func CatchInfo(err error) {
 // Level Notice Catcher Logging Helpers
 
 func (self *Journaler) CatchNotice(err error) {
-	self.send(level.Notice, message.NewErrorMessage(err))
+	self.sender.Send(level.Notice, message.NewErrorMessage(err))
 }
 func CatchNotice(err error) {
 	std.CatchNotice(err)
@@ -62,7 +62,7 @@ func CatchNotice(err error) {
 // Level Warning Catcher Logging Helpers
 
 func (self *Journaler) CatchWarning(err error) {
-	self.send(level.Warning, message.NewErrorMessage(err))
+	self.sender.Send(level.Warning, message.NewErrorMessage(err))
 }
 func CatchWarning(err error) {
 	std.CatchWarning(err)
@@ -71,7 +71,7 @@ func CatchWarning(err error) {
 // Level Error Catcher Logging Helpers
 
 func (self *Journaler) CatchError(err error) {
-	self.send(level.Error, message.NewErrorMessage(err))
+	self.sender.Send(level.Error, message.NewErrorMessage(err))
 }
 func CatchError(err error) {
 	std.CatchError(err)
@@ -93,7 +93,7 @@ func CatchErrorFatal(err error) {
 // Level Critical Catcher Logging Helpers
 
 func (self *Journaler) CatchCritical(err error) {
-	self.send(level.Critical, message.NewErrorMessage(err))
+	self.sender.Send(level.Critical, message.NewErrorMessage(err))
 }
 func CatchCritical(err error) {
 	std.CatchCritical(err)
@@ -114,7 +114,7 @@ func CatchCriticalFatal(err error) {
 // Level Alert Catcher Logging Helpers
 
 func (self *Journaler) CatchAlert(err error) {
-	self.send(level.Alert, message.NewErrorMessage(err))
+	self.sender.Send(level.Alert, message.NewErrorMessage(err))
 }
 func CatchAlert(err error) {
 	std.CatchAlert(err)
@@ -135,7 +135,7 @@ func CatchAlertFatal(err error) {
 // Level Emergency Catcher Logging Helpers
 
 func (self *Journaler) CatchEmergency(err error) {
-	self.send(level.Emergency, message.NewErrorMessage(err))
+	self.sender.Send(level.Emergency, message.NewErrorMessage(err))
 }
 func CatchEmergency(err error) {
 	std.CatchEmergency(err)

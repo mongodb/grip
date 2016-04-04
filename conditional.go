@@ -16,7 +16,7 @@ func (self *Journaler) conditionalSend(priority level.Priority, conditional bool
 		return
 	}
 
-	self.send(priority, message.ConvertToComposer(m))
+	self.sender.Send(priority, message.ConvertToComposer(m))
 	return
 }
 

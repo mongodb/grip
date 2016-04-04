@@ -10,7 +10,7 @@ var std = NewJournaler("grip")
 
 func init() {
 	if !strings.Contains(os.Args[0], "go-build") {
-		std.Name = os.Args[0]
+		std.name = os.Args[0]
 	}
 
 	if ev := os.Getenv("GRIP_USE_STDOUT"); ev != "" {

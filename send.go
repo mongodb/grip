@@ -8,10 +8,6 @@ import (
 	"github.com/tychoish/grip/send"
 )
 
-func (self *Journaler) send(priority level.Priority, m message.Composer) {
-	self.sender.Send(priority, m)
-}
-
 func (self *Journaler) sendPanic(priority level.Priority, m message.Composer) {
 	// the Send method in the Sender interface will perform this
 	// check but to add fatal methods we need to do this here.
@@ -36,19 +32,19 @@ func (self *Journaler) sendFatal(priority level.Priority, m message.Composer) {
 
 // default methods for sending messages at the default level, whatever it is.
 func (self *Journaler) SendDefault(msg string) {
-	self.send(self.sender.GetDefaultLevel(), message.NewDefaultMessage(msg))
+	self.sender.Send(self.sender.GetDefaultLevel(), message.NewDefaultMessage(msg))
 }
 func SendDefault(msg string) {
 	std.SendDefault(msg)
 }
 func (self *Journaler) SendDefaultf(msg string, a ...interface{}) {
-	self.send(self.sender.GetDefaultLevel(), message.NewFormatedMessage(msg, a...))
+	self.sender.Send(self.sender.GetDefaultLevel(), message.NewFormatedMessage(msg, a...))
 }
 func SendDefaultf(msg string, a ...interface{}) {
 	std.SendDefaultf(msg, a...)
 }
 func (self *Journaler) SendDefaultln(a ...interface{}) {
-	self.send(self.sender.GetDefaultLevel(), message.NewLinesMessage(a...))
+	self.sender.Send(self.sender.GetDefaultLevel(), message.NewLinesMessage(a...))
 }
 func SendDefaultln(a ...interface{}) {
 	std.SendDefaultln(a...)

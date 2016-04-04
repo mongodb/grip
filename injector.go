@@ -20,7 +20,7 @@ func Sender() send.Sender {
 
 func (self *Journaler) UseNativeLogger() error {
 	// name, threshold, default
-	sender, err := send.NewNativeLogger(self.Name, self.sender.GetThresholdLevel(), self.sender.GetDefaultLevel())
+	sender, err := send.NewNativeLogger(self.name, self.sender.GetThresholdLevel(), self.sender.GetDefaultLevel())
 	self.SetSender(sender)
 	return err
 }
@@ -30,7 +30,7 @@ func UseNativeLogger() error {
 
 func (self *Journaler) UseSystemdLogger() error {
 	// name, threshold, default
-	sender, err := send.NewJournaldLogger(self.Name, self.sender.GetThresholdLevel(), self.sender.GetDefaultLevel())
+	sender, err := send.NewJournaldLogger(self.name, self.sender.GetThresholdLevel(), self.sender.GetDefaultLevel())
 	if err != nil {
 		if self.Sender().Name() == "bootstrap" {
 			self.SetSender(sender)
@@ -45,7 +45,7 @@ func UseSystemdLogger() error {
 }
 
 func (self *Journaler) UserFileLogger(filename string) error {
-	s, err := send.NewFileLogger(self.Name, filename, self.sender.GetThresholdLevel(), self.sender.GetDefaultLevel())
+	s, err := send.NewFileLogger(self.name, filename, self.sender.GetThresholdLevel(), self.sender.GetDefaultLevel())
 	if err != nil {
 		if self.Sender().Name() == "bootstrap" {
 			self.SetSender(s)

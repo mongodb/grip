@@ -58,7 +58,7 @@ import (
 // logging is not available.
 type Journaler struct {
 	// an identifier for the log component.
-	Name   string
+	name   string
 	sender send.Sender
 }
 
@@ -69,16 +69,21 @@ type Journaler struct {
 // to configure the backend.
 func NewJournaler(name string) *Journaler {
 	return &Journaler{
-		Name: name,
+		name: name,
 		// sender: threshold, default
 		sender: send.NewBootstrapLogger(level.Info, level.Notice),
 	}
 }
 
+func (self *Journaler) Name() string {
+	return self.name
+
+}
+
 // SetName declare a name string for the logger, including in the logging
 // message. Typically this is included on the output of the command.
 func (self *Journaler) SetName(name string) {
-	self.Name = name
+	self.name = name
 	self.sender.SetName(name)
 }
 
