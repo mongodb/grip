@@ -5,11 +5,6 @@ import (
 	"github.com/tychoish/grip/message"
 )
 
-// Deprecated Takes an error object and prints a message if the err is non-nil.
-func Catch(err error) {
-	CatchDefault(err)
-}
-
 // Logging helpers for catching and logging error messages. Helpers exist
 // for the following levels, with helpers defined both globally for the
 // global logger and for Journaler logging objects.
