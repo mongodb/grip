@@ -10,8 +10,7 @@ import (
 // of "continue on error"-style operations
 
 type MultiCatcher struct {
-	errs  []string
-	count int
+	errs []string
 }
 
 func NewCatcher() *MultiCatcher {
@@ -21,12 +20,11 @@ func NewCatcher() *MultiCatcher {
 func (self *MultiCatcher) Add(err error) {
 	if err != nil {
 		self.errs = append(self.errs, err.Error())
-		self.count += 1
 	}
 }
 
 func (self *MultiCatcher) Len() int {
-	return self.count
+	return len(self.errs)
 }
 
 func (self *MultiCatcher) HasErrors() bool {
