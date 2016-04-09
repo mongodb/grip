@@ -40,9 +40,9 @@ func (self *MultiCatcher) String() string {
 }
 
 func (self *MultiCatcher) Resolve() (err error) {
-	if self.count == 0 {
+	if self.Len() == 0 {
 		err = nil
-	} else if self.count == 1 {
+	} else if self.Len() == 1 {
 		err = errors.New(self.errs[0])
 	} else {
 		err = errors.New(self.String())
