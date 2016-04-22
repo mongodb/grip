@@ -45,7 +45,7 @@ func (j *Journaler) Emergency(msg string) {
 	j.sender.Send(level.Emergency, message.NewDefaultMessage(msg))
 }
 func (j *Journaler) Emergencyf(msg string, a ...interface{}) {
-	j.sender.Send(level.Emergency, message.NewFormatedMessage(msg, a))
+	j.sender.Send(level.Emergency, message.NewFormatedMessage(msg, a...))
 }
 func (j *Journaler) Emergencyln(a ...interface{}) {
 	j.sender.Send(level.Emergency, message.NewLinesMessage(a...))
@@ -54,7 +54,7 @@ func (j *Journaler) EmergencyPanic(msg string) {
 	j.sendPanic(level.Emergency, message.NewDefaultMessage(msg))
 }
 func (j *Journaler) EmergencyPanicf(msg string, a ...interface{}) {
-	j.sendPanic(level.Emergency, message.NewFormatedMessage(msg, a))
+	j.sendPanic(level.Emergency, message.NewFormatedMessage(msg, a...))
 }
 func (j *Journaler) EmergencyPanicln(a ...interface{}) {
 	j.sendPanic(level.Emergency, message.NewLinesMessage(a...))
@@ -63,7 +63,7 @@ func (j *Journaler) EmergencyFatal(msg string) {
 	j.sendFatal(level.Emergency, message.NewDefaultMessage(msg))
 }
 func (j *Journaler) EmergencyFatalf(msg string, a ...interface{}) {
-	j.sendFatal(level.Emergency, message.NewFormatedMessage(msg, a))
+	j.sendFatal(level.Emergency, message.NewFormatedMessage(msg, a...))
 }
 func (j *Journaler) EmergencyFatalln(a ...interface{}) {
 	j.sendFatal(level.Emergency, message.NewLinesMessage(a...))
@@ -102,7 +102,7 @@ func (j *Journaler) Alert(msg string) {
 	j.sender.Send(level.Alert, message.NewDefaultMessage(msg))
 }
 func (j *Journaler) Alertf(msg string, a ...interface{}) {
-	j.sender.Send(level.Alert, message.NewFormatedMessage(msg, a))
+	j.sender.Send(level.Alert, message.NewFormatedMessage(msg, a...))
 }
 func (j *Journaler) Alertln(a ...interface{}) {
 	j.sender.Send(level.Alert, message.NewLinesMessage(a...))
@@ -111,7 +111,7 @@ func (j *Journaler) AlertPanic(msg string) {
 	j.sendFatal(level.Alert, message.NewDefaultMessage(msg))
 }
 func (j *Journaler) AlertPanicf(msg string, a ...interface{}) {
-	j.sendPanic(level.Alert, message.NewFormatedMessage(msg, a))
+	j.sendPanic(level.Alert, message.NewFormatedMessage(msg, a...))
 }
 func (j *Journaler) AlertPanicln(a ...interface{}) {
 	j.sendPanic(level.Alert, message.NewLinesMessage(a...))
@@ -120,7 +120,7 @@ func (j *Journaler) AlertFatal(msg string) {
 	j.sendFatal(level.Alert, message.NewDefaultMessage(msg))
 }
 func (j *Journaler) AlertFatalf(msg string, a ...interface{}) {
-	j.sendFatal(level.Alert, message.NewFormatedMessage(msg, a))
+	j.sendFatal(level.Alert, message.NewFormatedMessage(msg, a...))
 }
 func (j *Journaler) AlertFatalln(a ...interface{}) {
 	j.sendFatal(level.Alert, message.NewLinesMessage(a...))
@@ -159,7 +159,7 @@ func (j *Journaler) Critical(msg string) {
 	j.sender.Send(level.Critical, message.NewDefaultMessage(msg))
 }
 func (j *Journaler) Criticalf(msg string, a ...interface{}) {
-	j.sender.Send(level.Critical, message.NewFormatedMessage(msg, a))
+	j.sender.Send(level.Critical, message.NewFormatedMessage(msg, a...))
 }
 func (j *Journaler) Criticalln(a ...interface{}) {
 	j.sender.Send(level.Critical, message.NewLinesMessage(a...))
@@ -168,7 +168,7 @@ func (j *Journaler) CriticalFatal(msg string) {
 	j.sendFatal(level.Critical, message.NewDefaultMessage(msg))
 }
 func (j *Journaler) CriticalFatalf(msg string, a ...interface{}) {
-	j.sender.Send(level.Critical, message.NewFormatedMessage(msg, a))
+	j.sender.Send(level.Critical, message.NewFormatedMessage(msg, a...))
 }
 func (j *Journaler) CriticalFatalln(a ...interface{}) {
 	j.sendFatal(level.Critical, message.NewLinesMessage(a...))
@@ -177,7 +177,7 @@ func (j *Journaler) CriticalPanic(msg string) {
 	j.sendPanic(level.Critical, message.NewDefaultMessage(msg))
 }
 func (j *Journaler) CriticalPanicf(msg string, a ...interface{}) {
-	j.sendPanic(level.Critical, message.NewFormatedMessage(msg, a))
+	j.sendPanic(level.Critical, message.NewFormatedMessage(msg, a...))
 }
 func (j *Journaler) CriticalPanicln(a ...interface{}) {
 	j.sendPanic(level.Critical, message.NewLinesMessage(a...))
@@ -216,7 +216,7 @@ func (j *Journaler) Error(msg string) {
 	j.sender.Send(level.Error, message.NewDefaultMessage(msg))
 }
 func (j *Journaler) Errorf(msg string, a ...interface{}) {
-	j.sender.Send(level.Error, message.NewFormatedMessage(msg, a))
+	j.sender.Send(level.Error, message.NewFormatedMessage(msg, a...))
 }
 func (j *Journaler) Errorln(a ...interface{}) {
 	j.sender.Send(level.Error, message.NewLinesMessage(a...))
@@ -225,7 +225,7 @@ func (j *Journaler) ErrorFatal(msg string) {
 	j.sendFatal(level.Error, message.NewDefaultMessage(msg))
 }
 func (j *Journaler) ErrorFatalf(msg string, a ...interface{}) {
-	j.sendFatal(level.Error, message.NewFormatedMessage(msg, a))
+	j.sendFatal(level.Error, message.NewFormatedMessage(msg, a...))
 }
 func (j *Journaler) ErrorFatalln(a ...interface{}) {
 	j.sendFatal(level.Error, message.NewLinesMessage(a...))
@@ -234,7 +234,7 @@ func (j *Journaler) ErrorPanic(msg string) {
 	j.sendFatal(level.Error, message.NewDefaultMessage(msg))
 }
 func (j *Journaler) ErrorPanicf(msg string, a ...interface{}) {
-	j.sendPanic(level.Error, message.NewFormatedMessage(msg, a))
+	j.sendPanic(level.Error, message.NewFormatedMessage(msg, a...))
 }
 func (j *Journaler) ErrorPanicln(a ...interface{}) {
 	j.sendPanic(level.Error, message.NewLinesMessage(a...))
@@ -273,7 +273,7 @@ func (j *Journaler) Warning(msg string) {
 	j.sender.Send(level.Warning, message.NewDefaultMessage(msg))
 }
 func (j *Journaler) Warningf(msg string, a ...interface{}) {
-	j.sender.Send(level.Warning, message.NewFormatedMessage(msg, a))
+	j.sender.Send(level.Warning, message.NewFormatedMessage(msg, a...))
 }
 func (j *Journaler) Warningln(a ...interface{}) {
 	j.sender.Send(level.Warning, message.NewLinesMessage(a...))
@@ -294,7 +294,7 @@ func (j *Journaler) Notice(msg string) {
 	j.sender.Send(level.Notice, message.NewDefaultMessage(msg))
 }
 func (j *Journaler) Noticef(msg string, a ...interface{}) {
-	j.sender.Send(level.Notice, message.NewFormatedMessage(msg, a))
+	j.sender.Send(level.Notice, message.NewFormatedMessage(msg, a...))
 }
 func (j *Journaler) Noticeln(a ...interface{}) {
 	j.sender.Send(level.Notice, message.NewLinesMessage(a...))
@@ -315,7 +315,7 @@ func (j *Journaler) Info(msg string) {
 	j.sender.Send(level.Info, message.NewDefaultMessage(msg))
 }
 func (j *Journaler) Infof(msg string, a ...interface{}) {
-	j.sender.Send(level.Info, message.NewFormatedMessage(msg, a))
+	j.sender.Send(level.Info, message.NewFormatedMessage(msg, a...))
 }
 func (j *Journaler) Infoln(a ...interface{}) {
 	j.sender.Send(level.Info, message.NewLinesMessage(a...))
@@ -336,7 +336,7 @@ func (j *Journaler) Debug(msg string) {
 	j.sender.Send(level.Debug, message.NewDefaultMessage(msg))
 }
 func (j *Journaler) Debugf(msg string, a ...interface{}) {
-	j.sender.Send(level.Debug, message.NewFormatedMessage(msg, a))
+	j.sender.Send(level.Debug, message.NewFormatedMessage(msg, a...))
 }
 func (j *Journaler) Debugln(a ...interface{}) {
 	j.sender.Send(level.Debug, message.NewLinesMessage(a...))
