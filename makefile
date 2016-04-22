@@ -5,8 +5,8 @@ deps:
 
 test-deps:deps
 	go get gopkg.in/check.v1
-	go get github.com/alecthomas/gometalinter
-	gometalinter --install --update
+	-go get github.com/alecthomas/gometalinter >/dev/null 2>&1
+	-gometalinter --install --update >/dev/null 2>&1
 
 build:deps
 	go build -v
