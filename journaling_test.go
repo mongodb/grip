@@ -37,7 +37,7 @@ func (s *GripSuite) TestDefaultJournalerIsBootstrap(c *C) {
 	// the bootstrap sender is a bit special because you can't
 	// change it's name, therefore:
 	secondName := "something_else"
-	s.grip.SetName(second_name)
+	s.grip.SetName(secondName)
 	c.Assert(s.grip.sender.Name(), Equals, "bootstrap")
 	c.Assert(s.grip.Name(), Equals, secondName)
 }

@@ -21,7 +21,7 @@ func (s *GripSuite) TestSenderGetterReturnsExpectedJournaler(c *C) {
 	defer ns.Close()
 	c.Assert(grip.Sender(), FitsTypeOf, ns)
 
-	err := grip.UserFileLogger("foo")
+	err = grip.UserFileLogger("foo")
 	c.Assert(err, IsNil)
 
 	defer os.Remove("foo")
