@@ -3,7 +3,7 @@ PACKAGES := ./ ./level ./message ./send
 deps:
 	go get -u github.com/coreos/go-systemd/journal
 
-test-deps:
+test-deps:deps
 	go get -u gopkg.in/check.v1
 
 build:deps
