@@ -1,10 +1,10 @@
 PACKAGES := ./ ./level ./message ./send
 
 deps:
-	go get -u github.com/coreos/go-systemd/journal
+	go get github.com/coreos/go-systemd/journal
 
 test-deps:deps
-	go get -u gopkg.in/check.v1
+	go get gopkg.in/check.v1
 
 build:deps
 	go build -v
@@ -14,4 +14,4 @@ lint:
 	go vet $(PACKAGES)
 
 test:build lint
-	go test -v -check.v $(PACKAGES)
+	go test -cover -v -check.v $(PACKAGES)

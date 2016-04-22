@@ -11,4 +11,4 @@ go:
   - 1.5
   - 1.6
 install: make test-deps
-script: make test
+script: make lint test
