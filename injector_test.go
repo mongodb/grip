@@ -12,14 +12,18 @@ func (s *GripSuite) TestSenderGetterReturnsExpectedJournaler(c *C) {
 	c.Assert(grip.Name(), Equals, "sender_swap")
 	c.Assert(grip.sender.Name(), Equals, "bootstrap")
 
-	grip.UseNativeLogger()
+	err := grip.UseNativeLogger()
+	c.Assert(err, IsNil)
+
 	c.Assert(grip.Name(), Equals, "sender_swap")
 	c.Assert(grip.sender.Name(), Not(Equals), "bootstrap")
 	ns, _ := send.NewNativeLogger("native_sender", s.grip.sender.ThresholdLevel(), s.grip.sender.DefaultLevel())
 	defer ns.Close()
 	c.Assert(grip.Sender(), FitsTypeOf, ns)
 
-	grip.UserFileLogger("foo")
+	err := grip.UserFileLogger("foo")
+	c.Assert(err, IsNil)
+
 	defer os.Remove("foo")
 	c.Assert(grip.Name(), Equals, "sender_swap")
 	c.Assert(grip.Sender(), Not(FitsTypeOf), ns)

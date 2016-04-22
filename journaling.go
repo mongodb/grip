@@ -78,16 +78,16 @@ func NewJournaler(name string) *Journaler {
 	}
 }
 
-func (self *Journaler) Name() string {
-	return self.name
+func (j *Journaler) Name() string {
+	return j.name
 
 }
 
 // SetName declare a name string for the logger, including in the logging
 // message. Typically this is included on the output of the command.
-func (self *Journaler) SetName(name string) {
-	self.name = name
-	self.sender.SetName(name)
+func (j *Journaler) SetName(name string) {
+	j.name = name
+	j.sender.SetName(name)
 }
 
 // SetName provides a wrapper for setting the name of the global logger.
@@ -99,24 +99,24 @@ func SetName(name string) {
 // Journaler.sender.Send() method, but we have a couple of methods to
 // use for the Panic/Fatal helpers.
 
-func (self *Journaler) sendPanic(priority level.Priority, m message.Composer) {
+func (j *Journaler) sendPanic(priority level.Priority, m message.Composer) {
 	// the Send method in the Sender interface will perform this
 	// check but to add fatal methods we need to do this here.
-	if !send.ShouldLogMessage(self.sender, priority, m) {
+	if !send.ShouldLogMessage(j.sender, priority, m) {
 		return
 	}
 
-	self.sender.Send(priority, m)
+	j.sender.Send(priority, m)
 	panic(m.Resolve())
 }
 
-func (self *Journaler) sendFatal(priority level.Priority, m message.Composer) {
+func (j *Journaler) sendFatal(priority level.Priority, m message.Composer) {
 	// the Send method in the Sender interface will perform this
 	// check but to add fatal methods we need to do this here.
-	if !send.ShouldLogMessage(self.sender, priority, m) {
+	if !send.ShouldLogMessage(j.sender, priority, m) {
 		return
 	}
 
-	self.sender.Send(priority, m)
+	j.sender.Send(priority, m)
 	os.Exit(1)
 }

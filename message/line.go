@@ -28,7 +28,7 @@ func (l *lineMessenger) Loggable() bool {
 }
 
 func (l *lineMessenger) Resolve() string {
-	return strings.Trim(fmt.Sprintln(l.Lines), "\n")
+	return strings.Trim(fmt.Sprintln(l.Lines...), "\n")
 }
 
 func (l *lineMessenger) Raw() interface{} {

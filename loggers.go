@@ -19,14 +19,14 @@ import (
 // Debug
 
 // default methods for sending messages at the default level.
-func (self *Journaler) Default(msg string) {
-	self.sender.Send(self.sender.DefaultLevel(), message.NewDefaultMessage(msg))
+func (j *Journaler) Default(msg string) {
+	j.sender.Send(j.sender.DefaultLevel(), message.NewDefaultMessage(msg))
 }
-func (self *Journaler) Defaultf(msg string, a ...interface{}) {
-	self.sender.Send(self.sender.DefaultLevel(), message.NewFormatedMessage(msg, a...))
+func (j *Journaler) Defaultf(msg string, a ...interface{}) {
+	j.sender.Send(j.sender.DefaultLevel(), message.NewFormatedMessage(msg, a...))
 }
-func (self *Journaler) Defaultln(a ...interface{}) {
-	self.sender.Send(self.sender.DefaultLevel(), message.NewLinesMessage(a...))
+func (j *Journaler) Defaultln(a ...interface{}) {
+	j.sender.Send(j.sender.DefaultLevel(), message.NewLinesMessage(a...))
 }
 func Default(msg string) {
 	std.Default(msg)
@@ -41,32 +41,32 @@ func Defaultln(a ...interface{}) {
 // Leveled Logging Methods
 // Emergency-level logging methods
 
-func (self *Journaler) Emergency(msg string) {
-	self.sender.Send(level.Emergency, message.NewDefaultMessage(msg))
+func (j *Journaler) Emergency(msg string) {
+	j.sender.Send(level.Emergency, message.NewDefaultMessage(msg))
 }
-func (self *Journaler) Emergencyf(msg string, a ...interface{}) {
-	self.sender.Send(level.Emergency, message.NewFormatedMessage(msg, a))
+func (j *Journaler) Emergencyf(msg string, a ...interface{}) {
+	j.sender.Send(level.Emergency, message.NewFormatedMessage(msg, a))
 }
-func (self *Journaler) Emergencyln(a ...interface{}) {
-	self.sender.Send(level.Emergency, message.NewLinesMessage(a...))
+func (j *Journaler) Emergencyln(a ...interface{}) {
+	j.sender.Send(level.Emergency, message.NewLinesMessage(a...))
 }
-func (self *Journaler) EmergencyPanic(msg string) {
-	self.sendPanic(level.Emergency, message.NewDefaultMessage(msg))
+func (j *Journaler) EmergencyPanic(msg string) {
+	j.sendPanic(level.Emergency, message.NewDefaultMessage(msg))
 }
-func (self *Journaler) EmergencyPanicf(msg string, a ...interface{}) {
-	self.sendPanic(level.Emergency, message.NewFormatedMessage(msg, a))
+func (j *Journaler) EmergencyPanicf(msg string, a ...interface{}) {
+	j.sendPanic(level.Emergency, message.NewFormatedMessage(msg, a))
 }
-func (self *Journaler) EmergencyPanicln(a ...interface{}) {
-	self.sendPanic(level.Emergency, message.NewLinesMessage(a...))
+func (j *Journaler) EmergencyPanicln(a ...interface{}) {
+	j.sendPanic(level.Emergency, message.NewLinesMessage(a...))
 }
-func (self *Journaler) EmergencyFatal(msg string) {
-	self.sendFatal(level.Emergency, message.NewDefaultMessage(msg))
+func (j *Journaler) EmergencyFatal(msg string) {
+	j.sendFatal(level.Emergency, message.NewDefaultMessage(msg))
 }
-func (self *Journaler) EmergencyFatalf(msg string, a ...interface{}) {
-	self.sendFatal(level.Emergency, message.NewFormatedMessage(msg, a))
+func (j *Journaler) EmergencyFatalf(msg string, a ...interface{}) {
+	j.sendFatal(level.Emergency, message.NewFormatedMessage(msg, a))
 }
-func (self *Journaler) EmergencyFatalln(a ...interface{}) {
-	self.sendFatal(level.Emergency, message.NewLinesMessage(a...))
+func (j *Journaler) EmergencyFatalln(a ...interface{}) {
+	j.sendFatal(level.Emergency, message.NewLinesMessage(a...))
 }
 func EmergencyFatal(msg string) {
 	std.EmergencyFatal(msg)
@@ -98,32 +98,32 @@ func EmergencyFatalln(a ...interface{}) {
 
 // Alert-level logging methods
 
-func (self *Journaler) Alert(msg string) {
-	self.sender.Send(level.Alert, message.NewDefaultMessage(msg))
+func (j *Journaler) Alert(msg string) {
+	j.sender.Send(level.Alert, message.NewDefaultMessage(msg))
 }
-func (self *Journaler) Alertf(msg string, a ...interface{}) {
-	self.sender.Send(level.Alert, message.NewFormatedMessage(msg, a))
+func (j *Journaler) Alertf(msg string, a ...interface{}) {
+	j.sender.Send(level.Alert, message.NewFormatedMessage(msg, a))
 }
-func (self *Journaler) Alertln(a ...interface{}) {
-	self.sender.Send(level.Alert, message.NewLinesMessage(a...))
+func (j *Journaler) Alertln(a ...interface{}) {
+	j.sender.Send(level.Alert, message.NewLinesMessage(a...))
 }
-func (self *Journaler) AlertPanic(msg string) {
-	self.sendFatal(level.Alert, message.NewDefaultMessage(msg))
+func (j *Journaler) AlertPanic(msg string) {
+	j.sendFatal(level.Alert, message.NewDefaultMessage(msg))
 }
-func (self *Journaler) AlertPanicf(msg string, a ...interface{}) {
-	self.sendPanic(level.Alert, message.NewFormatedMessage(msg, a))
+func (j *Journaler) AlertPanicf(msg string, a ...interface{}) {
+	j.sendPanic(level.Alert, message.NewFormatedMessage(msg, a))
 }
-func (self *Journaler) AlertPanicln(a ...interface{}) {
-	self.sendPanic(level.Alert, message.NewLinesMessage(a...))
+func (j *Journaler) AlertPanicln(a ...interface{}) {
+	j.sendPanic(level.Alert, message.NewLinesMessage(a...))
 }
-func (self *Journaler) AlertFatal(msg string) {
-	self.sendFatal(level.Alert, message.NewDefaultMessage(msg))
+func (j *Journaler) AlertFatal(msg string) {
+	j.sendFatal(level.Alert, message.NewDefaultMessage(msg))
 }
-func (self *Journaler) AlertFatalf(msg string, a ...interface{}) {
-	self.sendFatal(level.Alert, message.NewFormatedMessage(msg, a))
+func (j *Journaler) AlertFatalf(msg string, a ...interface{}) {
+	j.sendFatal(level.Alert, message.NewFormatedMessage(msg, a))
 }
-func (self *Journaler) AlertFatalln(a ...interface{}) {
-	self.sendFatal(level.Alert, message.NewLinesMessage(a...))
+func (j *Journaler) AlertFatalln(a ...interface{}) {
+	j.sendFatal(level.Alert, message.NewLinesMessage(a...))
 }
 func AlertFatal(msg string) {
 	std.AlertFatal(msg)
@@ -155,32 +155,32 @@ func AlertFatalln(a ...interface{}) {
 
 // Critical-level logging methods
 
-func (self *Journaler) Critical(msg string) {
-	self.sender.Send(level.Critical, message.NewDefaultMessage(msg))
+func (j *Journaler) Critical(msg string) {
+	j.sender.Send(level.Critical, message.NewDefaultMessage(msg))
 }
-func (self *Journaler) Criticalf(msg string, a ...interface{}) {
-	self.sender.Send(level.Critical, message.NewFormatedMessage(msg, a))
+func (j *Journaler) Criticalf(msg string, a ...interface{}) {
+	j.sender.Send(level.Critical, message.NewFormatedMessage(msg, a))
 }
-func (self *Journaler) Criticalln(a ...interface{}) {
-	self.sender.Send(level.Critical, message.NewLinesMessage(a...))
+func (j *Journaler) Criticalln(a ...interface{}) {
+	j.sender.Send(level.Critical, message.NewLinesMessage(a...))
 }
-func (self *Journaler) CriticalFatal(msg string) {
-	self.sendFatal(level.Critical, message.NewDefaultMessage(msg))
+func (j *Journaler) CriticalFatal(msg string) {
+	j.sendFatal(level.Critical, message.NewDefaultMessage(msg))
 }
-func (self *Journaler) CriticalFatalf(msg string, a ...interface{}) {
-	self.sender.Send(level.Critical, message.NewFormatedMessage(msg, a))
+func (j *Journaler) CriticalFatalf(msg string, a ...interface{}) {
+	j.sender.Send(level.Critical, message.NewFormatedMessage(msg, a))
 }
-func (self *Journaler) CriticalFatalln(a ...interface{}) {
-	self.sendFatal(level.Critical, message.NewLinesMessage(a...))
+func (j *Journaler) CriticalFatalln(a ...interface{}) {
+	j.sendFatal(level.Critical, message.NewLinesMessage(a...))
 }
-func (self *Journaler) CriticalPanic(msg string) {
-	self.sendPanic(level.Critical, message.NewDefaultMessage(msg))
+func (j *Journaler) CriticalPanic(msg string) {
+	j.sendPanic(level.Critical, message.NewDefaultMessage(msg))
 }
-func (self *Journaler) CriticalPanicf(msg string, a ...interface{}) {
-	self.sendPanic(level.Critical, message.NewFormatedMessage(msg, a))
+func (j *Journaler) CriticalPanicf(msg string, a ...interface{}) {
+	j.sendPanic(level.Critical, message.NewFormatedMessage(msg, a))
 }
-func (self *Journaler) CriticalPanicln(a ...interface{}) {
-	self.sendPanic(level.Critical, message.NewLinesMessage(a...))
+func (j *Journaler) CriticalPanicln(a ...interface{}) {
+	j.sendPanic(level.Critical, message.NewLinesMessage(a...))
 }
 func Critical(msg string) {
 	std.Critical(msg)
@@ -212,32 +212,32 @@ func CriticalPanicln(a ...interface{}) {
 
 // Error-level logging methods
 
-func (self *Journaler) Error(msg string) {
-	self.sender.Send(level.Error, message.NewDefaultMessage(msg))
+func (j *Journaler) Error(msg string) {
+	j.sender.Send(level.Error, message.NewDefaultMessage(msg))
 }
-func (self *Journaler) Errorf(msg string, a ...interface{}) {
-	self.sender.Send(level.Error, message.NewFormatedMessage(msg, a))
+func (j *Journaler) Errorf(msg string, a ...interface{}) {
+	j.sender.Send(level.Error, message.NewFormatedMessage(msg, a))
 }
-func (self *Journaler) Errorln(a ...interface{}) {
-	self.sender.Send(level.Error, message.NewLinesMessage(a...))
+func (j *Journaler) Errorln(a ...interface{}) {
+	j.sender.Send(level.Error, message.NewLinesMessage(a...))
 }
-func (self *Journaler) ErrorFatal(msg string) {
-	self.sendFatal(level.Error, message.NewDefaultMessage(msg))
+func (j *Journaler) ErrorFatal(msg string) {
+	j.sendFatal(level.Error, message.NewDefaultMessage(msg))
 }
-func (self *Journaler) ErrorFatalf(msg string, a ...interface{}) {
-	self.sendFatal(level.Error, message.NewFormatedMessage(msg, a))
+func (j *Journaler) ErrorFatalf(msg string, a ...interface{}) {
+	j.sendFatal(level.Error, message.NewFormatedMessage(msg, a))
 }
-func (self *Journaler) ErrorFatalln(a ...interface{}) {
-	self.sendFatal(level.Error, message.NewLinesMessage(a...))
+func (j *Journaler) ErrorFatalln(a ...interface{}) {
+	j.sendFatal(level.Error, message.NewLinesMessage(a...))
 }
-func (self *Journaler) ErrorPanic(msg string) {
-	self.sendFatal(level.Error, message.NewDefaultMessage(msg))
+func (j *Journaler) ErrorPanic(msg string) {
+	j.sendFatal(level.Error, message.NewDefaultMessage(msg))
 }
-func (self *Journaler) ErrorPanicf(msg string, a ...interface{}) {
-	self.sendPanic(level.Error, message.NewFormatedMessage(msg, a))
+func (j *Journaler) ErrorPanicf(msg string, a ...interface{}) {
+	j.sendPanic(level.Error, message.NewFormatedMessage(msg, a))
 }
-func (self *Journaler) ErrorPanicln(a ...interface{}) {
-	self.sendPanic(level.Error, message.NewLinesMessage(a...))
+func (j *Journaler) ErrorPanicln(a ...interface{}) {
+	j.sendPanic(level.Error, message.NewLinesMessage(a...))
 }
 func Error(msg string) {
 	std.Error(msg)
@@ -269,14 +269,14 @@ func ErrorFatalln(a ...interface{}) {
 
 // Warning-level logging methods
 
-func (self *Journaler) Warning(msg string) {
-	self.sender.Send(level.Warning, message.NewDefaultMessage(msg))
+func (j *Journaler) Warning(msg string) {
+	j.sender.Send(level.Warning, message.NewDefaultMessage(msg))
 }
-func (self *Journaler) Warningf(msg string, a ...interface{}) {
-	self.sender.Send(level.Warning, message.NewFormatedMessage(msg, a))
+func (j *Journaler) Warningf(msg string, a ...interface{}) {
+	j.sender.Send(level.Warning, message.NewFormatedMessage(msg, a))
 }
-func (self *Journaler) Warningln(a ...interface{}) {
-	self.sender.Send(level.Warning, message.NewLinesMessage(a...))
+func (j *Journaler) Warningln(a ...interface{}) {
+	j.sender.Send(level.Warning, message.NewLinesMessage(a...))
 }
 func Warning(msg string) {
 	std.Warning(msg)
@@ -290,14 +290,14 @@ func Warningln(a ...interface{}) {
 
 // Notice-level logging methods
 
-func (self *Journaler) Notice(msg string) {
-	self.sender.Send(level.Notice, message.NewDefaultMessage(msg))
+func (j *Journaler) Notice(msg string) {
+	j.sender.Send(level.Notice, message.NewDefaultMessage(msg))
 }
-func (self *Journaler) Noticef(msg string, a ...interface{}) {
-	self.sender.Send(level.Notice, message.NewFormatedMessage(msg, a))
+func (j *Journaler) Noticef(msg string, a ...interface{}) {
+	j.sender.Send(level.Notice, message.NewFormatedMessage(msg, a))
 }
-func (self *Journaler) Noticeln(a ...interface{}) {
-	self.sender.Send(level.Notice, message.NewLinesMessage(a...))
+func (j *Journaler) Noticeln(a ...interface{}) {
+	j.sender.Send(level.Notice, message.NewLinesMessage(a...))
 }
 func Notice(msg string) {
 	std.Notice(msg)
@@ -311,14 +311,14 @@ func Noticeln(a ...interface{}) {
 
 // Info-level logging methods
 
-func (self *Journaler) Info(msg string) {
-	self.sender.Send(level.Info, message.NewDefaultMessage(msg))
+func (j *Journaler) Info(msg string) {
+	j.sender.Send(level.Info, message.NewDefaultMessage(msg))
 }
-func (self *Journaler) Infof(msg string, a ...interface{}) {
-	self.sender.Send(level.Info, message.NewFormatedMessage(msg, a))
+func (j *Journaler) Infof(msg string, a ...interface{}) {
+	j.sender.Send(level.Info, message.NewFormatedMessage(msg, a))
 }
-func (self *Journaler) Infoln(a ...interface{}) {
-	self.sender.Send(level.Info, message.NewLinesMessage(a...))
+func (j *Journaler) Infoln(a ...interface{}) {
+	j.sender.Send(level.Info, message.NewLinesMessage(a...))
 }
 func Info(msg string) {
 	std.Info(msg)
@@ -332,14 +332,14 @@ func Infoln(a ...interface{}) {
 
 // Debug-level logging methods
 
-func (self *Journaler) Debug(msg string) {
-	self.sender.Send(level.Debug, message.NewDefaultMessage(msg))
+func (j *Journaler) Debug(msg string) {
+	j.sender.Send(level.Debug, message.NewDefaultMessage(msg))
 }
-func (self *Journaler) Debugf(msg string, a ...interface{}) {
-	self.sender.Send(level.Debug, message.NewFormatedMessage(msg, a))
+func (j *Journaler) Debugf(msg string, a ...interface{}) {
+	j.sender.Send(level.Debug, message.NewFormatedMessage(msg, a))
 }
-func (self *Journaler) Debugln(a ...interface{}) {
-	self.sender.Send(level.Debug, message.NewLinesMessage(a...))
+func (j *Journaler) Debugln(a ...interface{}) {
+	j.sender.Send(level.Debug, message.NewLinesMessage(a...))
 }
 func Debug(msg string) {
 	std.Debug(msg)

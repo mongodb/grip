@@ -12,6 +12,7 @@ build:deps
 lint:
 	gofmt -l $(PACKAGES)
 	go vet $(PACKAGES)
+	-gometalinter --disable=gotype --deadline=20s $(PACKAGES)
 
 test:build lint
 	go test -cover -v -check.v $(PACKAGES)

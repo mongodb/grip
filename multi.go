@@ -17,37 +17,33 @@ func NewCatcher() *MultiCatcher {
 	return &MultiCatcher{}
 }
 
-func (self *MultiCatcher) Add(err error) {
+func (c *MultiCatcher) Add(err error) {
 	if err != nil {
-		self.errs = append(self.errs, err.Error())
+		c.errs = append(c.errs, err.Error())
 	}
 }
 
-func (self *MultiCatcher) Len() int {
-	return len(self.errs)
+func (c *MultiCatcher) Len() int {
+	return len(c.errs)
 }
 
-func (self *MultiCatcher) HasErrors() bool {
-	if self.Len() == 0 {
-		return false
-	} else {
-		return true
-	}
+func (c *MultiCatcher) HasErrors() bool {
+	return c.Len() > 0
 }
 
-func (self *MultiCatcher) String() string {
-	return strings.Join(self.errs, ", ")
+func (c *MultiCatcher) String() string {
+	return strings.Join(c.errs, ", ")
 }
 
-func (self *MultiCatcher) Resolve() (err error) {
-	if self.Len() == 0 {
+func (c *MultiCatcher) Resolve() (err error) {
+	if c.Len() == 0 {
 		err = nil
-	} else if self.Len() == 1 {
-		err = errors.New(self.errs[0])
+	} else if c.Len() == 1 {
+		err = errors.New(c.errs[0])
 	} else {
-		err = errors.New(self.String())
+		err = errors.New(c.String())
 	}
 
-	self = NewCatcher()
+	c = NewCatcher()
 	return err
 }

@@ -7,8 +7,8 @@ import (
 
 // Default Composer Methods
 
-func (self *Journaler) ComposeDefault(m message.Composer) {
-	self.sender.Send(self.sender.DefaultLevel(), m)
+func (j *Journaler) ComposeDefault(m message.Composer) {
+	j.sender.Send(j.sender.DefaultLevel(), m)
 }
 func ComposeDefault(m message.Composer) {
 	std.ComposeDefault(m)
@@ -16,14 +16,14 @@ func ComposeDefault(m message.Composer) {
 
 // Emergency Composer Methods
 
-func (self *Journaler) ComposeEmergency(m message.Composer) {
-	self.sender.Send(level.Emergency, m)
+func (j *Journaler) ComposeEmergency(m message.Composer) {
+	j.sender.Send(level.Emergency, m)
 }
-func (self *Journaler) ComposeEmergencyPanic(m message.Composer) {
-	self.sendPanic(level.Emergency, m)
+func (j *Journaler) ComposeEmergencyPanic(m message.Composer) {
+	j.sendPanic(level.Emergency, m)
 }
-func (self *Journaler) ComposeEmergencyFatal(m message.Composer) {
-	self.sendFatal(level.Emergency, m)
+func (j *Journaler) ComposeEmergencyFatal(m message.Composer) {
+	j.sendFatal(level.Emergency, m)
 }
 func ComposeEmergency(m message.Composer) {
 	std.ComposeEmergency(m)
@@ -37,14 +37,14 @@ func ComposeEmergencyFatal(m message.Composer) {
 
 // Alert Composer Methods
 
-func (self *Journaler) ComposeAlert(m message.Composer) {
-	self.sender.Send(level.Alert, m)
+func (j *Journaler) ComposeAlert(m message.Composer) {
+	j.sender.Send(level.Alert, m)
 }
-func (self *Journaler) ComposeAlertPanic(m message.Composer) {
-	self.sendPanic(level.Alert, m)
+func (j *Journaler) ComposeAlertPanic(m message.Composer) {
+	j.sendPanic(level.Alert, m)
 }
-func (self *Journaler) ComposeAlertFatal(m message.Composer) {
-	self.sendFatal(level.Alert, m)
+func (j *Journaler) ComposeAlertFatal(m message.Composer) {
+	j.sendFatal(level.Alert, m)
 }
 func ComposeAlert(m message.Composer) {
 	std.ComposeAlert(m)
@@ -58,14 +58,14 @@ func ComposeAlertFatal(m message.Composer) {
 
 // Critical Composer Methods
 
-func (self *Journaler) ComposeCritical(m message.Composer) {
-	self.sender.Send(level.Critical, m)
+func (j *Journaler) ComposeCritical(m message.Composer) {
+	j.sender.Send(level.Critical, m)
 }
-func (self *Journaler) ComposeCriticalPanic(m message.Composer) {
-	self.sendPanic(level.Critical, m)
+func (j *Journaler) ComposeCriticalPanic(m message.Composer) {
+	j.sendPanic(level.Critical, m)
 }
-func (self *Journaler) ComposeCriticalFatal(m message.Composer) {
-	self.sendFatal(level.Critical, m)
+func (j *Journaler) ComposeCriticalFatal(m message.Composer) {
+	j.sendFatal(level.Critical, m)
 }
 func ComposeCritical(m message.Composer) {
 	std.ComposeCritical(m)
@@ -79,14 +79,14 @@ func ComposeCriticalFatal(m message.Composer) {
 
 // Error Composer Methods
 
-func (self *Journaler) ComposeError(m message.Composer) {
-	self.sender.Send(level.Error, m)
+func (j *Journaler) ComposeError(m message.Composer) {
+	j.sender.Send(level.Error, m)
 }
-func (self *Journaler) ComposeErrorPanic(m message.Composer) {
-	self.sendPanic(level.Error, m)
+func (j *Journaler) ComposeErrorPanic(m message.Composer) {
+	j.sendPanic(level.Error, m)
 }
-func (self *Journaler) ComposeErrorFatal(m message.Composer) {
-	self.sendFatal(level.Error, m)
+func (j *Journaler) ComposeErrorFatal(m message.Composer) {
+	j.sendFatal(level.Error, m)
 }
 func ComposeError(m message.Composer) {
 	std.ComposeError(m)
@@ -100,15 +100,15 @@ func ComposeErrorFatal(m message.Composer) {
 
 // Warning Composer Methods
 
-func (self *Journaler) ComposeWarning(m message.Composer) {
-	self.sender.Send(level.Warning, m)
+func (j *Journaler) ComposeWarning(m message.Composer) {
+	j.sender.Send(level.Warning, m)
 }
 func ComposeWarning(m message.Composer) {
 	std.ComposeWarning(m)
 }
 
-func (self *Journaler) ComposeNotice(m message.Composer) {
-	self.sender.Send(level.Notice, m)
+func (j *Journaler) ComposeNotice(m message.Composer) {
+	j.sender.Send(level.Notice, m)
 }
 func ComposeNotice(m message.Composer) {
 	std.ComposeNotice(m)
@@ -116,8 +116,8 @@ func ComposeNotice(m message.Composer) {
 
 // Info Composer
 
-func (self *Journaler) ComposeInfo(m message.Composer) {
-	self.sender.Send(level.Info, m)
+func (j *Journaler) ComposeInfo(m message.Composer) {
+	j.sender.Send(level.Info, m)
 }
 func ComposeInfo(m message.Composer) {
 	std.ComposeInfo(m)
@@ -125,8 +125,8 @@ func ComposeInfo(m message.Composer) {
 
 // Debug Composer
 
-func (self *Journaler) ComposeDebug(m message.Composer) {
-	self.sender.Send(level.Debug, m)
+func (j *Journaler) ComposeDebug(m message.Composer) {
+	j.sender.Send(level.Debug, m)
 }
 func ComposeDebug(m message.Composer) {
 	std.ComposeDebug(m)

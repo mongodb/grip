@@ -2,12 +2,12 @@ package grip
 
 import "github.com/tychoish/grip/send"
 
-// Method to swap send.Sender() implementations in a logging
+// SetSender swaps send.Sender() implementations in a logging
 // instance. Calls the Close() method on the existing instance before
 // changing the implementation for the current instance.
-func (self *Journaler) SetSender(s send.Sender) {
-	self.sender.Close()
-	self.sender = s
+func (j *Journaler) SetSender(s send.Sender) {
+	j.sender.Close()
+	j.sender = s
 }
 func SetSender(s send.Sender) {
 	std.SetSender(s)
@@ -16,8 +16,8 @@ func SetSender(s send.Sender) {
 // Returns the current Journaler's sender instance. Use this in
 // combination with SetSender() to have multiple Journaler instances
 // backed by the same send.Sender instance.
-func (self *Journaler) Sender() send.Sender {
-	return self.sender
+func (j *Journaler) Sender() send.Sender {
+	return j.sender
 }
 
 func Sender() send.Sender {
@@ -26,10 +26,10 @@ func Sender() send.Sender {
 
 // Set the Journaler to use a native, standard output, logging
 // instance, without changing the configuration of the Journaler.
-func (self *Journaler) UseNativeLogger() error {
+func (j *Journaler) UseNativeLogger() error {
 	// name, threshold, default
-	sender, err := send.NewNativeLogger(self.name, self.sender.ThresholdLevel(), self.sender.DefaultLevel())
-	self.SetSender(sender)
+	sender, err := send.NewNativeLogger(j.name, j.sender.ThresholdLevel(), j.sender.DefaultLevel())
+	j.SetSender(sender)
 	return err
 }
 func UseNativeLogger() error {
@@ -38,16 +38,16 @@ func UseNativeLogger() error {
 
 // Set the Journaler to use the systemd loggerwithout changing the
 // configuration of the Journaler.
-func (self *Journaler) UseSystemdLogger() error {
+func (j *Journaler) UseSystemdLogger() error {
 	// name, threshold, default
-	sender, err := send.NewJournaldLogger(self.name, self.sender.ThresholdLevel(), self.sender.DefaultLevel())
+	sender, err := send.NewJournaldLogger(j.name, j.sender.ThresholdLevel(), j.sender.DefaultLevel())
 	if err != nil {
-		if self.Sender().Name() == "bootstrap" {
-			self.SetSender(sender)
+		if j.Sender().Name() == "bootstrap" {
+			j.SetSender(sender)
 		}
 		return err
 	}
-	self.SetSender(sender)
+	j.SetSender(sender)
 	return nil
 }
 func UseSystemdLogger() error {
@@ -56,15 +56,15 @@ func UseSystemdLogger() error {
 
 // Use a file-based logger that writes all log output to a file, based
 // on the standard library logging methods.
-func (self *Journaler) UserFileLogger(filename string) error {
-	s, err := send.NewFileLogger(self.name, filename, self.sender.ThresholdLevel(), self.sender.DefaultLevel())
+func (j *Journaler) UserFileLogger(filename string) error {
+	s, err := send.NewFileLogger(j.name, filename, j.sender.ThresholdLevel(), j.sender.DefaultLevel())
 	if err != nil {
-		if self.Sender().Name() == "bootstrap" {
-			self.SetSender(s)
+		if j.Sender().Name() == "bootstrap" {
+			j.SetSender(s)
 		}
 		return err
 	}
-	self.SetSender(s)
+	j.SetSender(s)
 	return nil
 }
 func UseFileLogger(filename string) error {
