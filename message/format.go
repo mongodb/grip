@@ -20,10 +20,7 @@ func (f *formatMessenger) Resolve() string {
 }
 
 func (f *formatMessenger) Loggable() bool {
-	if f.base == "" {
-		return false
-	}
-	return true
+	return f.base != ""
 }
 
 func (f *formatMessenger) Raw() interface{} {

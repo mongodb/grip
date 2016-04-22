@@ -24,7 +24,8 @@ func (s *GripSuite) TestSenderGetterReturnsExpectedJournaler(c *C) {
 	err = grip.UserFileLogger("foo")
 	c.Assert(err, IsNil)
 
-	defer os.Remove("foo")
+	defer func() { std.CatchError(os.Remove("foo")) }()
+
 	c.Assert(grip.Name(), Equals, "sender_swap")
 	c.Assert(grip.Sender(), Not(FitsTypeOf), ns)
 	fs, _ := send.NewFileLogger("file_sender", "foo", s.grip.sender.ThresholdLevel(), s.grip.sender.DefaultLevel())

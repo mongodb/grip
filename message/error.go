@@ -16,11 +16,7 @@ func (e *errorMessage) Resolve() string {
 }
 
 func (e *errorMessage) Loggable() bool {
-	if e.Err == nil {
-		return false
-	}
-	return true
-
+	return e.Err != nil
 }
 
 func (e *errorMessage) Raw() interface{} {

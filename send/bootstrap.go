@@ -47,18 +47,18 @@ func (b *bootstrapLogger) SetDefaultLevel(l level.Priority) error {
 	if level.IsValidPriority(l) {
 		b.defaultLevel = l
 		return nil
-	} else {
-		return fmt.Errorf("%s (%d) is not a valid priority value (0-6)", l, int(l))
 	}
+
+	return fmt.Errorf("%s (%d) is not a valid priority value (0-6)", l, int(l))
 }
 
 func (b *bootstrapLogger) SetThresholdLevel(l level.Priority) error {
 	if level.IsValidPriority(l) {
 		b.thresholdLevel = l
 		return nil
-	} else {
-		return fmt.Errorf("%s (%d) is not a valid priority value (0-6)", l, int(l))
 	}
+
+	return fmt.Errorf("%s (%d) is not a valid priority value (0-6)", l, int(l))
 }
 
 func (b *bootstrapLogger) DefaultLevel() level.Priority {

@@ -13,10 +13,7 @@ func (s *stringMessage) Resolve() string {
 }
 
 func (s *stringMessage) Loggable() bool {
-	if s.content != "" {
-		return true
-	}
-	return false
+	return s.content != ""
 }
 
 func (s *stringMessage) Raw() interface{} {

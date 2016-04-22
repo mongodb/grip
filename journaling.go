@@ -78,6 +78,7 @@ func NewJournaler(name string) *Journaler {
 	}
 }
 
+// Name
 func (j *Journaler) Name() string {
 	return j.name
 

@@ -9,6 +9,7 @@ func (j *Journaler) SetSender(s send.Sender) {
 	j.sender.Close()
 	j.sender = s
 }
+
 func SetSender(s send.Sender) {
 	std.SetSender(s)
 }

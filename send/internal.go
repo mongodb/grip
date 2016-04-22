@@ -34,11 +34,7 @@ func NewInternalLogger(thresholdLevel, defaultLevel level.Priority) (*internalSe
 	}
 
 	err = l.SetThresholdLevel(thresholdLevel)
-	if err != nil {
-		return l, err
-	}
-
-	return l, nil
+	return l, err
 }
 
 func (s *internalSender) GetMessage() *InternalMessage {
@@ -72,9 +68,8 @@ func (s *internalSender) SetThresholdLevel(p level.Priority) error {
 	if level.IsValidPriority(p) {
 		s.thresholdLevel = p
 		return nil
-	} else {
-		return fmt.Errorf("%s (%d) is not a valid priority value (0-6)", p, int(p))
 	}
+	return fmt.Errorf("%s (%d) is not a valid priority value (0-6)", p, int(p))
 }
 
 func (s *internalSender) DefaultLevel() level.Priority {
@@ -85,9 +80,9 @@ func (s *internalSender) SetDefaultLevel(p level.Priority) error {
 	if level.IsValidPriority(p) {
 		s.defaultLevel = p
 		return nil
-	} else {
-		return fmt.Errorf("%s (%d) is not a valid priority value (0-6)", p, int(p))
 	}
+	return fmt.Errorf("%s (%d) is not a valid priority value (0-6)", p, int(p))
+
 }
 
 func (s *internalSender) AddOption(key, value string) {

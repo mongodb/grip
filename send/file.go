@@ -44,11 +44,7 @@ func NewFileLogger(name, filePath string, thresholdLevel, defaultLevel level.Pri
 	}
 
 	err = l.SetThresholdLevel(thresholdLevel)
-	if err != nil {
-		return l, err
-	}
-
-	return l, nil
+	return l, err
 }
 
 func (f *fileLogger) createLogger() {
@@ -56,7 +52,7 @@ func (f *fileLogger) createLogger() {
 }
 
 func (f *fileLogger) Close() {
-	f.fileObj.Close()
+	_ = f.fileObj.Close()
 }
 
 func (f *fileLogger) Send(p level.Priority, m message.Composer) {
@@ -92,16 +88,16 @@ func (f *fileLogger) SetDefaultLevel(p level.Priority) error {
 	if level.IsValidPriority(p) {
 		f.defaultLevel = p
 		return nil
-	} else {
-		return fmt.Errorf("%s (%d) is not a valid priority value (0-6)", p, int(p))
 	}
+
+	return fmt.Errorf("%s (%d) is not a valid priority value (0-6)", p, int(p))
 }
 
 func (f *fileLogger) SetThresholdLevel(p level.Priority) error {
 	if level.IsValidPriority(p) {
 		f.thresholdLevel = p
 		return nil
-	} else {
-		return fmt.Errorf("%s (%d) is not a valid priority value (0-6)", p, int(p))
 	}
+
+	return fmt.Errorf("%s (%d) is not a valid priority value (0-6)", p, int(p))
 }

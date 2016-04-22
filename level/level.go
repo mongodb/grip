@@ -23,23 +23,23 @@ const (
 
 const Invalid Priority = -1
 
-func (self Priority) String() string {
+func (p Priority) String() string {
 	switch {
-	case self == 0:
+	case p == 0:
 		return "emergency"
-	case self == 1:
+	case p == 1:
 		return "alert"
-	case self == 2:
+	case p == 2:
 		return "critical"
-	case self == 3:
+	case p == 3:
 		return "error"
-	case self == 4:
+	case p == 4:
 		return "warning"
-	case self == 5:
+	case p == 5:
 		return "notice"
-	case self == 6:
+	case p == 6:
 		return "info"
-	case self == 7:
+	case p == 7:
 		return "debug"
 	default:
 		return "invalid"

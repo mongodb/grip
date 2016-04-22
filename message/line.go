@@ -20,11 +20,7 @@ func NewLinesMessage(args ...interface{}) *lineMessenger {
 }
 
 func (l *lineMessenger) Loggable() bool {
-	if len(l.Lines) > 0 {
-		return true
-	}
-
-	return false
+	return len(l.Lines) > 0
 }
 
 func (l *lineMessenger) Resolve() string {

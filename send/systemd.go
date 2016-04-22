@@ -69,19 +69,18 @@ func (s *systemdJournal) SetDefaultLevel(p level.Priority) error {
 	if level.IsValidPriority(p) {
 		s.defaultLevel = s.convertPrioritySystemd(p)
 		return nil
-	} else {
-		return fmt.Errorf("%s (%d) is not a valid priority value (0-6)", p, (p))
 	}
+
+	return fmt.Errorf("%s (%d) is not a valid priority value (0-6)", p, (p))
 }
 
 func (s *systemdJournal) SetThresholdLevel(p level.Priority) error {
 	if level.IsValidPriority(p) {
 		s.thresholdLevel = s.convertPrioritySystemd(p)
 		return nil
-	} else {
-		return fmt.Errorf("%s (%d) is not a valid priority value (0-6)", p, (p))
 	}
 
+	return fmt.Errorf("%s (%d) is not a valid priority value (0-6)", p, (p))
 }
 
 func (s *systemdJournal) DefaultLevel() level.Priority {
