@@ -5,7 +5,9 @@ import (
 	"os/exec"
 	"testing"
 
+	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
+	"github.com/tychoish/grip/send"
 
 	. "gopkg.in/check.v1"
 )
@@ -26,6 +28,7 @@ func (s *GripSuite) SetUpSuite(c *C) {
 
 func (s *GripSuite) SetUpTest(c *C) {
 	s.grip.SetName(s.name)
+	s.grip.SetSender(send.NewBootstrapLogger(s.grip.ThresholdLevel(), s.grip.DefaultLevel()))
 }
 
 func (s *GripSuite) TestDefaultJournalerIsBootstrap(c *C) {
@@ -48,8 +51,11 @@ func (s *GripSuite) TestNameSetterAndGetter(c *C) {
 }
 
 func (s *GripSuite) TestPanicSenderActuallyPanics(c *C) {
-	// first make sure that the defualt send method doesn't panic
+	// both of these are in anonymous functions so that the defers
+	// cover the correct area.
+
 	func() {
+		// first make sure that the defualt send method doesn't panic
 		defer func() {
 			c.Assert(recover(), IsNil)
 		}()
@@ -57,13 +63,27 @@ func (s *GripSuite) TestPanicSenderActuallyPanics(c *C) {
 		s.grip.sender.Send(s.grip.DefaultLevel(), message.NewLinesMessage("foo"))
 	}()
 
-	// call a panic function with a recoverer set.
-	defer func() {
-		c.Assert(recover(), Not(IsNil))
+	func() {
+		// call a panic function with a recoverer set.
+		defer func() {
+			c.Assert(recover(), Not(IsNil))
+		}()
+
+		s.grip.sendPanic(s.grip.DefaultLevel(), message.NewLinesMessage("foo"))
 	}()
 
-	s.grip.sendPanic(s.grip.DefaultLevel(), message.NewLinesMessage("foo"))
+}
 
+func (s *GripSuite) TestPanicSenderRespectsTThreshold(c *C) {
+	isBelowThreshold := level.Debug > s.grip.DefaultLevel()
+	c.Assert(isBelowThreshold, Equals, true)
+
+	// test that there is a no panic if the message isn't "logabble"
+	defer func() {
+		c.Assert(recover(), IsNil)
+	}()
+
+	s.grip.sendPanic(level.Debug, message.NewLinesMessage("foo"))
 }
 
 // This testing method uses the technique outlined in:
