@@ -31,8 +31,8 @@ func ConvertToComposer(message interface{}) Composer {
 	case Composer:
 		return message
 	case string:
-		// we make some weird assumptions here to a level in
-		// this conversion, might be messy
+		return NewDefaultMessage(message)
+	case []interface{}:
 		return NewLinesMessage(message)
 	case error:
 		return NewErrorMessage(message)

@@ -208,3 +208,7 @@ logging function an instance of a type that implements the
 
 Composed logging may be useful for some debugging logging that depends
 on additional database or API queries or data serialization.
+
+Grip uses composers internally, but you can pass composers directly to
+any of the basic logging method (e.g. ``Info()``, ``Debug()``) for
+composed logging.
