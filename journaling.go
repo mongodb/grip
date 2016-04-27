@@ -78,10 +78,13 @@ func NewJournaler(name string) *Journaler {
 	}
 }
 
-// Name
+// Name of the logger instance
 func (j *Journaler) Name() string {
 	return j.name
+}
 
+func Name() string {
+	return std.Name()
 }
 
 // SetName declare a name string for the logger, including in the logging
