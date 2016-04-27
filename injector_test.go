@@ -4,31 +4,30 @@ import (
 	"os"
 
 	"github.com/tychoish/grip/send"
-	. "gopkg.in/check.v1"
 )
 
-func (s *GripSuite) TestSenderGetterReturnsExpectedJournaler(c *C) {
+func (s *GripSuite) TestSenderGetterReturnsExpectedJournaler() {
 	grip := NewJournaler("sender_swap")
-	c.Assert(grip.Name(), Equals, "sender_swap")
-	c.Assert(grip.sender.Name(), Equals, "bootstrap")
+	s.Equal(grip.Name(), "sender_swap")
+	s.Equal(grip.sender.Name(), "bootstrap")
 
 	err := grip.UseNativeLogger()
-	c.Assert(err, IsNil)
+	s.NoError(err)
 
-	c.Assert(grip.Name(), Equals, "sender_swap")
-	c.Assert(grip.sender.Name(), Not(Equals), "bootstrap")
+	s.Equal(grip.Name(), "sender_swap")
+	s.NotEqual(grip.sender.Name(), "bootstrap")
 	ns, _ := send.NewNativeLogger("native_sender", s.grip.sender.ThresholdLevel(), s.grip.sender.DefaultLevel())
 	defer ns.Close()
-	c.Assert(grip.Sender(), FitsTypeOf, ns)
+	s.IsType(grip.Sender(), ns)
 
 	err = grip.UserFileLogger("foo")
-	c.Assert(err, IsNil)
+	s.NoError(err)
 
 	defer func() { std.CatchError(os.Remove("foo")) }()
 
-	c.Assert(grip.Name(), Equals, "sender_swap")
-	c.Assert(grip.Sender(), Not(FitsTypeOf), ns)
+	s.Equal(grip.Name(), "sender_swap")
+	s.NotEqual(grip.Sender(), ns)
 	fs, _ := send.NewFileLogger("file_sender", "foo", s.grip.sender.ThresholdLevel(), s.grip.sender.DefaultLevel())
 	defer fs.Close()
-	c.Assert(grip.Sender(), FitsTypeOf, fs)
+	s.IsType(grip.Sender(), fs)
 }

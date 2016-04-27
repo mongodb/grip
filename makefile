@@ -6,7 +6,7 @@ deps:
 	go get github.com/coreos/go-systemd/journal
 
 test-deps:deps
-	go get gopkg.in/check.v1
+	go get github.com/stretchr/testify
 	-go get github.com/alecthomas/gometalinter >/dev/null 2>&1
 	-gometalinter --install --update >/dev/null 2>&1
 
@@ -18,7 +18,7 @@ lint:
 	go vet $(PACKAGES)
 	-gometalinter --disable=gotype --deadline=20s $(PACKAGES)
 
-test:build lint
+test:build
 	go test -v -covermode=count -coverprofile=${coverageFile} ${projectPath}
 	go tool cover -func=${coverageFile}
 

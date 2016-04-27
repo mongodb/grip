@@ -8,16 +8,14 @@ import (
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/grip/send"
-
-	. "gopkg.in/check.v1"
 )
 
-func (s *GripSuite) TestConditionalSend(c *C) {
+func (s *GripSuite) TestConditionalSend() {
 	// because sink is an internal type (implementation of
 	// sender,) and "GetMessage" isn't in the interface, though it
 	// is exported, we can't pass the sink between functions.
 	sink, err := send.NewInternalLogger(s.grip.ThresholdLevel(), s.grip.DefaultLevel())
-	c.Assert(err, IsNil)
+	s.NoError(err)
 	s.grip.SetSender(sink)
 
 	msg := message.NewLinesMessage("foo")
@@ -25,43 +23,35 @@ func (s *GripSuite) TestConditionalSend(c *C) {
 
 	// when the conditional argument is true, it should work
 	s.grip.conditionalSend(level.Emergency, true, msg)
-	c.Assert(sink.GetMessage().Message, Equals, msg)
+	s.Equal(sink.GetMessage().Message, msg)
 
 	// when the conditional argument is true, it should work, and the channel is fifo
 	s.grip.conditionalSend(level.Emergency, false, msgTwo)
 	s.grip.conditionalSend(level.Emergency, true, msg)
-	c.Assert(sink.GetMessage().Message, Equals, msg)
+	s.Equal(sink.GetMessage().Message, msg)
 
 	// change the order
 	s.grip.conditionalSend(level.Emergency, true, msg)
 	s.grip.conditionalSend(level.Emergency, false, msgTwo)
-	c.Assert(sink.GetMessage().Message, Equals, msg)
+	s.Equal(sink.GetMessage().Message, msg)
 }
 
-func (s *GripSuite) TestConditionalSendPanic(c *C) {
+func (s *GripSuite) TestConditionalSendPanic() {
 	sink, err := send.NewInternalLogger(s.grip.ThresholdLevel(), s.grip.DefaultLevel())
-	c.Assert(err, IsNil)
+	s.NoError(err)
 	s.grip.SetSender(sink)
 
 	msg := message.NewLinesMessage("foo")
 
 	// first if the conditional is false, it can't panic.
-	func() {
-		defer func() {
-			c.Assert(recover(), IsNil)
-		}()
-
+	s.NotPanics(func() {
 		s.grip.conditionalSendPanic(level.Emergency, false, msg)
-	}()
+	})
 
 	// next, if the conditional is true it should panic
-	func() {
-		defer func() {
-			c.Assert(recover(), Not(IsNil))
-		}()
-
+	s.Panics(func() {
 		s.grip.conditionalSendPanic(level.Emergency, true, msg)
-	}()
+	})
 }
 
 func TestConditionalSendFatalExits(t *testing.T) {
@@ -78,11 +68,10 @@ func TestConditionalSendFatalExits(t *testing.T) {
 	}
 }
 
-func (s *GripSuite) TestConditionalSendFatalDoesNotExitIfNotLoggable(c *C) {
+func (s *GripSuite) TestConditionalSendFatalDoesNotExitIfNotLoggable() {
 	msg := message.NewLinesMessage("foo")
 	s.grip.conditionalSendFatal(std.DefaultLevel(), false, msg)
 
-	isBelowThreshold := level.Debug > s.grip.DefaultLevel()
-	c.Assert(isBelowThreshold, Equals, true)
+	s.True(level.Debug > s.grip.DefaultLevel())
 	s.grip.conditionalSendFatal(level.Debug, true, msg)
 }

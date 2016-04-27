@@ -5,59 +5,60 @@ import (
 	"os/exec"
 	"testing"
 
+	"github.com/stretchr/testify/suite"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/grip/send"
-
-	. "gopkg.in/check.v1"
 )
-
-func TestGoCheckTests(t *testing.T) { TestingT(t) }
 
 type GripSuite struct {
 	grip *Journaler
 	name string
+	suite.Suite
 }
 
-var _ = Suite(&GripSuite{})
+func TestGripSuite(t *testing.T) {
+	suite.Run(t, new(GripSuite))
+}
 
-func (s *GripSuite) SetUpSuite(c *C) {
+func (s *GripSuite) SetupSuite() {
 	s.grip = NewJournaler(s.name)
-	c.Assert(s.grip.Name(), Equals, s.name)
+	s.Equal(s.grip.Name(), s.name)
 }
 
-func (s *GripSuite) SetUpTest(c *C) {
+func (s *GripSuite) SetupTest() {
 	s.grip.SetName(s.name)
 	s.grip.SetSender(send.NewBootstrapLogger(s.grip.ThresholdLevel(), s.grip.DefaultLevel()))
 }
 
-func (s *GripSuite) TestDefaultJournalerIsBootstrap(c *C) {
-	c.Assert(s.grip.sender.Name(), Equals, "bootstrap")
+func (s *GripSuite) TestDefaultJournalerIsBootstrap() {
+	s.Equal(s.grip.sender.Name(), "bootstrap")
 
 	// the bootstrap sender is a bit special because you can't
 	// change it's name, therefore:
 	secondName := "something_else"
 	s.grip.SetName(secondName)
-	c.Assert(s.grip.sender.Name(), Equals, "bootstrap")
-	c.Assert(s.grip.Name(), Equals, secondName)
+
+	s.Equal(s.grip.sender.Name(), "bootstrap")
+	s.Equal(s.grip.Name(), secondName)
 }
 
-func (s *GripSuite) TestNameSetterAndGetter(c *C) {
+func (s *GripSuite) TestNameSetterAndGetter() {
 	for _, name := range []string{"a", "a39df", "a@)(*E)"} {
 		s.grip.SetName(name)
-		c.Assert(s.grip.name, Equals, name)
-		c.Assert(s.grip.Name(), Equals, name)
+		s.Equal(s.grip.name, name)
+		s.Equal(s.grip.Name(), name)
 	}
 }
 
-func (s *GripSuite) TestPanicSenderActuallyPanics(c *C) {
+func (s *GripSuite) TestPanicSenderActuallyPanics() {
 	// both of these are in anonymous functions so that the defers
 	// cover the correct area.
 
 	func() {
 		// first make sure that the defualt send method doesn't panic
 		defer func() {
-			c.Assert(recover(), IsNil)
+			s.Nil(recover())
 		}()
 
 		s.grip.sender.Send(s.grip.DefaultLevel(), message.NewLinesMessage("foo"))
@@ -66,7 +67,7 @@ func (s *GripSuite) TestPanicSenderActuallyPanics(c *C) {
 	func() {
 		// call a panic function with a recoverer set.
 		defer func() {
-			c.Assert(recover(), Not(IsNil))
+			s.NotNil(recover())
 		}()
 
 		s.grip.sendPanic(s.grip.DefaultLevel(), message.NewLinesMessage("foo"))
@@ -74,13 +75,12 @@ func (s *GripSuite) TestPanicSenderActuallyPanics(c *C) {
 
 }
 
-func (s *GripSuite) TestPanicSenderRespectsTThreshold(c *C) {
-	isBelowThreshold := level.Debug > s.grip.DefaultLevel()
-	c.Assert(isBelowThreshold, Equals, true)
+func (s *GripSuite) TestPanicSenderRespectsTThreshold() {
+	s.True(level.Debug > s.grip.DefaultLevel())
 
 	// test that there is a no panic if the message isn't "logabble"
 	defer func() {
-		c.Assert(recover(), IsNil)
+		s.Nil(recover())
 	}()
 
 	s.grip.sendPanic(level.Debug, message.NewLinesMessage("foo"))
