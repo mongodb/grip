@@ -1,4 +1,6 @@
 PACKAGES := ./ ./level ./message ./send
+projectPath := github.com/tychoish/grip
+coverageFile := coverage.out
 
 deps:
 	go get github.com/coreos/go-systemd/journal
@@ -17,4 +19,8 @@ lint:
 	-gometalinter --disable=gotype --deadline=20s $(PACKAGES)
 
 test:build lint
-	go test -cover -v -check.v $(PACKAGES)
+	go test -v -covermode=count -coverprofile=${coverageFile} ${projectPath}
+	go tool cover -func=${coverageFile}
+
+coverage-report:test
+	go tool cover -html=${coverageFile}
