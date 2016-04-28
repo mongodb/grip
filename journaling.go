@@ -42,10 +42,6 @@ and are only logged if that boolean argument evaluates to true, to
 provide calling code with an additional way to filter out
 potentially expensive or vebose logging calls. (e.g. "Log
 Sometimes" or "Log Rarely")
-
-Loggers
-
-Grip has two implementations of
 */
 package grip
 

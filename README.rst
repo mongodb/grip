@@ -8,7 +8,7 @@
 things:
 
 #. Provide a common logging interface to log to both standard
-   logging methods and/or ``systemd`` journal components.
+   logging, methods and/or ``systemd`` journal components.
 
 #. Provides some simple methods for handling errors, particularly when
    you want to accumulate and then return errors.
@@ -96,13 +96,9 @@ standard logger instance.):
 
 - ``SendDefault(<message string>)`` to log using the default level.
 
-- ``SetName(<string>)`` to reset the name of the logger and fallback
-  logger instance. ``grip`` attempts to set this to the name of your
-  program, but will fallback to ``go-grip-default-logger`` (typically
-  when program is invoked with ``go run``.)
-
-- ``SetFallback(<*log.Logger>)`` to pass your own logging instance to
-  use when ``systemd`` is unavailable.
+- ``SetName(<string>)`` to reset the name of the logger. ``grip``
+  attempts to set this to the name of your program for the standard
+  logger.
 
 - ``SetDefault(<level int>)`` change the default log level. Levels are
   values between ``0`` and ``7``, where lower numbers are *more*
@@ -126,8 +122,6 @@ By default:
   (suppressing only debug.)
 
 - fallback logging writes to standard output.
-
-- ``InvertFanllback`` is ``false``, ``systemd`` logging is prefered.
 
 Collector for "Continue on Error" Semantics
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -190,6 +184,11 @@ only log a message in certain situations, by adding a Boolean argument
 to the logging call. Use this to implement "log sometimes" messages to
 minimize verbosity without complicating the calling code around the
 logging.
+
+These methods have a ``<Level><,Panic,Fatal>When<>`` format. For
+example: ``AlertWhen``, ``AlertWhenln``, ``AlertWhenf``,
+``AlertPanicWhen``, ``AlertFatalWhen``, ``AlertPanicWhenln``,
+``AlertFatalWhenln``, ``AlertPanicWhenf``, and ``AlertFatalWhenf``.
 
 Composed Logging
 ~~~~~~~~~~~~~~~~
