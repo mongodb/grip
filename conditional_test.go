@@ -56,7 +56,7 @@ func (s *GripSuite) TestConditionalSendPanic() {
 
 func TestConditionalSendFatalExits(t *testing.T) {
 	if os.Getenv("SHOULD_CRASH") == "1" {
-		std.conditionalSendFatal(std.DefaultLevel(), true, message.NewLinesMessage("foo"))
+		std.EmergencyFatalWhen(true, message.NewLinesMessage("foo"))
 		return
 	}
 

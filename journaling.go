@@ -18,32 +18,34 @@ Output
 
 The send.Sender interface provides a way of changing the logging
 backend, and the send package provides a number of alternate
-implementations of logging systems, including:
-
-- Go standard library logging to standard output.
-- Go standard library logging to a file.
-- systemd journal logging.
+implementations of logging systems, including: systemd's journal,
+logging to standard output, logging to a file, and generic syslog
+support.
 
 Logging Methods
 
 There are logging methods that allow a number of different idioms:
 
 1. Standard logging methods, that take strings, format expressions (a
-   la fmt.Sprintf()), and fmt.Println() like expressions.
+la fmt.Sprintf()), and fmt.Println() like expressions.
 
 2. "Catch" loggers, which take an error object, and log messages when
-   the error is non-nil.
+the error is non-nil.
 
 3. Composed messages which, using the message.Composer interface, allow
-   grip to defer processing message content until after determining if
-   the message is going to be logged. (e.g. for logging objects that
-   require a serialization process before logging.)
+grip to defer processing message content until after determining if
+the message is going to be logged. (e.g. for logging objects that
+require a serialization process before logging.)
 
 4. Conditional logging messages which take an extra boolean argument,
-   and are only logged if that boolean argument evaluates to true, to
-   provide calling code with an additional way to filter out
-   potentially expensive or vebose logging calls. (e.g. "Log
-   Sometimes" or "Log Rarely")
+and are only logged if that boolean argument evaluates to true, to
+provide calling code with an additional way to filter out
+potentially expensive or vebose logging calls. (e.g. "Log
+Sometimes" or "Log Rarely")
+
+Loggers
+
+Grip has two implementations of
 */
 package grip
 

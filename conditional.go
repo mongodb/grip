@@ -98,22 +98,22 @@ func EmergencyWhenf(conditional bool, msg string, args ...interface{}) {
 	std.EmergencyWhenf(conditional, msg, args...)
 }
 func EmergencyPanicWhen(conditional bool, msg interface{}) {
-	std.conditionalSendPanic(level.Emergency, conditional, msg)
+	std.EmergencyPanicWhen(conditional, msg)
 }
 func EmergencyPanicWhenln(conditional bool, msg ...interface{}) {
-	std.conditionalSendPanic(level.Emergency, conditional, message.NewLinesMessage(msg...))
+	std.EmergencyFatalWhenln(conditional, message.NewLinesMessage(msg...))
 }
 func EmergencyPanicWhenf(conditional bool, msg string, args ...interface{}) {
-	std.conditionalSendPanic(level.Emergency, conditional, message.NewFormatedMessage(msg, args))
+	std.EmergencyPanicWhenf(conditional, message.NewFormatedMessage(msg, args))
 }
 func EmergencyFatalWhen(conditional bool, msg interface{}) {
-	std.conditionalSendFatal(level.Emergency, conditional, msg)
+	std.EmergencyFatalWhen(conditional, msg)
 }
 func EmergencyFatalWhenln(conditional bool, msg ...interface{}) {
-	std.conditionalSendFatal(level.Emergency, conditional, message.NewLinesMessage(msg...))
+	std.EmergencyFatalWhenln(message.NewLinesMessage(msg...))
 }
 func EmergencyFatalWhenf(conditional bool, msg string, args ...interface{}) {
-	std.conditionalSendFatal(level.Emergency, conditional, message.NewFormatedMessage(msg, args))
+	std.EmergencyFatalWhenf(conditional, message.NewFormatedMessage(msg, args))
 }
 
 // Alert-Level Conditional Methods
@@ -155,22 +155,22 @@ func AlertWhenf(conditional bool, msg string, args ...interface{}) {
 	std.AlertWhenf(conditional, msg, args...)
 }
 func AlertPanicWhen(conditional bool, msg interface{}) {
-	std.conditionalSendPanic(level.Alert, conditional, msg)
+	std.AlertPanicWhen(conditional, msg)
 }
 func AlertPanicWhenln(conditional bool, msg ...interface{}) {
-	std.conditionalSendPanic(level.Alert, conditional, message.NewLinesMessage(msg...))
+	std.AlertPanicWhenln(conditional, message.NewLinesMessage(msg...))
 }
 func AlertPanicWhenf(conditional bool, msg string, args ...interface{}) {
-	std.conditionalSendPanic(level.Alert, conditional, message.NewFormatedMessage(msg, args))
+	std.AlertPanicWhenf(conditional, message.NewFormatedMessage(msg, args))
 }
 func AlertFatalWhen(conditional bool, msg interface{}) {
-	std.conditionalSendFatal(level.Alert, conditional, msg)
+	std.AlertFatalWhen(conditional, msg)
 }
 func AlertFatalWhenln(conditional bool, msg ...interface{}) {
-	std.conditionalSendFatal(level.Alert, conditional, message.NewLinesMessage(msg...))
+	std.AlertFatalWhenln(conditional, message.NewLinesMessage(msg...))
 }
 func AlertFatalWhenf(conditional bool, msg string, args ...interface{}) {
-	std.conditionalSendFatal(level.Alert, conditional, message.NewFormatedMessage(msg, args))
+	std.AlertFatalWhenf(conditional, message.NewFormatedMessage(msg, args))
 }
 
 // Critical-level Conditional Methods
@@ -212,22 +212,22 @@ func CriticalWhenf(conditional bool, msg string, args ...interface{}) {
 	std.CriticalWhenf(conditional, msg, args...)
 }
 func CriticalPanicWhen(conditional bool, msg interface{}) {
-	std.conditionalSendPanic(level.Critical, conditional, msg)
+	std.CriticalPanicWhen(level.Critical, conditional, msg)
 }
 func CriticalPanicWhenln(conditional bool, msg ...interface{}) {
-	std.conditionalSendPanic(level.Critical, conditional, message.NewLinesMessage(msg...))
+	std.CriticalPanicWhenln(conditional, message.NewLinesMessage(msg...))
 }
 func CriticalPanicWhenf(conditional bool, msg string, args ...interface{}) {
-	std.conditionalSendPanic(level.Critical, conditional, message.NewFormatedMessage(msg, args))
+	std.CriticalPanicWhenf(conditional, message.NewFormatedMessage(msg, args))
 }
 func CriticalFatalWhen(conditional bool, msg interface{}) {
-	std.conditionalSendFatal(level.Critical, conditional, msg)
+	std.CriticalFatalWhen(conditional, msg)
 }
 func CriticalFatalWhenln(conditional bool, msg ...interface{}) {
-	std.conditionalSendFatal(level.Critical, conditional, message.NewLinesMessage(msg...))
+	std.CriticalFatalWhenln(conditional, message.NewLinesMessage(msg...))
 }
 func CriticalFatalWhenf(conditional bool, msg string, args ...interface{}) {
-	std.conditionalSendFatal(level.Critical, conditional, message.NewFormatedMessage(msg, args))
+	std.CriticalFatalWhenf(conditional, message.NewFormatedMessage(msg, args))
 }
 
 // Error-level Conditional Methods
@@ -269,22 +269,22 @@ func ErrorWhenf(conditional bool, msg string, args ...interface{}) {
 	std.ErrorWhenf(conditional, msg, args...)
 }
 func ErrorPanicWhen(conditional bool, msg interface{}) {
-	std.conditionalSendPanic(level.Error, conditional, msg)
+	std.ErrorPanicWhen(conditional, msg)
 }
 func ErrorPanicWhenln(conditional bool, msg ...interface{}) {
-	std.conditionalSendPanic(level.Error, conditional, message.NewLinesMessage(msg...))
+	std.ErrorPanicWhenln(conditional, message.NewLinesMessage(msg...))
 }
 func ErrorPanicWhenf(conditional bool, msg string, args ...interface{}) {
-	std.conditionalSendPanic(level.Error, conditional, message.NewFormatedMessage(msg, args))
+	std.ErrorPanicWhenf(conditional, message.NewFormatedMessage(msg, args))
 }
 func ErrorFatalWhen(conditional bool, msg interface{}) {
-	std.conditionalSendFatal(level.Error, conditional, msg)
+	std.ErrorFatalWhen(conditional, msg)
 }
 func ErrorFatalWhenln(conditional bool, msg ...interface{}) {
-	std.conditionalSendFatal(level.Error, conditional, message.NewLinesMessage(msg...))
+	std.ErrorFatalWhenln(conditional, message.NewLinesMessage(msg...))
 }
 func ErrorFatalWhenf(conditional bool, msg string, args ...interface{}) {
-	std.conditionalSendFatal(level.Error, conditional, message.NewFormatedMessage(msg, args))
+	std.ErrorFatalWhenf(conditional, message.NewFormatedMessage(msg, args))
 }
 
 // Warning-level Conditional Methods
