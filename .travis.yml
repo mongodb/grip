@@ -12,4 +12,4 @@ go:
   - 1.5
   - 1.6
 install: make test-deps
-script: make coverage
+script: make build coverage
