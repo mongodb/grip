@@ -21,11 +21,13 @@ $(gopath)/src/%:
 
 # userfacing targets for basic build/test/lint operations
 .PHONY:build test lint coverage-report
-build:deps $(buildDir)/$(name)
+build:deps
+	@mkdir -p $@
+	go build
 test:test-deps
 	go test -v ./...
 lint:
-	$(gopath)/bin/gometalinter --deadline=20s --disable=gotype ./...
+	-$(gopath)/bin/gometalinter --deadline=20s --disable=gotype ./...
 coverage:$(foreach target,$(packages),$(buildDir)/coverage.$(target).out) $(buildDir)/coverage.out
 coverage-report:$(foreach target,$(packages),coverage-report-$(target))
 # end front-ends
