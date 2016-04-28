@@ -1,22 +1,33 @@
+/*
+Basic Logging
+
+Loging helpers exist for the following levels:
+
+   Emergency + (fatal/panic)
+   Alert + (fatal/panic)
+   Critical + (fatal/panic)
+   Error + (fatal/panic)
+   Warning
+   Notice
+   Info
+   Debug
+
+These methods accept both strings (message content,) or types that
+implement the message.MessageComposer interface. Composer types make
+it possible to delay generating a message unless the logger is over
+the logging threshold. Use this to avoid expensive serialization
+operations for suppressed logging operations.
+
+All levels also have additional methods with `ln` and `f` appended to
+the end of the method name which allow Println() and Printf() style
+functionality. You must pass printf/println-style arguments to these methods.
+*/
 package grip
 
 import (
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
 )
-
-// Loging helpers exist for the following levels (using logging
-// instances, and the standard global logging, following the convention
-// of the standard log package.)
-//
-// Emergency + (fatal/panic)
-// Alert + (fatal/panic)
-// Critical + (fatal/panic)
-// Error + (fatal/panic)
-// Warning
-// Notice
-// Info
-// Debug
 
 // default methods for sending messages at the default level.
 func (j *Journaler) Default(msg interface{}) {

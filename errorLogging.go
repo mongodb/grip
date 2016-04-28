@@ -1,3 +1,8 @@
+// Catch Logging
+//
+// Logging helpers for catching and logging error messages. Helpers exist
+// for the following levels, with helpers defined both globally for the
+// global logger and for Journaler logging objects.
 package grip
 
 import (
@@ -5,12 +10,6 @@ import (
 	"github.com/tychoish/grip/message"
 )
 
-// Logging helpers for catching and logging error messages. Helpers exist
-// for the following levels, with helpers defined both globally for the
-// global logger and for Journaler logging objects.
-//
-// Avalible levels and operations:
-//
 // Emergency + (fatal/panic)
 // Alert + (fatal/panic)
 // Critical + (fatal/panic)
