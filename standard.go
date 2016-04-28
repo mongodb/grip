@@ -10,7 +10,7 @@ var std = NewJournaler("grip")
 
 func init() {
 	if !strings.Contains(os.Args[0], "go-build") {
-		std.name = os.Args[0]
+		std.SetName(os.Args[0])
 	}
 
 	if ev := os.Getenv("GRIP_USE_STDOUT"); ev != "" {
@@ -21,7 +21,7 @@ func init() {
 		std.CatchAlert(err)
 	}
 
-	if std.sender.Name() == "bootstrap" {
+	if std.Sender().Name() == "bootstrap" {
 		if runtime.GOOS == "linux" {
 			err := std.UseSystemdLogger()
 			if err != nil {

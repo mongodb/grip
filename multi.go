@@ -5,10 +5,9 @@ import (
 	"strings"
 )
 
-// Provides an interface to collect and coalesse error messages within
-// a function or other sequence of operations. Used to implement a kind
-// of "continue on error"-style operations
-
+// MultiCatcher provides an interface to collect and coalesse error
+// messages within a function or other sequence of operations. Used to
+// implement a kind of "continue on error"-style operations
 type MultiCatcher struct {
 	errs []string
 }
