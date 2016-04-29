@@ -1,7 +1,7 @@
 # project configuration
 name := grip
 buildDir := build
-packages := logging # TODO: add other packages when there are tests
+packages := logging grip # TODO: add other packages when there are tests
 projectPath := github.com/tychoish/$(name)
 
 # declaration of dependencies
@@ -28,7 +28,7 @@ test:test-deps
 	go test -v ./...
 lint:
 	-$(gopath)/bin/gometalinter --deadline=20s --disable=gotype ./...
-coverage:$(foreach target,$(packages),$(buildDir)/coverage.$(target).out) $(buildDir)/coverage.out
+coverage:$(foreach target,$(packages),$(buildDir)/coverage.$(target).out)
 coverage-report:$(foreach target,$(packages),coverage-report-$(target))
 # end front-ends
 
@@ -49,15 +49,14 @@ $(buildDir)/$(name):$(gopath)/src/$(projectPath)
 
 # implementation for package coverage
 coverage-%:$(buildDir)/coverage.%.out
-$(buildDir)/coverage.out:test-deps
-# this special target is only needed because there are tests in the root package.
-	go test -v -covermode=count -coverprofile=$@ $(projectPath)
-	[ -f $@ ] && go tool cover -func=$@ | sed 's%${projectPath}/%%' | column -t
+coverage-report-%:$(buildDir)/coverage.%.out
+	[ -f $< ] && go tool cover -html=$<
 $(buildDir)/coverage.%.out:% test-deps
 	go test -v -covermode=count -coverprofile=$@ $(projectPath)/$<
 	[ -f $@ ] && go tool cover -func=$@ | sed 's%${projectPath}/%%' | column -t
-coverage-report-%:$(buildDir)/coverage.%.out
-	[ -f $< ] && go tool cover -html=$<
+$(buildDir)/coverage.$(name).out:test-deps
+	go test -v -covermode=count -coverprofile=$@ $(projectPath)
+	[ -f $@ ] && go tool cover -func=$@ | sed 's%${projectPath}/%%' | column -t
 # end coverage rports
 
 
