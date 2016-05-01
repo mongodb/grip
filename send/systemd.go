@@ -19,7 +19,11 @@ type systemdJournal struct {
 	fallback       *log.Logger
 }
 
-func NewJournaldLogger(name string, thresholdLevel, defaultLevel level.Priority) (*systemdJournal, error) {
+// NewJournaldLogger creates a Sender object that writes log messages
+// to the system's systemd journald logging facility. If there's an
+// error with the sending to the journald, messages fallback to
+// writing to standard output.
+func NewJournaldLogger(name string, thresholdLevel, defaultLevel level.Priority) (Sender, error) {
 	s := &systemdJournal{
 		name:    name,
 		options: make(map[string]string),

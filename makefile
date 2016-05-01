@@ -26,8 +26,13 @@ build:deps
 	go build
 test:test-deps
 	go test -v ./...
+levelsRegex := 	(Catch.*|Default.*|Emergency.*|Alert.*|Critical.*|Error.*|Warning.*|Notice.*|Debug.*|Info.*)
+lintExclusion := --exclude="exported method Grip\.$(levelsRegex)"
+lintExclusion += --exclude="exported function $(levelsRegex)"
+lintExclusion += --exclude="exported method InternalSender\..*"
+lintExclusion += --exclude="package comment should be of the form \"Package grip \.\.\.\""
 lint:
-	-$(gopath)/bin/gometalinter --deadline=20s --disable=gotype ./...
+	-$(gopath)/bin/gometalinter --deadline=20s --disable=gotype $(lintExclusion) ./...
 coverage:$(foreach target,$(packages),$(buildDir)/coverage.$(target).out)
 coverage-report:$(foreach target,$(packages),coverage-report-$(target))
 # end front-ends

@@ -12,7 +12,11 @@ type bootstrapLogger struct {
 	thresholdLevel level.Priority
 }
 
-func NewBootstrapLogger(thresholdLevel, defaultLevel level.Priority) *bootstrapLogger {
+// NewBootstrapLogger returns a minimal, default composer
+// implementation, used by the Journaler instances, for storing basic
+// threhsold level configuration during journaler creation. Not
+// functional as a sender for general use.
+func NewBootstrapLogger(thresholdLevel, defaultLevel level.Priority) Sender {
 	b := &bootstrapLogger{}
 	err := b.SetDefaultLevel(defaultLevel)
 	if err != nil {

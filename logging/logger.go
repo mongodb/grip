@@ -18,6 +18,10 @@ type Grip struct {
 	sender send.Sender
 }
 
+// NewGrip takes the name for a logging instance and creates a new
+// Grip instance with configured with a Bootstrap logging
+// instance. The default level is "Notice" and the threshold level is
+// "info."
 func NewGrip(name string) *Grip {
 	return &Grip{
 		name:   name,

@@ -1,5 +1,5 @@
 /*
-Grip provides a flexible logging package for basic Go programs.
+Package grip provides a flexible logging package for basic Go programs.
 Drawing inspiration from Go and Python's standard library
 logging, as well as systemd's journal service, and other logging
 systems, Grip provides a number of very powerful logging

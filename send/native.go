@@ -19,7 +19,10 @@ type nativeLogger struct {
 	template       string
 }
 
-func NewNativeLogger(name string, thresholdLevel, defaultLevel level.Priority) (*nativeLogger, error) {
+// NewNativeLogger creates a new Sender interface that writes all
+// loggable messages to a standard output logger that uses Go's
+// standard library logging system.
+func NewNativeLogger(name string, thresholdLevel, defaultLevel level.Priority) (Sender, error) {
 	l := &nativeLogger{
 		name:     name,
 		template: "[p=%d]: %s\n",

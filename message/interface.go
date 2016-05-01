@@ -1,6 +1,6 @@
 package message
 
-// message.Composer defines an interface with a "Resolve()" method that
+// Composer defines an interface with a "Resolve()" method that
 // returns the message in string format. Objects that implement this
 // interface, in combination to the Compose[*] operations, the
 // Resolve() method is only caled if the priority of the method is
@@ -25,7 +25,8 @@ type Composer interface {
 	Loggable() bool
 }
 
-// Cooerce unknown objects into Composer instances, as possible.
+// ConvertToComposer can coerce unknown objects into Composer
+// instances, as possible.
 func ConvertToComposer(message interface{}) Composer {
 	switch message := message.(type) {
 	case Composer:

@@ -9,27 +9,30 @@ func SetSender(s send.Sender) {
 	std.SetSender(s)
 }
 
-// Returns the current Journaler's sender instance. Use this in
-// combination with SetSender() to have multiple Journaler instances
+// Sender returns the current Journaler's sender instance. Use this in
+// combination with SetSender to have multiple Journaler instances
 // backed by the same send.Sender instance.
 func Sender() send.Sender {
 	return std.Sender()
 }
 
-// Set the Journaler to use a native, standard output, logging
-// instance, without changing the configuration of the Journaler.
+// UseNativeLogger configures the standard grip package logger to use
+// a native, standard output, logging instance, without changing the
+// configuration of the Journaler.
 func UseNativeLogger() error {
 	return std.UseNativeLogger()
 }
 
-// Set the Journaler to use the systemd loggerwithout changing the
-// configuration of the Journaler.
+// UseSystemdLogger configures the standard grip package logger to use
+// the systemd loggerwithout changing the configuration of the
+// Journaler.
 func UseSystemdLogger() error {
 	return std.UseSystemdLogger()
 }
 
-// Use a file-based logger that writes all log output to a file, based
-// on the standard library logging methods.
+// UseFileLogger configures the standard grip package logger to use a
+// file-based logger that writes all log output to a file, based on
+// the go standard library logging methods.
 func UseFileLogger(filename string) error {
 	return std.UseFileLogger(filename)
 }

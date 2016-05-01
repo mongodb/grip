@@ -4,7 +4,10 @@ type errorMessage struct {
 	Err error `json:"error" bson:"error" yaml:"error"`
 }
 
-func NewErrorMessage(err error) *errorMessage {
+// NewErrorMessage takes an error object and returns a Composer
+// instance that only renders a loggable message when the error is
+// non-nil.
+func NewErrorMessage(err error) Composer {
 	return &errorMessage{err}
 }
 

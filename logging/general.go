@@ -1,4 +1,8 @@
 /*
+Package logging provides the primary implementation of the Journaler
+interface (which is cloned in public functions in the grip interface
+itself.)
+
 Basic Logging
 
 Loging helpers exist for the following levels:

@@ -1,17 +1,3 @@
-/*
-Conditional Logging
-
-The Conditional logging methods take two arguments, a Boolean, and a
-message argument. Messages can be strings, objects that implement the
-MessageComposer interface, or errors. If condition boolean is true,
-the threshold level is met, and the message to log is not an empty
-string, then it logs the resolved message.
-
-Use conditional logging methods to potentially suppress log messages
-based on situations orthogonal to log level, with "log sometimes" or
-"log rarely" semantics. Combine with MessageComposers to to avoid
-expensive message building operations.
-*/
 package logging
 
 import (

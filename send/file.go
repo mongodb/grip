@@ -23,6 +23,10 @@ type fileLogger struct {
 	fileObj *os.File
 }
 
+// NewFileLogger creates a Sender implementation that writes log
+// output to a file. Returns an error but falls back to a standard
+// output logger if there's problems with the file. Internally using
+// the go standard library logging system.
 func NewFileLogger(name, filePath string, thresholdLevel, defaultLevel level.Priority) (Sender, error) {
 	l := &fileLogger{
 		name:     name,

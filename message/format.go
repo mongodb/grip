@@ -7,11 +7,10 @@ type formatMessenger struct {
 	args []interface{}
 }
 
-// NewFormatedMessage() takes arguments as fmt.Sprintf(), and returns
+// NewFormatedMessage takes arguments as fmt.Sprintf(), and returns
 // an object that only runs the format operation as part of the
-// Resolve() method.  Use in combination with Compose[*] logging
-// methods.
-func NewFormatedMessage(base string, args ...interface{}) *formatMessenger {
+// Resolve() method.
+func NewFormatedMessage(base string, args ...interface{}) Composer {
 	return &formatMessenger{base, args}
 }
 

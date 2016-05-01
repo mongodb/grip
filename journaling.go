@@ -7,7 +7,7 @@ import "github.com/tychoish/grip/logging"
 // possible, falling back to standard output-native when systemd
 // logging is not available.
 
-// Creates a new Journaler instance. The Sender method is a
+// NewJournaler creates a new Journaler instance. The Sender method is a
 // non-operational bootstrap method that stores default and threshold
 // types, as needed. You must use SetSender() or the
 // UseSystemdLogger(), UseNativeLogger(), or UseFileLogger() methods

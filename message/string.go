@@ -4,7 +4,9 @@ type stringMessage struct {
 	content string
 }
 
-func NewDefaultMessage(message string) *stringMessage {
+// NewDefaultMessage provides a Composer interface around a single
+// string, which are always logable unless the string is empty.
+func NewDefaultMessage(message string) Composer {
 	return &stringMessage{message}
 }
 

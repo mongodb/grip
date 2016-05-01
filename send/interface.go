@@ -1,6 +1,8 @@
-// Provides an interface for defining "senders" for different logging
-// backends, as well as basic implementations for common logging
-// approaches to use with the Grip logging interface. Backends currently include:
+// Package send provides an interface for defining "senders" for
+// different logging backends, as well as basic implementations for
+// common logging approaches to use with the Grip logging
+// interface. Backends currently include: syslog, systemd's journal,
+// standard output, and file baased methods.
 package send
 
 import (
@@ -49,6 +51,11 @@ type Sender interface {
 	Close()
 }
 
+// ShouldLogMessage provides a sender-independent method for
+// determining if a message should be logged. Considers a priority
+// value for a message, the default and threshould priorities from the
+// sender, and the likability of a message provided by the Composer
+// interface to determine if a message is loggable.
 func ShouldLogMessage(s Sender, p level.Priority, m message.Composer) bool {
 	// higher p numbers are "lower priority" than lower ones
 	// (e.g. Emergency=0, Debug=7)

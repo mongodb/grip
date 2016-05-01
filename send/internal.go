@@ -7,7 +7,12 @@ import (
 	"github.com/tychoish/grip/message"
 )
 
-type internalSender struct {
+// InternalSender implements a Sender object that makes it possible to
+// access logging messages, in the InternalMessage format without
+// logging to an output method. The Send method does not filter out
+// under-priority and unloggable messages. Used  for testing
+// purposes.
+type InternalSender struct {
 	name           string
 	options        map[string]string
 	defaultLevel   level.Priority
@@ -15,6 +20,8 @@ type internalSender struct {
 	output         chan *InternalMessage
 }
 
+// InternalMessage provides a complete representation of all
+// information associated with a logging event.
 type InternalMessage struct {
 	Message  message.Composer
 	Priority level.Priority
@@ -22,9 +29,14 @@ type InternalMessage struct {
 	Rendered string
 }
 
-func NewInternalLogger(thresholdLevel, defaultLevel level.Priority) (*internalSender, error) {
-	l := &internalSender{
-		output:  make(chan *InternalMessage, 1),
+// NewInternalLogger creates and returns a Sender implementation that
+// does not log messages, but converts them to the InternalMessage
+// format and puts them into an internal channel, that allows you to
+// access the massages via the extra "GetMessage" method. Useful for
+// testing.
+func NewInternalLogger(thresholdLevel, defaultLevel level.Priority) (*InternalSender, error) {
+	l := &InternalSender{
+		output:  make(chan *InternalMessage, 100),
 		options: make(map[string]string),
 	}
 
@@ -37,11 +49,11 @@ func NewInternalLogger(thresholdLevel, defaultLevel level.Priority) (*internalSe
 	return l, err
 }
 
-func (s *internalSender) GetMessage() *InternalMessage {
+func (s *InternalSender) GetMessage() *InternalMessage {
 	return <-s.output
 }
 
-func (s *internalSender) Send(p level.Priority, m message.Composer) {
+func (s *InternalSender) Send(p level.Priority, m message.Composer) {
 	o := &InternalMessage{
 		Message:  m,
 		Priority: p,
@@ -52,19 +64,19 @@ func (s *internalSender) Send(p level.Priority, m message.Composer) {
 	s.output <- o
 }
 
-func (s *internalSender) Name() string {
+func (s *InternalSender) Name() string {
 	return s.name
 }
 
-func (s *internalSender) SetName(n string) {
+func (s *InternalSender) SetName(n string) {
 	s.name = n
 }
 
-func (s *internalSender) ThresholdLevel() level.Priority {
+func (s *InternalSender) ThresholdLevel() level.Priority {
 	return s.thresholdLevel
 }
 
-func (s *internalSender) SetThresholdLevel(p level.Priority) error {
+func (s *InternalSender) SetThresholdLevel(p level.Priority) error {
 	if level.IsValidPriority(p) {
 		s.thresholdLevel = p
 		return nil
@@ -72,11 +84,11 @@ func (s *internalSender) SetThresholdLevel(p level.Priority) error {
 	return fmt.Errorf("%s (%d) is not a valid priority value (0-6)", p, int(p))
 }
 
-func (s *internalSender) DefaultLevel() level.Priority {
+func (s *InternalSender) DefaultLevel() level.Priority {
 	return s.defaultLevel
 }
 
-func (s *internalSender) SetDefaultLevel(p level.Priority) error {
+func (s *InternalSender) SetDefaultLevel(p level.Priority) error {
 	if level.IsValidPriority(p) {
 		s.defaultLevel = p
 		return nil
@@ -85,10 +97,10 @@ func (s *internalSender) SetDefaultLevel(p level.Priority) error {
 
 }
 
-func (s *internalSender) AddOption(key, value string) {
+func (s *InternalSender) AddOption(key, value string) {
 	s.options[key] = value
 }
 
-func (s *internalSender) Close() {
+func (s *InternalSender) Close() {
 	close(s.output)
 }

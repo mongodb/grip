@@ -21,7 +21,14 @@ type syslogger struct {
 	fallback       *log.Logger
 }
 
-func NewSyslogLogger(name, network, raddr string, thresholdLevel, defaultLevel level.Priority) (*syslogger, error) {
+// NewSyslogLogger creates a new Sender object taht writes all
+// loggable messages to a syslog instance on the specified
+// network. Uses the Go standard library syslog implementation that is
+// only available on Unix systems. Use this constructor to return a
+// connection to a remote Syslog interface, but will fall back first
+// to the local syslog interface before writing messages to standard
+// output.
+func NewSyslogLogger(name, network, raddr string, thresholdLevel, defaultLevel level.Priority) (Sender, error) {
 	s := &syslogger{
 		name: name,
 	}
@@ -51,7 +58,12 @@ func NewSyslogLogger(name, network, raddr string, thresholdLevel, defaultLevel l
 	return s, err
 }
 
-func NewLocalSyslogger(name string, thresholdLevel, defaultLevel level.Priority) (*syslogger, error) {
+// NewLocalSyslogLogger is a constructor for creating the same kind of
+// Sender instance as NewSyslogLogger, except connecting directly to
+// the local syslog service. If there is no local syslog service, or
+// there are issues connecting to it, writes logging messages to
+// standard error.
+func NewLocalSyslogLogger(name string, thresholdLevel, defaultLevel level.Priority) (Sender, error) {
 	return NewSyslogLogger(name, "", "", thresholdLevel, defaultLevel)
 }
 

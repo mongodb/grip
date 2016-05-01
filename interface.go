@@ -5,6 +5,9 @@ import (
 	"github.com/tychoish/grip/send"
 )
 
+// Journaler describes the public interface of the the Grip
+// interface. Used to enforce consistency between the grip and logging
+// packages.
 type Journaler interface {
 	Name() string
 	Sender() send.Sender

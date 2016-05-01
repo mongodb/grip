@@ -10,15 +10,16 @@ func (g *Grip) SetSender(s send.Sender) {
 	g.sender = s
 }
 
-// Returns the current Journaler's sender instance. Use this in
+// Sender returns the current Journaler's sender instance. Use this in
 // combination with SetSender() to have multiple Journaler instances
 // backed by the same send.Sender instance.
 func (g *Grip) Sender() send.Sender {
 	return g.sender
 }
 
-// Set the Journaler to use a native, standard output, logging
-// instance, without changing the configuration of the Journaler.
+// UseNativeLogger sets the Journaler to use a native, standard
+// output, logging instance, without changing the configuration of the
+// Journaler.
 func (g *Grip) UseNativeLogger() error {
 	// name, threshold, default
 	sender, err := send.NewNativeLogger(g.name, g.sender.ThresholdLevel(), g.sender.DefaultLevel())
@@ -26,8 +27,8 @@ func (g *Grip) UseNativeLogger() error {
 	return err
 }
 
-// Set the Journaler to use the systemd loggerwithout changing the
-// configuration of the Journaler.
+// UseSystemdLogger set the Journaler to use the systemd loggerwithout
+// changing the configuration of the Journaler.
 func (g *Grip) UseSystemdLogger() error {
 	// name, threshold, default
 	sender, err := send.NewJournaldLogger(g.name, g.sender.ThresholdLevel(), g.sender.DefaultLevel())
@@ -41,8 +42,8 @@ func (g *Grip) UseSystemdLogger() error {
 	return nil
 }
 
-// Use a file-based logger that writes all log output to a file, based
-// on the standard library logging methods.
+// UseFileLogger creates a file-based logger that writes all log
+// output to a file, based on the standard library logging methods.
 func (g *Grip) UseFileLogger(filename string) error {
 	s, err := send.NewFileLogger(g.name, filename, g.sender.ThresholdLevel(), g.sender.DefaultLevel())
 	if err != nil {
