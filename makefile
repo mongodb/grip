@@ -89,9 +89,11 @@ $(buildDir)/test.$(name).out:test-deps
 
 # targets to install dependencies
 deps:$(deps)
-test-deps:$(testDeps)
+test-deps:$(testDeps) $(deps)
 lint-deps:$(lintDeps)
 	$(gopath)/bin/gometalinter --install
 clean:
-	rm -rf $(deps) $(lintDeps) $(testDeps)
+	rm -rf $(deps) $(lintDeps) $(testDeps) $(buildDir)/test.* $(buildDir)/coverage.*
+phony += deps test-deps lint-deps
+# configure phony targets
 .PHONY:$(phony)
