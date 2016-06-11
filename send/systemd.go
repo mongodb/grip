@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/coreos/go-systemd/journal"
 	"github.com/tychoish/grip/level"
@@ -17,6 +18,8 @@ type systemdJournal struct {
 	thresholdLevel journal.Priority
 	options        map[string]string
 	fallback       *log.Logger
+
+	*sync.RWMutex
 }
 
 // NewJournaldLogger creates a Sender object that writes log messages
@@ -27,6 +30,7 @@ func NewJournaldLogger(name string, thresholdLevel, defaultLevel level.Priority)
 	s := &systemdJournal{
 		name:    name,
 		options: make(map[string]string),
+		RWMutex: &sync.RWMutex{},
 	}
 
 	err := s.SetDefaultLevel(defaultLevel)
@@ -70,6 +74,9 @@ func (s *systemdJournal) Send(p level.Priority, m message.Composer) {
 }
 
 func (s *systemdJournal) SetDefaultLevel(p level.Priority) error {
+	s.Lock()
+	defer s.Unlock()
+
 	if level.IsValidPriority(p) {
 		s.defaultLevel = s.convertPrioritySystemd(p)
 		return nil
@@ -79,6 +86,9 @@ func (s *systemdJournal) SetDefaultLevel(p level.Priority) error {
 }
 
 func (s *systemdJournal) SetThresholdLevel(p level.Priority) error {
+	s.Lock()
+	defer s.Unlock()
+
 	if level.IsValidPriority(p) {
 		s.thresholdLevel = s.convertPrioritySystemd(p)
 		return nil
@@ -88,10 +98,16 @@ func (s *systemdJournal) SetThresholdLevel(p level.Priority) error {
 }
 
 func (s *systemdJournal) DefaultLevel() level.Priority {
+	s.RLock()
+	defer s.RUnlock()
+
 	return level.Priority(s.defaultLevel)
 }
 
 func (s *systemdJournal) ThresholdLevel() level.Priority {
+	s.RLock()
+	defer s.RUnlock()
+
 	return level.Priority(s.thresholdLevel)
 }
 

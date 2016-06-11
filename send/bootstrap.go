@@ -2,6 +2,7 @@ package send
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
@@ -10,6 +11,7 @@ import (
 type bootstrapLogger struct {
 	defaultLevel   level.Priority
 	thresholdLevel level.Priority
+	*sync.RWMutex
 }
 
 // NewBootstrapLogger returns a minimal, default composer
@@ -18,6 +20,7 @@ type bootstrapLogger struct {
 // functional as a sender for general use.
 func NewBootstrapLogger(thresholdLevel, defaultLevel level.Priority) Sender {
 	b := &bootstrapLogger{}
+	b.RWMutex = &sync.RWMutex{}
 	err := b.SetDefaultLevel(defaultLevel)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -48,6 +51,8 @@ func (b *bootstrapLogger) AddOption(_, _ string) {
 }
 
 func (b *bootstrapLogger) SetDefaultLevel(l level.Priority) error {
+	b.Lock()
+	defer b.Unlock()
 	if level.IsValidPriority(l) {
 		b.defaultLevel = l
 		return nil
@@ -57,6 +62,9 @@ func (b *bootstrapLogger) SetDefaultLevel(l level.Priority) error {
 }
 
 func (b *bootstrapLogger) SetThresholdLevel(l level.Priority) error {
+	b.Lock()
+	defer b.Unlock()
+
 	if level.IsValidPriority(l) {
 		b.thresholdLevel = l
 		return nil
@@ -66,10 +74,16 @@ func (b *bootstrapLogger) SetThresholdLevel(l level.Priority) error {
 }
 
 func (b *bootstrapLogger) DefaultLevel() level.Priority {
+	b.RLock()
+	defer b.RUnlock()
+
 	return b.defaultLevel
 }
 
 func (b *bootstrapLogger) ThresholdLevel() level.Priority {
+	b.RLock()
+	defer b.RUnlock()
+
 	return b.thresholdLevel
 }
 

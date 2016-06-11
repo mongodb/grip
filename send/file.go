@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
@@ -21,6 +22,7 @@ type fileLogger struct {
 
 	logger  *log.Logger
 	fileObj *os.File
+	*sync.RWMutex
 }
 
 // NewFileLogger creates a Sender implementation that writes log
@@ -32,6 +34,7 @@ func NewFileLogger(name, filePath string, thresholdLevel, defaultLevel level.Pri
 		name:     name,
 		options:  make(map[string]string),
 		template: "[p=%d]: %s\n",
+		RWMutex:  &sync.RWMutex{},
 	}
 
 	f, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
@@ -77,18 +80,30 @@ func (f *fileLogger) SetName(name string) {
 }
 
 func (f *fileLogger) AddOption(key, value string) {
+	f.Lock()
+	defer f.Unlock()
+
 	f.options[key] = value
 }
 
 func (f *fileLogger) DefaultLevel() level.Priority {
+	f.RLock()
+	defer f.RUnlock()
+
 	return f.defaultLevel
 }
 
 func (f *fileLogger) ThresholdLevel() level.Priority {
+	f.RLock()
+	defer f.RUnlock()
+
 	return f.thresholdLevel
 }
 
 func (f *fileLogger) SetDefaultLevel(p level.Priority) error {
+	f.Lock()
+	defer f.Unlock()
+
 	if level.IsValidPriority(p) {
 		f.defaultLevel = p
 		return nil
@@ -98,6 +113,9 @@ func (f *fileLogger) SetDefaultLevel(p level.Priority) error {
 }
 
 func (f *fileLogger) SetThresholdLevel(p level.Priority) error {
+	f.Lock()
+	defer f.Unlock()
+
 	if level.IsValidPriority(p) {
 		f.thresholdLevel = p
 		return nil

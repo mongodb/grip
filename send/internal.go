@@ -2,6 +2,7 @@ package send
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
@@ -18,6 +19,8 @@ type InternalSender struct {
 	defaultLevel   level.Priority
 	thresholdLevel level.Priority
 	output         chan *InternalMessage
+
+	*sync.RWMutex
 }
 
 // InternalMessage provides a complete representation of all
@@ -38,6 +41,7 @@ func NewInternalLogger(thresholdLevel, defaultLevel level.Priority) (*InternalSe
 	l := &InternalSender{
 		output:  make(chan *InternalMessage, 100),
 		options: make(map[string]string),
+		RWMutex: &sync.RWMutex{},
 	}
 
 	err := l.SetDefaultLevel(defaultLevel)
@@ -73,10 +77,16 @@ func (s *InternalSender) SetName(n string) {
 }
 
 func (s *InternalSender) ThresholdLevel() level.Priority {
+	s.RLock()
+	defer s.RUnlock()
+
 	return s.thresholdLevel
 }
 
 func (s *InternalSender) SetThresholdLevel(p level.Priority) error {
+	s.Lock()
+	defer s.Unlock()
+
 	if level.IsValidPriority(p) {
 		s.thresholdLevel = p
 		return nil
@@ -85,10 +95,16 @@ func (s *InternalSender) SetThresholdLevel(p level.Priority) error {
 }
 
 func (s *InternalSender) DefaultLevel() level.Priority {
+	s.RLock()
+	defer s.RUnlock()
+
 	return s.defaultLevel
 }
 
 func (s *InternalSender) SetDefaultLevel(p level.Priority) error {
+	s.Lock()
+	defer s.Unlock()
+
 	if level.IsValidPriority(p) {
 		s.defaultLevel = p
 		return nil
@@ -98,6 +114,9 @@ func (s *InternalSender) SetDefaultLevel(p level.Priority) error {
 }
 
 func (s *InternalSender) AddOption(key, value string) {
+	s.Lock()
+	defer s.Unlock()
+
 	s.options[key] = value
 }
 

@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
@@ -17,6 +18,8 @@ type nativeLogger struct {
 	options        map[string]string
 	logger         *log.Logger
 	template       string
+
+	*sync.RWMutex
 }
 
 // NewNativeLogger creates a new Sender interface that writes all
@@ -26,6 +29,7 @@ func NewNativeLogger(name string, thresholdLevel, defaultLevel level.Priority) (
 	l := &nativeLogger{
 		name:     name,
 		template: "[p=%d]: %s\n",
+		RWMutex:  &sync.RWMutex{},
 	}
 	l.createLogger()
 	err := l.SetDefaultLevel(defaultLevel)
@@ -64,14 +68,23 @@ func (n *nativeLogger) AddOption(key, value string) {
 }
 
 func (n *nativeLogger) DefaultLevel() level.Priority {
+	n.RLock()
+	defer n.RUnlock()
+
 	return n.defaultLevel
 }
 
 func (n *nativeLogger) ThresholdLevel() level.Priority {
+	n.RLock()
+	defer n.RUnlock()
+
 	return n.thresholdLevel
 }
 
 func (n *nativeLogger) SetDefaultLevel(p level.Priority) error {
+	n.Lock()
+	defer n.Unlock()
+
 	if level.IsValidPriority(p) {
 		n.defaultLevel = p
 		return nil
@@ -81,6 +94,9 @@ func (n *nativeLogger) SetDefaultLevel(p level.Priority) error {
 }
 
 func (n *nativeLogger) SetThresholdLevel(p level.Priority) error {
+	n.Lock()
+	defer n.Unlock()
+
 	if level.IsValidPriority(p) {
 		n.thresholdLevel = p
 		return nil

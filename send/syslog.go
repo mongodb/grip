@@ -8,6 +8,7 @@ import (
 	"log/syslog"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
@@ -19,6 +20,8 @@ type syslogger struct {
 	defaultLevel   level.Priority
 	thresholdLevel level.Priority
 	fallback       *log.Logger
+
+	*sync.RWMutex
 }
 
 // NewSyslogLogger creates a new Sender object taht writes all
@@ -30,7 +33,8 @@ type syslogger struct {
 // output.
 func NewSyslogLogger(name, network, raddr string, thresholdLevel, defaultLevel level.Priority) (Sender, error) {
 	s := &syslogger{
-		name: name,
+		name:    name,
+		RWMutex: &sync.RWMutex{},
 	}
 
 	err := s.SetDefaultLevel(defaultLevel)
@@ -123,6 +127,9 @@ func (s *syslogger) sendToSysLog(p level.Priority, message string) error {
 }
 
 func (s *syslogger) SetDefaultLevel(p level.Priority) error {
+	s.Lock()
+	defer s.Unlock()
+
 	if level.IsValidPriority(p) {
 		s.defaultLevel = p
 		return nil
@@ -132,6 +139,9 @@ func (s *syslogger) SetDefaultLevel(p level.Priority) error {
 }
 
 func (s *syslogger) SetThresholdLevel(p level.Priority) error {
+	s.Lock()
+	defer s.Unlock()
+
 	if level.IsValidPriority(p) {
 		s.thresholdLevel = p
 		return nil
@@ -141,10 +151,16 @@ func (s *syslogger) SetThresholdLevel(p level.Priority) error {
 }
 
 func (s *syslogger) DefaultLevel() level.Priority {
+	s.RLock()
+	defer s.RUnlock()
+
 	return s.defaultLevel
 }
 
 func (s *syslogger) ThresholdLevel() level.Priority {
+	s.RLock()
+	defer s.RUnlock()
+
 	return s.thresholdLevel
 }
 
