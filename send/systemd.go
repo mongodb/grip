@@ -141,3 +141,7 @@ func (s *systemdJournal) convertPrioritySystemd(p level.Priority) journal.Priori
 func (s *systemdJournal) Close() {
 	return
 }
+
+func (s *systemdJournal) Type() SenderType {
+	return Systemd
+}

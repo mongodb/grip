@@ -171,3 +171,7 @@ func (s *syslogger) AddOption(_, _ string) {
 func (s *syslogger) Close() {
 	_ = s.logger.Close()
 }
+
+func (s *syslogger) Type() SenderType {
+	return Syslog
+}

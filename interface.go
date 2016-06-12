@@ -14,6 +14,7 @@ type Journaler interface {
 	SetDefaultLevel(interface{})
 	SetName(string)
 	SetSender(send.Sender)
+	CloneSender(send.Sender)
 	SetThreshold(level interface{})
 	ThresholdLevel() level.Priority
 	UseFileLogger(string) error

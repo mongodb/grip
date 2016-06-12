@@ -17,6 +17,21 @@ func (g *Grip) Sender() send.Sender {
 	return g.sender
 }
 
+// CloneSender, for the trivially constructable Sender
+// implementations, makes a new instance of this type for the logging
+// instance. For unsupported sender implementations, just injects the
+// sender itself into the Grip instance.
+func (g *Grip) CloneSender(s send.Sender) {
+	switch {
+	case s.Type() == send.Native:
+		g.UseNativeLogger()
+	case s.Type() == send.Systemd:
+		g.UseSystemdLogger()
+	default:
+		g.SetSender(s)
+	}
+}
+
 // UseNativeLogger sets the Journaler to use a native, standard
 // output, logging instance, without changing the configuration of the
 // Journaler.

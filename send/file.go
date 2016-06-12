@@ -123,3 +123,7 @@ func (f *fileLogger) SetThresholdLevel(p level.Priority) error {
 
 	return fmt.Errorf("%s (%d) is not a valid priority value (0-6)", p, int(p))
 }
+
+func (f *fileLogger) Type() SenderType {
+	return File
+}

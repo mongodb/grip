@@ -16,6 +16,14 @@ func Sender() send.Sender {
 	return std.Sender()
 }
 
+// CloneSender, for the trivially constructable Sender
+// implementations, makes a new instance of this type for the logging
+// instance. For unsupported sender implementations, the method
+// injects the sender itself into the Journaler instance.
+func CloneSender(s send.Sender) {
+	std.CloneSender(s)
+}
+
 // UseNativeLogger configures the standard grip package logger to use
 // a native, standard output, logging instance, without changing the
 // configuration of the Journaler.

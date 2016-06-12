@@ -108,3 +108,7 @@ func (n *nativeLogger) SetThresholdLevel(p level.Priority) error {
 func (n *nativeLogger) Close() {
 	return
 }
+
+func (n *nativeLogger) Type() SenderType {
+	return Native
+}

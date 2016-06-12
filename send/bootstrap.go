@@ -90,3 +90,7 @@ func (b *bootstrapLogger) ThresholdLevel() level.Priority {
 func (b *bootstrapLogger) Close() {
 	return
 }
+
+func (b *bootstrapLogger) Type() SenderType {
+	return Bootstrap
+}

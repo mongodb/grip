@@ -20,6 +20,10 @@ type Sender interface {
 	Name() string
 	SetName(string)
 
+	// returns a constant for the type of the sender. Used by the
+	// loggers as part of their dependency injection mechanism.
+	Type() SenderType
+
 	// Method that actually sends messages (the string) to the
 	// logging capture system. The Send() method filters out
 	// logged messages based on priority, typically using the

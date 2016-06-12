@@ -123,3 +123,7 @@ func (s *InternalSender) AddOption(key, value string) {
 func (s *InternalSender) Close() {
 	close(s.output)
 }
+
+func (s *InternalSender) Type() SenderType {
+	return Internal
+}
