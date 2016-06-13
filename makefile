@@ -66,9 +66,7 @@ deps:$(deps)
 test-deps:$(testDeps)
 lint-deps:$(lintDeps)
 build:$(deps) $(gopath)/src/$(projectPath)
-	go build $(foreach pkg,$(packages),./$(pkg))
-build-race:$(buildDir)/$(name).race
-	go build -race $(foreach pkg,$(packages),./$(pkg))
+	go build ./ $(foreach pkg,$(shell find . -type d -not -iwholename '*.git*' -not -name "." -not -name "build"),$(pkg))
 test:$(testOutput)
 race:$(raceOutput)
 coverage:$(coverageOutput)
@@ -111,7 +109,7 @@ html-coverage-%:
 #    tests have compile and runtime deps. This varable has everything
 #    that the tests actually need to run. (The "build" target is
 #    intentional and makes these targets rerun as expected.)
-testRunDeps := $(testDeps) $(testSrcFiles) $(deps) build
+testRunDeps := $(testDeps) $(testSrcFiles) $(deps)
 #    implementation for package coverage and test running,mongodb to produce
 #    and save test output.
 $(buildDir)/coverage.%.html:$(buildDir)/coverage.%.out
