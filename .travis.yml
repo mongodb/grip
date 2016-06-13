@@ -11,5 +11,7 @@ go:
   - 1.4
   - 1.5
   - 1.6
-install: make test-deps
+install:
+  - make test-deps
+  - mkdir -p build
 script: make build test
