@@ -66,7 +66,7 @@ deps:$(deps)
 test-deps:$(testDeps)
 lint-deps:$(lintDeps)
 build:$(deps) $(gopath)/src/$(projectPath)
-	go build ./ $(foreach pkg,$(shell find . -type d -not -iwholename '*.git*' -not -name "." -not -name "build"),$(pkg))
+	$(vendorGopath) go build ./ $(foreach pkg,$(shell find . -type d -not -iwholename '*.git*' -not -name "." -not -name "build"),$(pkg))
 test:$(testOutput)
 race:$(raceOutput)
 coverage:$(coverageOutput)
@@ -86,9 +86,9 @@ $(gopath)/src/$(projectPath):$(gopath)/src/$(orgPath)
 $(name):$(buildDir)/$(name)
 	@[ -L $@ ] || ln -s $< $@
 $(buildDir)/$(name):$(gopath)/src/$(projectPath) $(srcFiles) $(deps)
-	go build -o $@ main/$(name).go
+	$(vendorGopath) go build -o $@ main/$(name).go
 $(buildDir)/$(name).race:$(gopath)/src/$(projectPath) $(srcFiles) $(deps)
-	go build -race -o $@ main/$(name).go
+	$(vendorGopath) go build -race -o $@ main/$(name).go
 # end main build
 
 
@@ -105,29 +105,72 @@ html-coverage-%:
 	@$(MAKE) $(makeArgs) $(buildDir)/coverage.$*.html
 # end convienence targets
 
+# start vendoring configuration
+#    begin with configuration of dependencies
+vendorDeps := github.com/Masterminds/glide
+vendorDeps := $(addprefix $(gopath)/src/,$(vendorDeps))
+vendor-deps:$(vendorDeps)
+#   this allows us to store our vendored code in vendor and use
+#   symlinks to support vendored code both in the legacy style and with
+#   new-style vendor directories. When this codebase can drop support
+#   for go1.4, we can delete most of this.
+-include $(buildDir)/makefile.vendor
+$(buildDir)/makefile.vendor:$(buildDir)/render-gopath
+	@mkdir -p $(buildDir)
+	@echo "vendorGopath := \$$(shell \$$(buildDir)/render-gopath)" >| $@
+#   targets for the directory components and manipulating vendored files.
+vendor-sync:$(vendorDeps)
+	glide install -s
+vendor-clean:
+#   clean binary files (makes patch builds possible and avoids commiting some things.)
+	find vendor/ -name "*.gif" -o -name "*.gz" -o -name "*.png" -o -name "*.ico" | xargs rm -f
+#   retain a minor edit to vendored code to add compatibility for gccgo.
+	rm -f vendor/golang.org/x/tools/container/intsets/popcnt_gccgo*
+	git checkout vendor/golang.org/x/tools/container/intsets/popcnt_generic.go
+change-go-version:
+	rm -rf $(buildDir)/make-vendor $(buildDir)/render-gopath
+	@$(MAKE) $(makeArgs) vendor > /dev/null 2>&1
+vendor:$(buildDir)/vendor/src
+$(buildDir)/vendor/src:$(buildDir)/make-vendor $(buildDir)/render-gopath
+	@./$(buildDir)/make-vendor
+#   targets to build the small programs used to support vendoring.
+$(buildDir)/make-vendor:buildscripts/make-vendor.go
+	@mkdir -p $(buildDir)
+	go build -o $@ $<
+$(buildDir)/render-gopath:buildscripts/render-gopath.go
+	@mkdir -p $(buildDir)
+	go build -o $@ $<
+#   define dependencies for buildscripts
+buildscripts/make-vendor.go:buildscripts/vendoring/vendoring.go
+buildscripts/render-gopath.go:buildscripts/vendoring/vendoring.go
+#   add phony targets
+phony += vendor vendor-deps vendor-clean vendor-sync change-go-version
+# end vendoring tooling configuration
+
+
 # start test and coverage artifacts
-#    tests have compile and runtime deps. This varable has everything
-#    that the tests actually need to run. (The "build" target is
-#    intentional and makes these targets rerun as expected.)
-testRunDeps := $(testDeps) $(testSrcFiles) $(deps)
-#    implementation for package coverage and test running,mongodb to produce
+#    This varable includes everything that the tests actually need to
+#    run. (The "build" target is intentional and makes these targetsb
+#    rerun as expected.)
+testRunDeps := $(testSrcFiles) $(name) build
+#    implementation for package coverage and test running, to produce
 #    and save test output.
 $(buildDir)/coverage.%.html:$(buildDir)/coverage.%.out
-	go tool cover -html=$< -o $@
+	$(vendorGopath) go tool cover -html=$< -o $@
 $(buildDir)/coverage.%.out:$(testRunDeps)
-	go test -covermode=count -coverprofile=$@ $(projectPath)/$*
+	$(vendorGopath) go test -covermode=count -coverprofile=$@ $(projectPath)/$*
 	@-[ -f $@ ] && go tool cover -func=$@ | sed 's%$(projectPath)/%%' | column -t
 $(buildDir)/coverage.$(name).out:$(testRunDeps)
-	go test -covermode=count -coverprofile=$@ $(projectPath)
+	$(vendorGopath) go test -covermode=count -coverprofile=$@ $(projectPath)
 	@-[ -f $@ ] && go tool cover -func=$@ | sed 's%$(projectPath)/%%' | column -t
 $(buildDir)/test.%.out:$(testRunDeps)
-	go test -v ./$* >| $@; exitCode=$$?; cat $@; [ $$exitCode -eq 0 ]
+	$(vendorGopath) go test -v ./$* >| $@; exitCode=$$?; cat $@; [ $$exitCode -eq 0 ]
 $(buildDir)/test.$(name).out:$(testRunDeps)
-	go test -v ./ >| $@; exitCode=$$?; cat $@; [ $$exitCode -eq 0 ]
+	$(vendorGopath) go test -v ./ >| $@; exitCode=$$?; cat $@; [ $$exitCode -eq 0 ]
 $(buildDir)/race.%.out:$(testRunDeps)
-	go test -race -v ./$* >| $@; exitCode=$$?; cat $@; [ $$exitCode -eq 0 ]
+	$(vendorGopath) go test -race -v ./$* >| $@; exitCode=$$?; cat $@; [ $$exitCode -eq 0 ]
 $(buildDir)/race.$(name).out:$(testRunDeps)
-	go test -race -v ./ >| $@; exitCode=$$?; cat $@; [ $$exitCode -eq 0 ]
+	$(vendorGopath) go test -race -v ./ >| $@; exitCode=$$?; cat $@; [ $$exitCode -eq 0 ]
 # end test and coverage artifacts
 
 
