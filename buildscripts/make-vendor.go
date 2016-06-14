@@ -51,6 +51,7 @@ func main() {
 		}
 
 		fmt.Println("created vendor legacy link")
+		return
 	}
 
 	fmt.Println("can use existing (new-style) vendoring configuration")
