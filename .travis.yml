@@ -14,4 +14,4 @@ go:
 install:
   - make test-deps
   - mkdir -p build
-script: make build test
+script: make vendor build test
