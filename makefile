@@ -152,7 +152,7 @@ phony += vendor vendor-deps vendor-clean vendor-sync change-go-version
 #    This varable includes everything that the tests actually need to
 #    run. (The "build" target is intentional and makes these targetsb
 #    rerun as expected.)
-testRunDeps := $(testSrcFiles) $(name) build
+testRunDeps := $(testSrcFiles) build
 #    implementation for package coverage and test running, to produce
 #    and save test output.
 $(buildDir)/coverage.%.html:$(buildDir)/coverage.%.out
