@@ -61,6 +61,7 @@ func (s *systemdJournal) SetName(name string) {
 }
 
 func (s *systemdJournal) Send(p level.Priority, m message.Composer) {
+	// this calls s.ThresholdLevel()
 	if !ShouldLogMessage(s, p, m) {
 		return
 	}
