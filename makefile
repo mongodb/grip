@@ -70,7 +70,6 @@ $(gopath)/src/%:
 	go get $(subst $(gopath)/src/,,$@)
 # end dependency installation tools
 
-
 # userfacing targets for basic build and development operations
 lint:$(gopath)/src/$(projectPath) $(lintDeps)
 	$(gopath)/bin/gometalinter $(lintArgs) ./... | sed 's%$</%%'
@@ -85,23 +84,20 @@ race:$(raceOutput)
 coverage:$(coverageOutput)
 coverage-html:$(coverageHtmlOutput)
 phony := lint build build-race race test coverage coverage-html
-phony += deps test-deps lint-deps test-deps
+phony += test-deps lint-deps test-deps
 .PRECIOUS: $(testOutput) $(raceOutput) $(coverageOutput) $(coverageHtmlOutput)
 # end front-ends
 
 
 # implementation details for building the binary and creating a
 # convienent link in the working directory
-$(gopath)/src/$(orgPath):
-	@mkdir -p $@
-$(gopath)/src/$(projectPath):$(gopath)/src/$(orgPath)
-	@[ -L $@ ] || ln -s $(shell pwd) $@
 $(name):$(buildDir)/$(name)
-	@[ -L $@ ] || ln -s $< $@
-$(buildDir)/$(name):$(gopath)/src/$(projectPath) $(srcFiles) $(deps)
+	@[ -e $@ ] || ln -s $<
+$(buildDir)/$(name):$(srcFiles)
 	$(vendorGopath) go build -o $@ main/$(name).go
-$(buildDir)/$(name).race:$(gopath)/src/$(projectPath) $(srcFiles) $(deps)
+$(buildDir)/$(name).race:$(srcFiles)
 	$(vendorGopath) go build -race -o $@ main/$(name).go
+phony += $(buildDir)/$(name)
 # end main build
 
 
@@ -170,7 +166,7 @@ phony += vendor vendor-deps vendor-clean vendor-sync change-go-version
 #    intentional and makes these targets rerun as expected.)
 testRunDeps := $(testSrcFiles) build
 testArgs := -v --timeout=20m
-#    implementation for package coverage and test running,mongodb to produce
+#    implementation for package coverage and test running, to produce
 #    and save test output.
 $(buildDir)/coverage.%.html:$(buildDir)/coverage.%.out
 	go tool cover -html=$< -o $(subst -,/,$@)
