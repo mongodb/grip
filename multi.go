@@ -77,7 +77,7 @@ func (c *MultiCatcher) String() string {
 	output := make([]string, len(c.errs))
 
 	for _, err := range c.errs {
-		output = append(output, fmt.Sprintf("%+v", err.Error()))
+		output = append(output, fmt.Sprintf("%+v", err))
 	}
 
 	return strings.Join(output, "\n")
