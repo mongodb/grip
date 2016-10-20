@@ -5,8 +5,8 @@ env:
     - GIMME_OS=darwin GIMME_ARCH=amd64
 go:
   - 1.4
-  - 1.5
   - 1.6
+  - 1.7
 install:
   - make test-deps
   - mkdir -p build
