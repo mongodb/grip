@@ -10,4 +10,4 @@ go:
 os:
   - linux
   - osx
-script: make test
+script: make vendor test
