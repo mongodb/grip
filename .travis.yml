@@ -10,7 +10,4 @@ go:
 os:
   - linux
   - osx
-install:
-  - make test-deps
-  - mkdir -p build
-script: make vendor build test
+script: make test
