@@ -1,6 +1,8 @@
 // +build linux
 package logging
 
+import "github.com/tychoish/grip/send"
+
 // UseSystemdLogger set the Journaler to use the systemd loggerwithout
 // changing the configuration of the Journaler.
 func (g *Grip) UseSystemdLogger() error {
