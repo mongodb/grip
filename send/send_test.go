@@ -29,7 +29,7 @@ func (s *SenderSuite) TestFileSenderImplementsInterface() {
 }
 
 func (s *SenderSuite) TestInternalSenderSenderImplementsInterface() {
-	s.Implements((*Sender)(nil), new(InternalSender), "internal")
+	s.Implements((*Sender)(nil), new(internalSender), "internal")
 }
 
 func (s *SenderSuite) TestNativeSenderImplementsInterface() {
