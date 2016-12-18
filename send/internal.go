@@ -13,12 +13,12 @@ import (
 type internalSender struct {
 	name   string
 	level  LevelInfo
-	output chan *InternalMessage
+	output chan *internalMessage
 }
 
 // InternalMessage provides a complete representation of all
 // information associated with a logging event.
-type InternalMessage struct {
+type internalMessage struct {
 	Message  message.Composer
 	Level    LevelInfo
 	Logged   bool
@@ -33,7 +33,7 @@ type InternalMessage struct {
 // testing.
 func NewInternalLogger(l LevelInfo) (*internalSender, error) {
 	s := &internalSender{
-		output: make(chan *InternalMessage, 100),
+		output: make(chan *internalMessage, 100),
 	}
 
 	if err := s.SetLevel(l); err != nil {
@@ -53,12 +53,12 @@ func (s *internalSender) SetLevel(l LevelInfo) error {
 	s.level = l
 	return nil
 }
-func (s *internalSender) GetMessage() *InternalMessage {
+func (s *internalSender) GetMessage() *internalMessage {
 	return <-s.output
 }
 
 func (s *internalSender) Send(p level.Priority, m message.Composer) {
-	s.output <- &InternalMessage{
+	s.output <- &internalMessage{
 		Message:  m,
 		Priority: p,
 		Rendered: m.Resolve(),
