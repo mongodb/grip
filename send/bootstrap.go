@@ -9,9 +9,8 @@ import (
 )
 
 type bootstrapLogger struct {
-	defaultLevel   level.Priority
-	thresholdLevel level.Priority
-	*sync.RWMutex
+	level LevelInfo
+	sync.RWMutex
 }
 
 // NewBootstrapLogger returns a minimal, default composer
@@ -20,16 +19,12 @@ type bootstrapLogger struct {
 // functional as a sender for general use.
 func NewBootstrapLogger(thresholdLevel, defaultLevel level.Priority) Sender {
 	b := &bootstrapLogger{}
-	b.RWMutex = &sync.RWMutex{}
-	err := b.SetDefaultLevel(defaultLevel)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
 
-	err = b.SetThresholdLevel(thresholdLevel)
-	if err != nil {
-		fmt.Println(err.Error())
+	level := LevelInfo{defaultLevel, thresholdLevel}
+	if !level.Valid() {
+		return nil
 	}
+	b.level = level
 
 	return b
 }
@@ -46,47 +41,30 @@ func (b *bootstrapLogger) SetName(_ string) {
 	return
 }
 
-func (b *bootstrapLogger) SetDefaultLevel(l level.Priority) error {
-	b.Lock()
-	defer b.Unlock()
-	if level.IsValidPriority(l) {
-		b.defaultLevel = l
-		return nil
-	}
-
-	return fmt.Errorf("%s (%d) is not a valid priority value (0-6)", l, int(l))
-}
-
-func (b *bootstrapLogger) SetThresholdLevel(l level.Priority) error {
-	b.Lock()
-	defer b.Unlock()
-
-	if level.IsValidPriority(l) {
-		b.thresholdLevel = l
-		return nil
-	}
-
-	return fmt.Errorf("%s (%d) is not a valid priority value (0-6)", l, int(l))
-}
-
-func (b *bootstrapLogger) DefaultLevel() level.Priority {
-	b.RLock()
-	defer b.RUnlock()
-
-	return b.defaultLevel
-}
-
-func (b *bootstrapLogger) ThresholdLevel() level.Priority {
-	b.RLock()
-	defer b.RUnlock()
-
-	return b.thresholdLevel
-}
-
 func (b *bootstrapLogger) Close() {
 	return
 }
 
 func (b *bootstrapLogger) Type() SenderType {
 	return Bootstrap
+}
+
+func (b *bootstrapLogger) SetLevel(l LevelInfo) error {
+	if !l.Valid() {
+		return fmt.Errorf("level settings are not valid: %+v", l)
+	}
+
+	b.Lock()
+	defer b.Unlock()
+
+	b.level = l
+
+	return nil
+}
+
+func (b *bootstrapLogger) Level() LevelInfo {
+	b.RLock()
+	defer b.RUnlock()
+
+	return b.level
 }

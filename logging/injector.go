@@ -37,21 +37,47 @@ func (g *Grip) CloneSender(s send.Sender) {
 // Journaler.
 func (g *Grip) UseNativeLogger() error {
 	// name, threshold, default
-	sender, err := send.NewNativeLogger(g.name, g.sender.ThresholdLevel(), g.sender.DefaultLevel())
-	g.SetSender(sender)
-	return err
+	s, err := send.NewNativeLogger(g.name, 0, 0)
+
+	return g.setSender(s, err)
 }
 
 // UseFileLogger creates a file-based logger that writes all log
 // output to a file, based on the standard library logging methods.
 func (g *Grip) UseFileLogger(filename string) error {
-	s, err := send.NewFileLogger(g.name, filename, g.sender.ThresholdLevel(), g.sender.DefaultLevel())
+	s, err := send.NewFileLogger(g.name, filename, 0, 0)
+
+	return g.setSender(s, err)
+}
+
+///////////////////////////////////
+//
+// Internal Methods
+//
+///////////////////////////////////
+
+func (g *Grip) inheritLevel(s send.Sender) error {
+	if err := s.SetLevel(g.sender.Level()); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (g *Grip) setSender(s send.Sender, err error) error {
+	if lerr := g.inheritLevel(s); lerr != nil {
+		return err
+	}
+
 	if err != nil {
 		if g.Sender().Name() == "bootstrap" {
 			g.SetSender(s)
 		}
+
 		return err
 	}
+
 	g.SetSender(s)
+
 	return nil
 }

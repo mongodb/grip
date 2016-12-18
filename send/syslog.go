@@ -34,29 +34,20 @@ func NewSyslogLogger(name, network, raddr string, thresholdLevel, defaultLevel l
 		name: name,
 	}
 
-	err := s.SetDefaultLevel(defaultLevel)
-	if err != nil {
-		lerr := s.setUpLocalSyslogConnection()
-		if lerr != nil {
-			return s, fmt.Errorf("%s; %s", err.Error(), lerr.Error())
-		}
-		return s, err
+	level := LevelInfo{defaultLevel, thresholdLevel}
+	if !level.Valid() {
+		return nil, fmt.Errorf("level configuration is invalid: %+v", level)
 	}
+	s.level = level
 
-	err = s.SetThresholdLevel(thresholdLevel)
+	w, err := syslog.Dial(network, raddr, syslog.Priority(level.Default), s.name)
 	if err != nil {
-		lerr := s.setUpLocalSyslogConnection()
-		if lerr != nil {
-			return s, fmt.Errorf("%s; %s", err.Error(), lerr.Error())
-		}
-		return s, err
+		return nil, err
 	}
-
-	w, err := syslog.Dial(network, raddr, syslog.Priority(s.DefaultLevel()), s.name)
 	s.logger = w
 
 	s.createFallback()
-	return s, err
+	return s, nil
 }
 
 // NewLocalSyslogLogger is a constructor for creating the same kind of
@@ -72,17 +63,26 @@ func (s *syslogger) createFallback() {
 	s.fallback = log.New(os.Stdout, strings.Join([]string{"[", s.name, "] "}, ""), log.LstdFlags)
 }
 
+func (s *syslogger) Close()           { _ = s.logger.Close() }
+func (s *syslogger) Type() SenderType { return Syslog }
+
 func (s *syslogger) setUpLocalSyslogConnection() error {
-	w, err := syslog.New(syslog.Priority(s.level.defaultLevel), s.name)
+	w, err := syslog.New(syslog.Priority(s.level.Default), s.name)
 	s.logger = w
 	return err
 }
 
 func (s *syslogger) Name() string {
+	s.RLock()
+	defer s.RUnlock()
+
 	return s.name
 }
 
 func (s *syslogger) SetName(name string) {
+	s.Lock()
+	defer s.Unlock()
+
 	s.name = name
 }
 
@@ -123,48 +123,22 @@ func (s *syslogger) sendToSysLog(p level.Priority, message string) error {
 	return fmt.Errorf("encountered error trying to send: {%s}. Possibly, priority related", message)
 }
 
-func (s *syslogger) SetDefaultLevel(p level.Priority) error {
+func (s *syslogger) SetLevel(l LevelInfo) error {
+	if !l.Valid() {
+		return fmt.Errorf("level settings are not valid: %+v", l)
+	}
+
 	s.Lock()
 	defer s.Unlock()
 
-	if level.IsValidPriority(p) {
-		s.level.defaultLevel = p
-		return nil
-	}
+	s.level = l
 
-	return fmt.Errorf("%s (%d) is not a valid priority value (0-6)", p, (p))
+	return nil
 }
 
-func (s *syslogger) SetThresholdLevel(p level.Priority) error {
-	s.Lock()
-	defer s.Unlock()
-
-	if level.IsValidPriority(p) {
-		s.level.thresholdLevel = p
-		return nil
-	}
-
-	return fmt.Errorf("%s (%d) is not a valid priority value (0-6)", p, (p))
-}
-
-func (s *syslogger) DefaultLevel() level.Priority {
+func (s *syslogger) Level() LevelInfo {
 	s.RLock()
 	defer s.RUnlock()
 
-	return s.level.defaultLevel
-}
-
-func (s *syslogger) ThresholdLevel() level.Priority {
-	s.RLock()
-	defer s.RUnlock()
-
-	return s.level.thresholdLevel
-}
-
-func (s *syslogger) Close() {
-	_ = s.logger.Close()
-}
-
-func (s *syslogger) Type() SenderType {
-	return Syslog
+	return s.level
 }

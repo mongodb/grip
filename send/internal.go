@@ -2,7 +2,6 @@ package send
 
 import (
 	"fmt"
-	"sync"
 
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
@@ -17,16 +16,15 @@ type InternalSender struct {
 	name   string
 	level  LevelInfo
 	output chan *InternalMessage
-
-	sync.RWMutex
 }
 
 // InternalMessage provides a complete representation of all
 // information associated with a logging event.
 type InternalMessage struct {
 	Message  message.Composer
-	Priority level.Priority
+	Level    LevelInfo
 	Logged   bool
+	Priority level.Priority
 	Rendered string
 }
 
@@ -40,79 +38,34 @@ func NewInternalLogger(thresholdLevel, defaultLevel level.Priority) (*InternalSe
 		output: make(chan *InternalMessage, 100),
 	}
 
-	err := l.SetDefaultLevel(defaultLevel)
-	if err != nil {
-		return l, err
+	level := LevelInfo{defaultLevel, thresholdLevel}
+	if !level.Valid() {
+		return nil, fmt.Errorf("level configuration is invalid: %+v", level)
 	}
+	l.level = level
 
-	err = l.SetThresholdLevel(thresholdLevel)
-	return l, err
+	return l, nil
 }
 
+func (s *InternalSender) Name() string     { return s.name }
+func (s *InternalSender) SetName(n string) { s.name = n }
+func (s *InternalSender) Close()           { close(s.output) }
+func (s *InternalSender) Type() SenderType { return Internal }
+func (s *InternalSender) Level() LevelInfo { return s.level }
+
+func (s *InternalSender) SetLevel(l LevelInfo) error {
+	s.level = l
+	return nil
+}
 func (s *InternalSender) GetMessage() *InternalMessage {
 	return <-s.output
 }
 
 func (s *InternalSender) Send(p level.Priority, m message.Composer) {
-	o := &InternalMessage{
+	s.output <- &InternalMessage{
 		Message:  m,
 		Priority: p,
 		Rendered: m.Resolve(),
 		Logged:   GetMessageInfo(s.level, p, m).ShouldLog(),
 	}
-
-	s.output <- o
-}
-
-func (s *InternalSender) Name() string {
-	return s.name
-}
-
-func (s *InternalSender) SetName(n string) {
-	s.name = n
-}
-
-func (s *InternalSender) ThresholdLevel() level.Priority {
-	s.RLock()
-	defer s.RUnlock()
-
-	return s.level.thresholdLevel
-}
-
-func (s *InternalSender) SetThresholdLevel(p level.Priority) error {
-	s.Lock()
-	defer s.Unlock()
-
-	if level.IsValidPriority(p) {
-		s.level.thresholdLevel = p
-		return nil
-	}
-	return fmt.Errorf("%s (%d) is not a valid priority value (0-6)", p, int(p))
-}
-
-func (s *InternalSender) DefaultLevel() level.Priority {
-	s.RLock()
-	defer s.RUnlock()
-
-	return s.level.defaultLevel
-}
-
-func (s *InternalSender) SetDefaultLevel(p level.Priority) error {
-	s.Lock()
-	defer s.Unlock()
-
-	if level.IsValidPriority(p) {
-		s.level.defaultLevel = p
-		return nil
-	}
-	return fmt.Errorf("%s (%d) is not a valid priority value (0-6)", p, int(p))
-
-}
-
-func (s *InternalSender) Close() {
-	close(s.output)
-}
-
-func (s *InternalSender) Type() SenderType {
-	return Internal
 }

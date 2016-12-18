@@ -47,7 +47,13 @@ func NewJournaldLogger(name string, thresholdLevel, defaultLevel level.Priority)
 	return s, nil
 }
 
+func (s *systemdJournal) Close()           {}
+func (s *systemdJournal) Type() SenderType { return Systemd }
+
 func (s *systemdJournal) Name() string {
+	s.RLock()
+	defer s.RUnlock()
+
 	return s.name
 }
 
@@ -56,6 +62,9 @@ func (s *systemdJournal) createFallback() {
 }
 
 func (s *systemdJournal) SetName(name string) {
+	s.Lock()
+	defer s.Unlock()
+
 	s.name = name
 	s.createFallback()
 }
@@ -73,46 +82,24 @@ func (s *systemdJournal) Send(p level.Priority, m message.Composer) {
 	}
 }
 
-func (s *systemdJournal) SetDefaultLevel(p level.Priority) error {
+func (s *systemdJournal) SetLevel(l LevelInfo) error {
+	if !l.Valid() {
+		return fmt.Errorf("level settings are not valid: %+v", l)
+	}
+
 	s.Lock()
 	defer s.Unlock()
 
-	if level.IsValidPriority(p) {
-		s.level.defaultLevel = p
-		return nil
-	}
+	s.level = l
 
-	return fmt.Errorf("%s (%d) is not a valid priority value (0-6)", p, (p))
+	return nil
 }
 
-func (s *systemdJournal) SetThresholdLevel(p level.Priority) error {
-	s.Lock()
-	defer s.Unlock()
-
-	if level.IsValidPriority(p) {
-		s.level.thresholdLevel = p
-		return nil
-	}
-
-	return fmt.Errorf("%s (%d) is not a valid priority value (0-6)", p, (p))
-}
-
-func (s *systemdJournal) DefaultLevel() level.Priority {
+func (s *systemdJournal) Level() LevelInfo {
 	s.RLock()
 	defer s.RUnlock()
 
-	return s.level.defaultLevel
-}
-
-func (s *systemdJournal) ThresholdLevel() level.Priority {
-	s.RLock()
-	defer s.RUnlock()
-
-	return s.level.thresholdLevel
-}
-
-func (s *systemdJournal) AddOption(key, value string) {
-	s.options[key] = value
+	return s.level
 }
 
 func (s *systemdJournal) convertPrioritySystemd(p level.Priority) journal.Priority {
@@ -136,12 +123,4 @@ func (s *systemdJournal) convertPrioritySystemd(p level.Priority) journal.Priori
 	default:
 		return s.convertPrioritySystemd(s.level.defaultLevel)
 	}
-}
-
-func (s *systemdJournal) Close() {
-	return
-}
-
-func (s *systemdJournal) Type() SenderType {
-	return Systemd
 }

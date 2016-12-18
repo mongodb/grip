@@ -29,15 +29,18 @@ func NewNativeLogger(name string, thresholdLevel, defaultLevel level.Priority) (
 		template: "[p=%s]: %s",
 	}
 	l.createLogger()
-	err := l.SetDefaultLevel(defaultLevel)
-	if err != nil {
-		return l, err
+
+	level := LevelInfo{defaultLevel, thresholdLevel}
+	if !level.Valid() {
+		return nil, fmt.Errorf("level configuration is invalid: %+v", level)
 	}
+	l.level = level
 
-	err = l.SetThresholdLevel(thresholdLevel)
-
-	return l, err
+	return l, nil
 }
+
+func (n *nativeLogger) Close()           {}
+func (n *nativeLogger) Type() SenderType { return Native }
 
 func (n *nativeLogger) createLogger() {
 	n.logger = log.New(os.Stdout, strings.Join([]string{"[", n.name, "] "}, ""), log.LstdFlags)
@@ -52,56 +55,36 @@ func (n *nativeLogger) Send(p level.Priority, m message.Composer) {
 }
 
 func (n *nativeLogger) Name() string {
+	n.RLock()
+	defer n.RUnlock()
+
 	return n.name
 }
 
 func (n *nativeLogger) SetName(name string) {
+	n.Lock()
+	defer n.Unlock()
+
 	n.name = name
 	n.createLogger()
 }
 
-func (n *nativeLogger) DefaultLevel() level.Priority {
-	n.RLock()
-	defer n.RUnlock()
+func (n *nativeLogger) SetLevel(l LevelInfo) error {
+	if !l.Valid() {
+		return fmt.Errorf("level settings are not valid: %+v", l)
+	}
 
-	return n.level.defaultLevel
-}
-
-func (n *nativeLogger) ThresholdLevel() level.Priority {
-	n.RLock()
-	defer n.RUnlock()
-
-	return n.level.thresholdLevel
-}
-
-func (n *nativeLogger) SetDefaultLevel(p level.Priority) error {
 	n.Lock()
 	defer n.Unlock()
 
-	if level.IsValidPriority(p) {
-		n.level.defaultLevel = p
-		return nil
-	}
+	n.level = l
 
-	return fmt.Errorf("%s (%d) is not a valid priority value (0-6)", p, int(p))
+	return nil
 }
 
-func (n *nativeLogger) SetThresholdLevel(p level.Priority) error {
-	n.Lock()
-	defer n.Unlock()
+func (n *nativeLogger) Level() LevelInfo {
+	n.RLock()
+	defer n.RUnlock()
 
-	if level.IsValidPriority(p) {
-		n.level.thresholdLevel = p
-		return nil
-	}
-
-	return fmt.Errorf("%s (%d) is not a valid priority value (0-6)", p, int(p))
-}
-
-func (n *nativeLogger) Close() {
-	return
-}
-
-func (n *nativeLogger) Type() SenderType {
-	return Native
+	return n.level
 }

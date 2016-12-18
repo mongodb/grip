@@ -41,23 +41,21 @@ func NewFileLogger(name, filePath string, thresholdLevel, defaultLevel level.Pri
 	l.fileObj = f
 	l.createLogger()
 
-	if err := l.SetDefaultLevel(defaultLevel); err != nil {
-		return nil, err
+	level := LevelInfo{defaultLevel, thresholdLevel}
+	if !level.Valid() {
+		return nil, fmt.Errorf("level configuration is invalid: %+v", level)
 	}
-
-	if err := l.SetThresholdLevel(thresholdLevel); err != nil {
-		return nil, err
-	}
+	l.level = level
 
 	return l, nil
 }
 
+func (f *fileLogger) Close()           { _ = f.fileObj.Close() }
+func (f *fileLogger) Type() SenderType { return File }
+func (f *fileLogger) Name() string     { return f.name }
+
 func (f *fileLogger) createLogger() {
 	f.logger = log.New(f.fileObj, strings.Join([]string{"[", f.name, "] "}, ""), log.LstdFlags)
-}
-
-func (f *fileLogger) Close() {
-	_ = f.fileObj.Close()
 }
 
 func (f *fileLogger) Send(p level.Priority, m message.Composer) {
@@ -68,53 +66,30 @@ func (f *fileLogger) Send(p level.Priority, m message.Composer) {
 	f.logger.Printf(f.template, int(p), m.Resolve())
 }
 
-func (f *fileLogger) Name() string {
-	return f.name
-}
-
 func (f *fileLogger) SetName(name string) {
+	f.Lock()
+	defer f.Unlock()
+
 	f.name = name
 	f.createLogger()
 }
 
-func (f *fileLogger) DefaultLevel() level.Priority {
-	f.RLock()
-	defer f.RUnlock()
+func (f *fileLogger) SetLevel(l LevelInfo) error {
+	if !l.Valid() {
+		return fmt.Errorf("level settings are not valid: %+v", l)
+	}
 
-	return f.level.defaultLevel
-}
-
-func (f *fileLogger) ThresholdLevel() level.Priority {
-	f.RLock()
-	defer f.RUnlock()
-
-	return f.level.thresholdLevel
-}
-
-func (f *fileLogger) SetDefaultLevel(p level.Priority) error {
 	f.Lock()
 	defer f.Unlock()
 
-	if level.IsValidPriority(p) {
-		f.level.defaultLevel = p
-		return nil
-	}
+	f.level = l
 
-	return fmt.Errorf("%s (%d) is not a valid priority value (0-6)", p, int(p))
+	return nil
 }
 
-func (f *fileLogger) SetThresholdLevel(p level.Priority) error {
-	f.Lock()
-	defer f.Unlock()
+func (f *fileLogger) Level() LevelInfo {
+	f.RLock()
+	defer f.RUnlock()
 
-	if level.IsValidPriority(p) {
-		f.level.thresholdLevel = p
-		return nil
-	}
-
-	return fmt.Errorf("%s (%d) is not a valid priority value (0-6)", p, int(p))
-}
-
-func (f *fileLogger) Type() SenderType {
-	return File
+	return f.level
 }

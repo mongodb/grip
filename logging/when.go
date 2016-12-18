@@ -47,7 +47,7 @@ func (g *Grip) SendWhenf(conditional bool, l level.Priority, msg string, args ..
 /////////////
 
 func (g *Grip) DefaultWhen(conditional bool, m interface{}) {
-	g.conditionalSend(g.sender.DefaultLevel(), conditional, message.ConvertToComposer(m))
+	g.conditionalSend(g.sender.Level().Default, conditional, message.ConvertToComposer(m))
 }
 func (g *Grip) DefaultWhenln(conditional bool, msg ...interface{}) {
 	g.DefaultWhen(conditional, message.NewLinesMessage(msg...))

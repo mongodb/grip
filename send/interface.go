@@ -30,17 +30,13 @@ type Sender interface {
 	// generic MessageInfo.ShouldLog() function.
 	Send(level.Priority, message.Composer)
 
-	// Sets the logger's threshold level. Messages of lower
-	// priority should be dropped.
-	SetThresholdLevel(level.Priority) error
-	// Retrieves the threshold level for the logger.
-	ThresholdLevel() level.Priority
+	// SetLevel allows you to modify the level
+	// configuration. Returns an error if you specify impossible
+	// values.
+	SetLevel(LevelInfo) error
 
-	// Sets the default level, which is used in conversion of
-	// logging types, and for "default" logging methods.
-	SetDefaultLevel(level.Priority) error
-	// Retreives the default level for the logger.
-	DefaultLevel() level.Priority
+	// Level returns the level configuration document.
+	Level() LevelInfo
 
 	// If the logging sender holds any resources that require
 	// desecration, they should be cleaned up tin the Close()
@@ -52,17 +48,21 @@ type Sender interface {
 // LevelInfo provides a sender-independent structure for storing
 // information about a sender's configured log levels.
 type LevelInfo struct {
-	defaultLevel   level.Priority
-	thresholdLevel level.Priority
+	Default   level.Priority
+	Threshold level.Priority
 }
 
 // NewLevelInfo builds a level info object based on the default and
 // threshold levels specified.
 func NewLevelInfo(d level.Priority, t level.Priority) LevelInfo {
 	return LevelInfo{
-		defaultLevel:   d,
-		thresholdLevel: t,
+		Default:   d,
+		Threshold: t,
 	}
+}
+
+func (l LevelInfo) Valid() bool {
+	return level.IsValidPriority(l.Default) && level.IsValidPriority(l.Threshold)
 }
 
 // MessageInfo provides a sender-independent method for determining if
@@ -86,6 +86,6 @@ func (m MessageInfo) ShouldLog() bool {
 func GetMessageInfo(info LevelInfo, level level.Priority, m message.Composer) MessageInfo {
 	return MessageInfo{
 		loggable:       m.Loggable(),
-		aboveThreshold: level <= info.thresholdLevel,
+		aboveThreshold: level <= info.Threshold,
 	}
 }
