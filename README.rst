@@ -33,6 +33,27 @@ Import:
 Components
 ----------
 
+Output Formats
+~~~~~~~~~~~~~~
+
+Grip supports a number of different logging output backends: 
+
+- systemd's journal (linux-only)
+- syslog (unix-only)
+- writing messages to standard output. (default)
+- writing messages to a file.
+- sending messages to a slack's channel
+- sending messages to a user via XMPP (jabber.)
+
+The default logger interface has methods to switch the backend to 
+the standard output (native; default), and file-based loggers. The
+SetSender() and CloneSender() methods allow to replace the sender
+implementation in your logger.
+
+See the documentation of the `Sender interface
+<https://godoc.org/github.com/tychoish/grip/send#Sender>`_ for more
+information on building new senders.
+
 Logging
 ~~~~~~~
 
@@ -55,20 +76,14 @@ Defined helpers exist for the following levels/actions:
 - ``Notice``
 - ``Warning``
 - ``Error``
-- ``ErrorPanic``
-- ``ErrorFatal``
 - ``Critical``
-- ``CriticalPanic``
-- ``CriticalFatal``
 - ``Alert``
-- ``Alert Panic``
-- ``AlertFatal``
 - ``Emergency``
 - ``EmergencyPanic``
 - ``EmergencyFatal``
 
 Helpers ending with ``Panic`` call ``panic()`` after logging the message
-message, and helpers ending with ``Fatal`` call ``OS.Exit(1)`` after
+message, and helpers ending with ``Fatal`` call ``os.Exit(1)`` after
 logging the message. Use responsibly.
 
 ``Journaler`` instances have a notion of "default" log levels and
@@ -164,11 +179,7 @@ levels:
 - ``CatchNotice``
 - ``CatchWarning``
 - ``CatchError``
-- ``CatchErrorPanic``
-- ``CatchErrorFatal``
 - ``CatchCritical``
-- ``CatchCriticalPanic``
-- ``CatchCriticalFatal``
 - ``CatchAlert``
 - ``CatchAlertPanic``
 - ``CatchAlertFatal``
@@ -186,9 +197,7 @@ minimize verbosity without complicating the calling code around the
 logging.
 
 These methods have a ``<Level><,Panic,Fatal>When<>`` format. For
-example: ``AlertWhen``, ``AlertWhenln``, ``AlertWhenf``,
-``AlertPanicWhen``, ``AlertFatalWhen``, ``AlertPanicWhenln``,
-``AlertFatalWhenln``, ``AlertPanicWhenf``, and ``AlertFatalWhenf``.
+example: ``AlertWhen``, ``AlertWhenln``, ``AlertWhenf``.
 
 Composed Logging
 ~~~~~~~~~~~~~~~~

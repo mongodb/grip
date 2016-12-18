@@ -33,7 +33,12 @@ const (
 	xmppPasswordEnvVar = "GRIP_XMMP_PASSWORD"
 )
 
-func NewXmppLogger(name, target string, info XMPPConnectionInfo, defaultLevel, thresholdLevel level.Priority) (Sender, error) {
+// NewXMPPLogger constructs a new Sender implementation that sends
+// messages to an XMPP user, "target", using the credentials specified in
+// the XMPPConnectionInfo struct. The constructor will attempt to exablish
+// a connection to the server via SSL, falling back automatically to an
+// unencrypted connection if the the first attempt fails.
+func NewXMPPLogger(name, target string, info XMPPConnectionInfo, defaultLevel, thresholdLevel level.Priority) (Sender, error) {
 	l := LevelInfo{
 		Default:   defaultLevel,
 		Threshold: thresholdLevel,
@@ -64,7 +69,15 @@ func NewXmppLogger(name, target string, info XMPPConnectionInfo, defaultLevel, t
 	return s, nil
 }
 
-func NewXmppDefault(name, target string, defaultLevel, threshholdLevel level.Priority) (Sender, error) {
+// NewXMPPDefault constructs an XMPP logging backend that reads the
+// hostname, username, and password from environment variables:
+//
+//    - GRIP_XMPP_HOSTNAME
+//    - GRIP_XMPP_USERNAME
+//    - GRIP_XMPP_PASSWORD
+//
+// Otherwise, the semantics of NewXMPPDefault are the same as NewXMPPLogger.
+func NewXMPPDefault(name, target string, defaultLevel, threshholdLevel level.Priority) (Sender, error) {
 	info := XMPPConnectionInfo{
 		Hostname: os.Getenv(xmppHostEnvVar),
 		Username: os.Getenv(xmppUsernameEnvVar),

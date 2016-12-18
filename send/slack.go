@@ -26,6 +26,12 @@ type slackJournal struct {
 	sync.RWMutex
 }
 
+// NewSlackLogger constructs a Sender that posts messages to a slack,
+// given a slack API token.
+//
+// You must specify the channel that will receive the messages, and
+// the hostname of the current machine, which is added to the logging
+// metadata.
 func NewSlackLogger(name, token, channel, hostname string, thresholdLevel, defaultLevel level.Priority) (Sender, error) {
 	s := &slackJournal{
 		name:     name,
@@ -53,6 +59,9 @@ func NewSlackLogger(name, token, channel, hostname string, thresholdLevel, defau
 	return s, nil
 }
 
+// NewSlackDefault is equivalent to NewSlackLogger, but constructs a
+// Sender reading the slack token from the environment variable
+// "GRIP_SLACK_CLIENT_TOKEN".
 func NewSlackDefault(name, channel string, thresholdLevel, defaultLevel level.Priority) (Sender, error) {
 	token, ok := os.LookupEnv(slackClientToken)
 	if !ok {
