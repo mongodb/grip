@@ -42,12 +42,6 @@ type Sender interface {
 	// Retreives the default level for the logger.
 	DefaultLevel() level.Priority
 
-	// Takes a key/value pair and stores the values in a mapping
-	// structure in the Sender interface. Used, primarily, by the
-	// systemd logger, but may be useful in the implementation of
-	// other componentized loggers.
-	AddOption(string, string)
-
 	// If the logging sender holds any resources that require
 	// desecration, they should be cleaned up tin the Close()
 	// method. Close() is called by the SetSender() method before

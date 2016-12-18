@@ -161,10 +161,6 @@ func (s *syslogger) ThresholdLevel() level.Priority {
 	return s.level.thresholdLevel
 }
 
-func (s *syslogger) AddOption(_, _ string) {
-	return
-}
-
 func (s *syslogger) Close() {
 	_ = s.logger.Close()
 }

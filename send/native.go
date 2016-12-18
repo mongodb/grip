@@ -14,7 +14,6 @@ import (
 type nativeLogger struct {
 	name     string
 	level    LevelInfo
-	options  map[string]string
 	logger   *log.Logger
 	template string
 
@@ -59,10 +58,6 @@ func (n *nativeLogger) Name() string {
 func (n *nativeLogger) SetName(name string) {
 	n.name = name
 	n.createLogger()
-}
-
-func (n *nativeLogger) AddOption(key, value string) {
-	n.options[key] = value
 }
 
 func (n *nativeLogger) DefaultLevel() level.Priority {

@@ -14,10 +14,9 @@ import (
 // under-priority and unloggable messages. Used  for testing
 // purposes.
 type InternalSender struct {
-	name    string
-	options map[string]string
-	level   LevelInfo
-	output  chan *InternalMessage
+	name   string
+	level  LevelInfo
+	output chan *InternalMessage
 
 	sync.RWMutex
 }
@@ -38,8 +37,7 @@ type InternalMessage struct {
 // testing.
 func NewInternalLogger(thresholdLevel, defaultLevel level.Priority) (*InternalSender, error) {
 	l := &InternalSender{
-		output:  make(chan *InternalMessage, 100),
-		options: make(map[string]string),
+		output: make(chan *InternalMessage, 100),
 	}
 
 	err := l.SetDefaultLevel(defaultLevel)
@@ -109,13 +107,6 @@ func (s *InternalSender) SetDefaultLevel(p level.Priority) error {
 	}
 	return fmt.Errorf("%s (%d) is not a valid priority value (0-6)", p, int(p))
 
-}
-
-func (s *InternalSender) AddOption(key, value string) {
-	s.Lock()
-	defer s.Unlock()
-
-	s.options[key] = value
 }
 
 func (s *InternalSender) Close() {

@@ -15,12 +15,12 @@ type fileLogger struct {
 	name  string
 	level LevelInfo
 
-	options  map[string]string
 	template string
 
 	logger  *log.Logger
 	fileObj *os.File
-	*sync.RWMutex
+
+	sync.RWMutex
 }
 
 // NewFileLogger creates a Sender implementation that writes log
@@ -30,9 +30,7 @@ type fileLogger struct {
 func NewFileLogger(name, filePath string, thresholdLevel, defaultLevel level.Priority) (Sender, error) {
 	l := &fileLogger{
 		name:     name,
-		options:  make(map[string]string),
 		template: "[p=%d]: %s\n",
-		RWMutex:  &sync.RWMutex{},
 	}
 
 	f, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
@@ -43,13 +41,15 @@ func NewFileLogger(name, filePath string, thresholdLevel, defaultLevel level.Pri
 	l.fileObj = f
 	l.createLogger()
 
-	err = l.SetDefaultLevel(defaultLevel)
-	if err != nil {
-		return l, err
+	if err := l.SetDefaultLevel(defaultLevel); err != nil {
+		return nil, err
 	}
 
-	err = l.SetThresholdLevel(thresholdLevel)
-	return l, err
+	if err := l.SetThresholdLevel(thresholdLevel); err != nil {
+		return nil, err
+	}
+
+	return l, nil
 }
 
 func (f *fileLogger) createLogger() {
@@ -75,13 +75,6 @@ func (f *fileLogger) Name() string {
 func (f *fileLogger) SetName(name string) {
 	f.name = name
 	f.createLogger()
-}
-
-func (f *fileLogger) AddOption(key, value string) {
-	f.Lock()
-	defer f.Unlock()
-
-	f.options[key] = value
 }
 
 func (f *fileLogger) DefaultLevel() level.Priority {

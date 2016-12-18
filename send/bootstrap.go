@@ -46,10 +46,6 @@ func (b *bootstrapLogger) SetName(_ string) {
 	return
 }
 
-func (b *bootstrapLogger) AddOption(_, _ string) {
-	return
-}
-
 func (b *bootstrapLogger) SetDefaultLevel(l level.Priority) error {
 	b.Lock()
 	defer b.Unlock()
