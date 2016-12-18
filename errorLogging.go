@@ -41,35 +41,17 @@ func CatchEmergencyFatal(err error) {
 func CatchAlert(err error) {
 	std.CatchAlert(err)
 }
-func CatchAlertPanic(err error) {
-	std.CatchAlertPanic(err)
-}
-func CatchAlertFatal(err error) {
-	std.CatchAlertFatal(err)
-}
 
 // Level Critical Catcher Logging Helpers
 
 func CatchCritical(err error) {
 	std.CatchCritical(err)
 }
-func CatchCriticalPanic(err error) {
-	std.CatchCriticalPanic(err)
-}
-func CatchCriticalFatal(err error) {
-	std.CatchCriticalFatal(err)
-}
 
 // Level Error Catcher Logging Helpers
 
 func CatchError(err error) {
 	std.CatchError(err)
-}
-func CatchErrorPanic(err error) {
-	std.CatchErrorPanic(err)
-}
-func CatchErrorFatal(err error) {
-	std.CatchErrorFatal(err)
 }
 
 // Level Warning Catcher Logging Helpers

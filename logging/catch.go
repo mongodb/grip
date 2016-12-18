@@ -31,31 +31,13 @@ func (g *Grip) CatchEmergencyFatal(err error) {
 func (g *Grip) CatchAlert(err error) {
 	g.sender.Send(level.Alert, message.NewErrorMessage(err))
 }
-func (g *Grip) CatchAlertPanic(err error) {
-	g.sendPanic(level.Alert, message.NewErrorMessage(err))
-}
-func (g *Grip) CatchAlertFatal(err error) {
-	g.sendFatal(level.Alert, message.NewErrorMessage(err))
-}
 
 func (g *Grip) CatchCritical(err error) {
 	g.sender.Send(level.Critical, message.NewErrorMessage(err))
 }
-func (g *Grip) CatchCriticalPanic(err error) {
-	g.sendPanic(level.Critical, message.NewErrorMessage(err))
-}
-func (g *Grip) CatchCriticalFatal(err error) {
-	g.sendFatal(level.Critical, message.NewErrorMessage(err))
-}
 
 func (g *Grip) CatchError(err error) {
 	g.sender.Send(level.Error, message.NewErrorMessage(err))
-}
-func (g *Grip) CatchErrorPanic(err error) {
-	g.sendPanic(level.Error, message.NewErrorMessage(err))
-}
-func (g *Grip) CatchErrorFatal(err error) {
-	g.sendFatal(level.Error, message.NewErrorMessage(err))
 }
 
 func (g *Grip) CatchWarning(err error) {

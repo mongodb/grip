@@ -81,9 +81,6 @@ func EmergencyFatalln(a ...interface{}) {
 
 // Alert-level logging methods
 
-func AlertFatal(msg interface{}) {
-	std.AlertFatal(msg)
-}
 func Alert(msg interface{}) {
 	std.Alert(msg)
 }
@@ -92,21 +89,6 @@ func Alertf(msg string, a ...interface{}) {
 }
 func Alertln(a ...interface{}) {
 	std.Alertln(a...)
-}
-func AlertPanic(msg interface{}) {
-	std.AlertPanic(msg)
-}
-func AlertPanicf(msg string, a ...interface{}) {
-	std.AlertPanicf(msg, a...)
-}
-func AlertPanicln(a ...interface{}) {
-	std.AlertPanicln(a...)
-}
-func AlertFatalf(msg string, a ...interface{}) {
-	std.AlertFatalf(msg, a...)
-}
-func AlertFatalln(a ...interface{}) {
-	std.AlertFatalln(a...)
 }
 
 // Critical-level logging methods
@@ -120,24 +102,6 @@ func Criticalf(msg string, a ...interface{}) {
 func Criticalln(a ...interface{}) {
 	std.Criticalln(a...)
 }
-func CriticalFatal(msg interface{}) {
-	std.CriticalFatal(msg)
-}
-func CriticalFatalf(msg string, a ...interface{}) {
-	std.CriticalFatalf(msg, a...)
-}
-func CriticalFatalln(a ...interface{}) {
-	std.CriticalFatalln(a...)
-}
-func CriticalPanic(msg interface{}) {
-	std.CriticalPanic(msg)
-}
-func CriticalPanicf(msg string, a ...interface{}) {
-	std.CriticalPanicf(msg, a...)
-}
-func CriticalPanicln(a ...interface{}) {
-	std.CriticalPanicln(a...)
-}
 
 // Error-level logging methods
 
@@ -149,24 +113,6 @@ func Errorf(msg string, a ...interface{}) {
 }
 func Errorln(a ...interface{}) {
 	std.Errorln(a...)
-}
-func ErrorPanic(msg interface{}) {
-	std.ErrorPanic(msg)
-}
-func ErrorPanicf(msg string, a ...interface{}) {
-	std.ErrorPanicf(msg, a...)
-}
-func ErrorPanicln(a ...interface{}) {
-	std.ErrorPanicln(a...)
-}
-func ErrorFatal(msg interface{}) {
-	std.ErrorFatal(msg)
-}
-func ErrorFatalf(msg string, a ...interface{}) {
-	std.ErrorFatalf(msg, a...)
-}
-func ErrorFatalln(a ...interface{}) {
-	std.ErrorPanicln(a...)
 }
 
 // Warning-level logging methods

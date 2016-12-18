@@ -36,7 +36,7 @@ type Sender interface {
 	// Retrieves the threshold level for the logger.
 	ThresholdLevel() level.Priority
 
-	// Sets the default level, which is used in conversion ofS
+	// Sets the default level, which is used in conversion of
 	// logging types, and for "default" logging methods.
 	SetDefaultLevel(level.Priority) error
 	// Retreives the default level for the logger.
