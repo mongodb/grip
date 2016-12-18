@@ -36,8 +36,7 @@ func (g *Grip) CloneSender(s send.Sender) {
 // output, logging instance, without changing the configuration of the
 // Journaler.
 func (g *Grip) UseNativeLogger() error {
-	// name, threshold, default
-	s, err := send.NewNativeLogger(g.name, 0, 0)
+	s, err := send.NewNativeLogger(g.name, g.sender.Level())
 
 	return g.setSender(s, err)
 }
@@ -45,7 +44,7 @@ func (g *Grip) UseNativeLogger() error {
 // UseFileLogger creates a file-based logger that writes all log
 // output to a file, based on the standard library logging methods.
 func (g *Grip) UseFileLogger(filename string) error {
-	s, err := send.NewFileLogger(g.name, filename, 0, 0)
+	s, err := send.NewFileLogger(g.name, filename, g.sender.Level())
 
 	return g.setSender(s, err)
 }

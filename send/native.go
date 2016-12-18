@@ -23,20 +23,18 @@ type nativeLogger struct {
 // NewNativeLogger creates a new Sender interface that writes all
 // loggable messages to a standard output logger that uses Go's
 // standard library logging system.
-func NewNativeLogger(name string, thresholdLevel, defaultLevel level.Priority) (Sender, error) {
-	l := &nativeLogger{
+func NewNativeLogger(name string, l LevelInfo) (Sender, error) {
+	s := &nativeLogger{
 		name:     name,
 		template: "[p=%s]: %s",
 	}
-	l.createLogger()
+	s.createLogger()
 
-	level := LevelInfo{defaultLevel, thresholdLevel}
-	if !level.Valid() {
-		return nil, fmt.Errorf("level configuration is invalid: %+v", level)
+	if err := s.SetLevel(l); err != nil {
+		return nil, err
 	}
-	l.level = level
 
-	return l, nil
+	return s, nil
 }
 
 func (n *nativeLogger) Close()           {}

@@ -1,8 +1,6 @@
 package send
 
 import (
-	"fmt"
-
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
 )
@@ -33,18 +31,16 @@ type InternalMessage struct {
 // format and puts them into an internal channel, that allows you to
 // access the massages via the extra "GetMessage" method. Useful for
 // testing.
-func NewInternalLogger(thresholdLevel, defaultLevel level.Priority) (*internalSender, error) {
-	l := &internalSender{
+func NewInternalLogger(l LevelInfo) (*internalSender, error) {
+	s := &internalSender{
 		output: make(chan *InternalMessage, 100),
 	}
 
-	level := LevelInfo{defaultLevel, thresholdLevel}
-	if !level.Valid() {
-		return nil, fmt.Errorf("level configuration is invalid: %+v", level)
+	if err := s.SetLevel(l); err != nil {
+		return nil, err
 	}
-	l.level = level
 
-	return l, nil
+	return s, nil
 }
 
 func (s *internalSender) Name() string     { return s.name }

@@ -27,27 +27,24 @@ type fileLogger struct {
 // output to a file. Returns an error but falls back to a standard
 // output logger if there's problems with the file. Internally using
 // the go standard library logging system.
-func NewFileLogger(name, filePath string, thresholdLevel, defaultLevel level.Priority) (Sender, error) {
-	l := &fileLogger{
+func NewFileLogger(name, filePath string, l LevelInfo) (Sender, error) {
+	s := &fileLogger{
 		name:     name,
 		template: "[p=%d]: %s\n",
 	}
 
+	if err := s.SetLevel(l); err != nil {
+		return nil, err
+	}
+
 	f, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
-		l, _ := NewNativeLogger(name, thresholdLevel, defaultLevel)
-		return l, fmt.Errorf("error opening logging file, %s, falling back to stdOut logging", err.Error())
+		return nil, fmt.Errorf("error opening logging file, %s, falling back to stdOut logging", err.Error())
 	}
-	l.fileObj = f
-	l.createLogger()
+	s.fileObj = f
+	s.createLogger()
 
-	level := LevelInfo{defaultLevel, thresholdLevel}
-	if !level.Valid() {
-		return nil, fmt.Errorf("level configuration is invalid: %+v", level)
-	}
-	l.level = level
-
-	return l, nil
+	return s, nil
 }
 
 func (f *fileLogger) Close()           { _ = f.fileObj.Close() }

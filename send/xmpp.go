@@ -38,14 +38,17 @@ const (
 // the XMPPConnectionInfo struct. The constructor will attempt to exablish
 // a connection to the server via SSL, falling back automatically to an
 // unencrypted connection if the the first attempt fails.
-func NewXMPPLogger(name, target string, info XMPPConnectionInfo, defaultLevel, thresholdLevel level.Priority) (Sender, error) {
-	l := LevelInfo{
-		Default:   defaultLevel,
-		Threshold: thresholdLevel,
+func NewXMPPLogger(name, target string, info XMPPConnectionInfo, l LevelInfo) (Sender, error) {
+	s := &xmppLogger{
+		name:   name,
+		target: target,
 	}
-	if !l.Valid() {
-		return nil, fmt.Errorf("level spec '%+v' is not valid", l)
+
+	if err := s.SetLevel(l); err != nil {
+		return nil, err
 	}
+
+	s.createFallback()
 
 	client, err := xmpp.NewClient(info.Hostname, info.Username, info.Password, false)
 	if err != nil {
@@ -57,14 +60,7 @@ func NewXMPPLogger(name, target string, info XMPPConnectionInfo, defaultLevel, t
 				info.Hostname, info.Username, strings.Join(errs, "; "))
 		}
 	}
-
-	s := &xmppLogger{
-		level:  l,
-		name:   name,
-		target: target,
-		client: client,
-	}
-	s.createFallback()
+	s.client = client
 
 	return s, nil
 }
@@ -77,14 +73,14 @@ func NewXMPPLogger(name, target string, info XMPPConnectionInfo, defaultLevel, t
 //    - GRIP_XMPP_PASSWORD
 //
 // Otherwise, the semantics of NewXMPPDefault are the same as NewXMPPLogger.
-func NewXMPPDefault(name, target string, defaultLevel, threshholdLevel level.Priority) (Sender, error) {
+func NewXMPPDefault(name, target string, l LevelInfo) (Sender, error) {
 	info := XMPPConnectionInfo{
 		Hostname: os.Getenv(xmppHostEnvVar),
 		Username: os.Getenv(xmppUsernameEnvVar),
 		Password: os.Getenv(xmppUsernameEnvVar),
 	}
 
-	return NewXMPPLogger(name, target, info, defaultLevel, threshholdLevel)
+	return NewXMPPLogger(name, target, info, l)
 }
 
 func (s *xmppLogger) Name() string {

@@ -32,7 +32,7 @@ type slackJournal struct {
 // You must specify the channel that will receive the messages, and
 // the hostname of the current machine, which is added to the logging
 // metadata.
-func NewSlackLogger(name, token, channel, hostname string, thresholdLevel, defaultLevel level.Priority) (Sender, error) {
+func NewSlackLogger(name, token, channel, hostname string, l LevelInfo) (Sender, error) {
 	s := &slackJournal{
 		name:     name,
 		hostName: hostname,
@@ -46,11 +46,9 @@ func NewSlackLogger(name, token, channel, hostname string, thresholdLevel, defau
 		s.channel = channel
 	}
 
-	level := LevelInfo{defaultLevel, thresholdLevel}
-	if !level.Valid() {
-		return nil, fmt.Errorf("level configuration is invalid: %+v", level)
+	if err := s.SetLevel(l); err != nil {
+		return nil, err
 	}
-	s.level = level
 
 	if _, err := s.client.AuthTest(); err != nil {
 		return nil, fmt.Errorf("slack authentication error: %v", err)
@@ -62,7 +60,7 @@ func NewSlackLogger(name, token, channel, hostname string, thresholdLevel, defau
 // NewSlackDefault is equivalent to NewSlackLogger, but constructs a
 // Sender reading the slack token from the environment variable
 // "GRIP_SLACK_CLIENT_TOKEN".
-func NewSlackDefault(name, channel string, thresholdLevel, defaultLevel level.Priority) (Sender, error) {
+func NewSlackDefault(name, channel string, l LevelInfo) (Sender, error) {
 	token, ok := os.LookupEnv(slackClientToken)
 	if !ok {
 		return nil, fmt.Errorf("environment variable %s not defined, cannot create slack client",
@@ -74,7 +72,7 @@ func NewSlackDefault(name, channel string, thresholdLevel, defaultLevel level.Pr
 		return nil, fmt.Errorf("error resolving hostname for slack logger: %v", err)
 	}
 
-	return NewSlackLogger(name, token, channel, hostname, thresholdLevel, defaultLevel)
+	return NewSlackLogger(name, token, channel, hostname, l)
 }
 
 func (s *slackJournal) Name() string {

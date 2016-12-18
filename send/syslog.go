@@ -29,18 +29,16 @@ type syslogger struct {
 // connection to a remote Syslog interface, but will fall back first
 // to the local syslog interface before writing messages to standard
 // output.
-func NewSyslogLogger(name, network, raddr string, thresholdLevel, defaultLevel level.Priority) (Sender, error) {
+func NewSyslogLogger(name, network, raddr string, l LevelInfo) (Sender, error) {
 	s := &syslogger{
 		name: name,
 	}
 
-	level := LevelInfo{defaultLevel, thresholdLevel}
-	if !level.Valid() {
-		return nil, fmt.Errorf("level configuration is invalid: %+v", level)
+	if err := s.SetLevel(l); err != nil {
+		return nil, err
 	}
-	s.level = level
 
-	w, err := syslog.Dial(network, raddr, syslog.Priority(level.Default), s.name)
+	w, err := syslog.Dial(network, raddr, syslog.Priority(l.Default), s.name)
 	if err != nil {
 		return nil, err
 	}
@@ -55,8 +53,8 @@ func NewSyslogLogger(name, network, raddr string, thresholdLevel, defaultLevel l
 // the local syslog service. If there is no local syslog service, or
 // there are issues connecting to it, writes logging messages to
 // standard error.
-func NewLocalSyslogLogger(name string, thresholdLevel, defaultLevel level.Priority) (Sender, error) {
-	return NewSyslogLogger(name, "", "", thresholdLevel, defaultLevel)
+func NewLocalSyslogLogger(name string, l LevelInfo) (Sender, error) {
+	return NewSyslogLogger(name, "", "", l)
 }
 
 func (s *syslogger) createFallback() {

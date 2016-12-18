@@ -24,8 +24,11 @@ type Grip struct {
 // "info."
 func NewGrip(name string) *Grip {
 	return &Grip{
-		name:   name,
-		sender: send.NewBootstrapLogger(level.Info, level.Notice),
+		name: name,
+		sender: send.NewBootstrapLogger(send.LevelInfo{
+			Threshold: level.Info,
+			Default:   level.Notice,
+		}),
 	}
 }
 

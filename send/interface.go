@@ -52,15 +52,6 @@ type LevelInfo struct {
 	Threshold level.Priority
 }
 
-// NewLevelInfo builds a level info object based on the default and
-// threshold levels specified.
-func NewLevelInfo(d level.Priority, t level.Priority) LevelInfo {
-	return LevelInfo{
-		Default:   d,
-		Threshold: t,
-	}
-}
-
 func (l LevelInfo) Valid() bool {
 	return level.IsValidPriority(l.Default) && level.IsValidPriority(l.Threshold)
 }

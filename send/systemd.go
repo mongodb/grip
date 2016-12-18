@@ -27,20 +27,14 @@ type systemdJournal struct {
 // to the system's systemd journald logging facility. If there's an
 // error with the sending to the journald, messages fallback to
 // writing to standard output.
-func NewJournaldLogger(name string, thresholdLevel, defaultLevel level.Priority) (Sender, error) {
+func NewJournaldLogger(name string, l LevelInfo) (Sender, error) {
 	s := &systemdJournal{
 		name:    name,
 		options: make(map[string]string),
 	}
 
-	err := s.SetDefaultLevel(defaultLevel)
-	if err != nil {
-		return s, err
-	}
-
-	err = s.SetThresholdLevel(thresholdLevel)
-	if err != nil {
-		return s, err
+	if err := s.SetLevel(l); err != nil {
+		return nil, err
 	}
 
 	s.createFallback()

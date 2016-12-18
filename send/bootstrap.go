@@ -17,14 +17,12 @@ type bootstrapLogger struct {
 // implementation, used by the Journaler instances, for storing basic
 // threhsold level configuration during journaler creation. Not
 // functional as a sender for general use.
-func NewBootstrapLogger(thresholdLevel, defaultLevel level.Priority) Sender {
+func NewBootstrapLogger(l LevelInfo) Sender {
 	b := &bootstrapLogger{}
 
-	level := LevelInfo{defaultLevel, thresholdLevel}
-	if !level.Valid() {
+	if err := b.SetLevel(l); err != nil {
 		return nil
 	}
-	b.level = level
 
 	return b
 }

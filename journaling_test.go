@@ -24,7 +24,7 @@ func (s *GripSuite) SetupSuite() {
 
 func (s *GripSuite) SetupTest() {
 	s.grip.SetName(s.name)
-	s.grip.SetSender(send.NewBootstrapLogger(s.grip.ThresholdLevel(), s.grip.DefaultLevel()))
+	s.grip.SetSender(send.NewBootstrapLogger(s.grip.Sender().Level()))
 }
 
 func (s *GripSuite) TestDefaultJournalerIsBootstrap() {
