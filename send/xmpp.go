@@ -84,7 +84,7 @@ func NewXMPPDefault(name, target string, defaultLevel, threshholdLevel level.Pri
 		Password: os.Getenv(xmppUsernameEnvVar),
 	}
 
-	return NewXmppLogger(name, target, info, defaultLevel, threshholdLevel)
+	return NewXMPPLogger(name, target, info, defaultLevel, threshholdLevel)
 }
 
 func (s *xmppLogger) Name() string {
