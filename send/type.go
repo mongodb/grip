@@ -9,6 +9,8 @@ const (
 	Syslog
 	Internal
 	File
+	Slack
+	Xmpp
 	Bootstrap
 )
 
@@ -28,6 +30,10 @@ func (t SenderType) String() string {
 		return "bootstrap"
 	case t == Custom:
 		return "custom"
+	case t == Slack:
+		return "slack"
+	case t == Xmpp:
+		return "xmpp"
 	default:
 		return "native"
 	}
