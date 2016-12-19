@@ -62,6 +62,6 @@ func (s *internalSender) Send(m message.Composer) {
 		Message:  m,
 		Priority: m.Priority(),
 		Rendered: m.Resolve(),
-		Logged:   GetMessageInfo(s.level, m).ShouldLog(),
+		Logged:   s.level.ShouldLog(m),
 	}
 }

@@ -26,25 +26,11 @@ func NewBootstrapLogger(l LevelInfo) Sender {
 	return b
 }
 
-func (b *bootstrapLogger) Name() string {
-	return "bootstrap"
-}
-
-func (b *bootstrapLogger) Send(_ message.Composer) {
-	return
-}
-
-func (b *bootstrapLogger) SetName(_ string) {
-	return
-}
-
-func (b *bootstrapLogger) Close() {
-	return
-}
-
-func (b *bootstrapLogger) Type() SenderType {
-	return Bootstrap
-}
+func (b *bootstrapLogger) Name() string            { return "bootstrap" }
+func (b *bootstrapLogger) Send(_ message.Composer) {}
+func (b *bootstrapLogger) SetName(_ string)        {}
+func (b *bootstrapLogger) Close()                  {}
+func (b *bootstrapLogger) Type() SenderType        { return Bootstrap }
 
 func (b *bootstrapLogger) SetLevel(l LevelInfo) error {
 	if !l.Valid() {

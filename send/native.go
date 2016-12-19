@@ -44,7 +44,7 @@ func (n *nativeLogger) createLogger() {
 }
 
 func (n *nativeLogger) Send(m message.Composer) {
-	if !GetMessageInfo(n.level, m).ShouldLog() {
+	if !n.level.ShouldLog(m) {
 		return
 	}
 

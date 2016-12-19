@@ -124,12 +124,9 @@ func (s *xmppLogger) Level() LevelInfo {
 }
 
 func (s *xmppLogger) Send(m message.Composer) {
-	if !GetMessageInfo(s.level, m).ShouldLog() {
+	if !s.level.ShouldLog(m) {
 		return
 	}
-
-	s.RLock()
-	defer s.RUnlock()
 
 	c := xmpp.Chat{
 		Remote: s.target,

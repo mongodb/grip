@@ -24,7 +24,7 @@ func NewLinesMessage(p level.Priority, args ...interface{}) Composer {
 	return m
 }
 
-func NewLines(args ...[]interface{}) Composer {
+func NewLines(args ...interface{}) Composer {
 	return &lineMessenger{
 		Lines: args,
 	}

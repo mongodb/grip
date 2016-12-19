@@ -52,31 +52,14 @@ type LevelInfo struct {
 	Threshold level.Priority
 }
 
+// Valid checks that the priorities stored in the LevelInfo document are valid.
 func (l LevelInfo) Valid() bool {
 	return level.IsValidPriority(l.Default) && level.IsValidPriority(l.Threshold)
 }
 
-// MessageInfo provides a sender-independent method for determining if
-// a message should be logged. Stores all of the information, and
-// provides a ShouldLog method that senders can use if a message is logabble.
-type MessageInfo struct {
-	aboveThreshold bool
-	loggable       bool
-}
-
-// ShouldLog returns true when the message, according to the
-// information contained in the MessageInfo structure should be
-// logged.
-func (m MessageInfo) ShouldLog() bool {
-	return m.loggable && m.aboveThreshold
-}
-
-// GetMessageInfo takes the sender's configured LevelInfo, a priority
-// for the message, and a MessageComposer object and returns a
-// MessageInfo.
-func GetMessageInfo(info LevelInfo, m message.Composer) MessageInfo {
-	return MessageInfo{
-		loggable:       m.Loggable(),
-		aboveThreshold: m.Priority() <= info.Threshold,
-	}
+// ShouldLog checks to see if the log message should be logged, and
+// returns false if there is no message or if the message's priority
+// is below the logging threshold.
+func (l LevelInfo) ShouldLog(m message.Composer) bool {
+	return m.Loggable() && (m.Priority() <= l.Threshold)
 }

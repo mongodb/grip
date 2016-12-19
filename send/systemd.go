@@ -64,7 +64,7 @@ func (s *systemdJournal) SetName(name string) {
 }
 
 func (s *systemdJournal) Send(p level.Priority, m message.Composer) {
-	if !GetMessageInfo(s.level, p, m).ShouldLog() {
+	if !s.level.ShouldLog(m) {
 		return
 	}
 

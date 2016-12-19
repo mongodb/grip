@@ -26,7 +26,7 @@ func NewFormatedMessage(p level.Priority, base string, args ...interface{}) Comp
 }
 
 func NewFormated(base string, args ...interface{}) Composer {
-	retrurn & formatMessenger{
+	return &formatMessenger{
 		base: base,
 		args: args,
 	}

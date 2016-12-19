@@ -85,7 +85,7 @@ func (s *syslogger) SetName(name string) {
 }
 
 func (s *syslogger) Send(m message.Composer) {
-	if !GetMessageInfo(s.level, m).ShouldLog() {
+	if !s.level.ShouldLog(m) {
 		return
 	}
 
@@ -95,7 +95,7 @@ func (s *syslogger) Send(m message.Composer) {
 	if err != nil {
 		s.fallback.Println("syslog error:", err.Error())
 		s.fallback.Printf("[p=%d]: %s\n", m.Priority(), msg)
-	} // int
+	}
 }
 
 func (s *syslogger) sendToSysLog(p level.Priority, message string) error {

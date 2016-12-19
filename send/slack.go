@@ -97,7 +97,7 @@ func (s *slackJournal) createFallback() {
 }
 
 func (s *slackJournal) Send(m message.Composer) {
-	if !GetMessageInfo(s.level, m).ShouldLog() {
+	if !s.level.ShouldLog(m) {
 		return
 	}
 

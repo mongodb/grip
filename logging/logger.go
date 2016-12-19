@@ -52,7 +52,7 @@ func (g *Grip) SetName(name string) {
 func (g *Grip) sendPanic(m message.Composer) {
 	// the Send method in the Sender interface will perform this
 	// check but to add fatal methods we need to do this here.
-	if !send.GetMessageInfo(g.sender.Level(), m).ShouldLog() {
+	if g.sender.Level().ShouldLog(m) {
 		return
 	}
 
@@ -63,7 +63,7 @@ func (g *Grip) sendPanic(m message.Composer) {
 func (g *Grip) sendFatal(m message.Composer) {
 	// the Send method in the Sender interface will perform this
 	// check but to add fatal methods we need to do this here.
-	if !send.GetMessageInfo(g.sender.Level(), m).ShouldLog() {
+	if g.sender.Level().ShouldLog(m) {
 		return
 	}
 

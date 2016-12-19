@@ -55,7 +55,7 @@ func (f *fileLogger) createLogger() {
 }
 
 func (f *fileLogger) Send(m message.Composer) {
-	if !GetMessageInfo(f.level, m).ShouldLog() {
+	if !f.level.ShouldLog(m) {
 		return
 	}
 
