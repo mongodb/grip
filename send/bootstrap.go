@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
 )
 
@@ -31,7 +30,7 @@ func (b *bootstrapLogger) Name() string {
 	return "bootstrap"
 }
 
-func (b *bootstrapLogger) Send(_ level.Priority, _ message.Composer) {
+func (b *bootstrapLogger) Send(_ message.Composer) {
 	return
 }
 

@@ -8,7 +8,6 @@ import (
 	"sync"
 
 	xmpp "github.com/mattn/go-xmpp"
-	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
 )
 
@@ -124,8 +123,8 @@ func (s *xmppLogger) Level() LevelInfo {
 	return s.level
 }
 
-func (s *xmppLogger) Send(p level.Priority, m message.Composer) {
-	if !GetMessageInfo(s.level, p, m).ShouldLog() {
+func (s *xmppLogger) Send(m message.Composer) {
+	if !GetMessageInfo(s.level, m).ShouldLog() {
 		return
 	}
 
@@ -140,6 +139,6 @@ func (s *xmppLogger) Send(p level.Priority, m message.Composer) {
 
 	if _, err := s.client.Send(c); err != nil {
 		s.fallback.Println("xmpp error:", err.Error())
-		s.fallback.Printf("[p=%s]: %s\n", p, c.Text)
+		s.fallback.Printf("[p=%s]: %s\n", m.Priority(), c.Text)
 	}
 }

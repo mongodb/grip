@@ -7,7 +7,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
 )
 
@@ -44,12 +43,12 @@ func (n *nativeLogger) createLogger() {
 	n.logger = log.New(os.Stdout, strings.Join([]string{"[", n.name, "] "}, ""), log.LstdFlags)
 }
 
-func (n *nativeLogger) Send(p level.Priority, m message.Composer) {
-	if !GetMessageInfo(n.level, p, m).ShouldLog() {
+func (n *nativeLogger) Send(m message.Composer) {
+	if !GetMessageInfo(n.level, m).ShouldLog() {
 		return
 	}
 
-	n.logger.Printf(n.template, p, m.Resolve())
+	n.logger.Printf(n.template, m.Priority(), m.Resolve())
 }
 
 func (n *nativeLogger) Name() string {

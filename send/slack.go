@@ -96,8 +96,8 @@ func (s *slackJournal) createFallback() {
 	s.fallback = log.New(os.Stdout, strings.Join([]string{"[", s.name, "] "}, ""), log.LstdFlags)
 }
 
-func (s *slackJournal) Send(p level.Priority, m message.Composer) {
-	if !GetMessageInfo(s.level, p, m).ShouldLog() {
+func (s *slackJournal) Send(m message.Composer) {
+	if !GetMessageInfo(s.level, m).ShouldLog() {
 		return
 	}
 
@@ -105,7 +105,7 @@ func (s *slackJournal) Send(p level.Priority, m message.Composer) {
 
 	s.RLock()
 	defer s.RUnlock()
-	params := getParams(s.name, s.hostName, p)
+	params := getParams(s.name, s.hostName, m.Priority())
 
 	if err := s.client.ChatPostMessage(s.channel, msg, params); err != nil {
 		s.fallback.Println("slack error:", err.Error())

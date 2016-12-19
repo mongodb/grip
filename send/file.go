@@ -7,7 +7,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
 )
 
@@ -30,7 +29,7 @@ type fileLogger struct {
 func NewFileLogger(name, filePath string, l LevelInfo) (Sender, error) {
 	s := &fileLogger{
 		name:     name,
-		template: "[p=%d]: %s\n",
+		template: "[p=%s]: %s\n",
 	}
 
 	if err := s.SetLevel(l); err != nil {
@@ -55,12 +54,12 @@ func (f *fileLogger) createLogger() {
 	f.logger = log.New(f.fileObj, strings.Join([]string{"[", f.name, "] "}, ""), log.LstdFlags)
 }
 
-func (f *fileLogger) Send(p level.Priority, m message.Composer) {
-	if !GetMessageInfo(f.level, p, m).ShouldLog() {
+func (f *fileLogger) Send(m message.Composer) {
+	if !GetMessageInfo(f.level, m).ShouldLog() {
 		return
 	}
 
-	f.logger.Printf(f.template, int(p), m.Resolve())
+	f.logger.Printf(f.template, m.Priority(), m.Resolve())
 }
 
 func (f *fileLogger) SetName(name string) {

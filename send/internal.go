@@ -57,11 +57,11 @@ func (s *internalSender) GetMessage() *internalMessage {
 	return <-s.output
 }
 
-func (s *internalSender) Send(p level.Priority, m message.Composer) {
+func (s *internalSender) Send(m message.Composer) {
 	s.output <- &internalMessage{
 		Message:  m,
-		Priority: p,
+		Priority: m.Priority(),
 		Rendered: m.Resolve(),
-		Logged:   GetMessageInfo(s.level, p, m).ShouldLog(),
+		Logged:   GetMessageInfo(s.level, m).ShouldLog(),
 	}
 }

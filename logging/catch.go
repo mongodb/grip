@@ -11,47 +11,47 @@ import (
 )
 
 func (g *Grip) CatchSend(l level.Priority, err error) {
-	g.sender.Send(l, message.NewErrorMessage(err))
+	g.sender.Send(message.NewErrorMessage(l, err))
 }
 
 func (g *Grip) CatchDefault(err error) {
-	g.sender.Send(g.DefaultLevel(), message.NewErrorMessage(err))
+	g.sender.Send(message.NewErrorMessage(g.DefaultLevel(), err))
 }
 
 func (g *Grip) CatchEmergency(err error) {
-	g.sender.Send(level.Emergency, message.NewErrorMessage(err))
+	g.sender.Send(message.NewErrorMessage(level.Emergency, err))
 }
 func (g *Grip) CatchEmergencyPanic(err error) {
-	g.sendPanic(level.Emergency, message.NewErrorMessage(err))
+	g.sendPanic(message.NewErrorMessage(level.Emergency, err))
 }
 func (g *Grip) CatchEmergencyFatal(err error) {
-	g.sendFatal(level.Emergency, message.NewErrorMessage(err))
+	g.sendFatal(message.NewErrorMessage(level.Emergency, err))
 }
 
 func (g *Grip) CatchAlert(err error) {
-	g.sender.Send(level.Alert, message.NewErrorMessage(err))
+	g.sender.Send(message.NewErrorMessage(level.Alert, err))
 }
 
 func (g *Grip) CatchCritical(err error) {
-	g.sender.Send(level.Critical, message.NewErrorMessage(err))
+	g.sender.Send(message.NewErrorMessage(level.Critical, err))
 }
 
 func (g *Grip) CatchError(err error) {
-	g.sender.Send(level.Error, message.NewErrorMessage(err))
+	g.sender.Send(message.NewErrorMessage(level.Error, err))
 }
 
 func (g *Grip) CatchWarning(err error) {
-	g.sender.Send(level.Warning, message.NewErrorMessage(err))
+	g.sender.Send(message.NewErrorMessage(level.Warning, err))
 }
 
 func (g *Grip) CatchNotice(err error) {
-	g.sender.Send(level.Notice, message.NewErrorMessage(err))
+	g.sender.Send(message.NewErrorMessage(level.Notice, err))
 }
 
 func (g *Grip) CatchInfo(err error) {
-	g.sender.Send(level.Info, message.NewErrorMessage(err))
+	g.sender.Send(message.NewErrorMessage(level.Info, err))
 }
 
 func (g *Grip) CatchDebug(err error) {
-	g.sender.Send(level.Debug, message.NewErrorMessage(err))
+	g.sender.Send(message.NewErrorMessage(level.Debug, err))
 }

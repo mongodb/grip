@@ -28,7 +28,7 @@ type Sender interface {
 	// logging capture system. The Send() method filters out
 	// logged messages based on priority, typically using the
 	// generic MessageInfo.ShouldLog() function.
-	Send(level.Priority, message.Composer)
+	Send(message.Composer)
 
 	// SetLevel allows you to modify the level
 	// configuration. Returns an error if you specify impossible
@@ -74,9 +74,9 @@ func (m MessageInfo) ShouldLog() bool {
 // GetMessageInfo takes the sender's configured LevelInfo, a priority
 // for the message, and a MessageComposer object and returns a
 // MessageInfo.
-func GetMessageInfo(info LevelInfo, level level.Priority, m message.Composer) MessageInfo {
+func GetMessageInfo(info LevelInfo, m message.Composer) MessageInfo {
 	return MessageInfo{
 		loggable:       m.Loggable(),
-		aboveThreshold: level <= info.Threshold,
+		aboveThreshold: m.Priority() <= info.Threshold,
 	}
 }
