@@ -3,17 +3,24 @@ package message
 import "github.com/tychoish/grip/level"
 
 type stringMessage struct {
-	content  string
-	priority level.Priority
+	content string
+	Base    `bson:"metadata" json:"metadata" yaml:"metadata"`
 }
 
 // NewDefaultMessage provides a Composer interface around a single
 // string, which are always logable unless the string is empty.
 func NewDefaultMessage(p level.Priority, message string) Composer {
-	return &stringMessage{
-		content:  message,
-		priority: p,
+	m := &stringMessage{
+		content: message,
 	}
+
+	m.SetPriority(p)
+
+	return m
+}
+
+func NewString(m string) Composer {
+	return &stringMessage{content: m}
 }
 
 func (s *stringMessage) Resolve() string {
@@ -25,6 +32,8 @@ func (s *stringMessage) Loggable() bool {
 }
 
 func (s *stringMessage) Raw() interface{} {
+	p := s.Priority()
+
 	return &struct {
 		Message  string `json:"message" bson:"message" yaml:"message"`
 		Loggable bool   `json:"loggable" bson:"loggable" yaml:"loggable"`
@@ -33,11 +42,7 @@ func (s *stringMessage) Raw() interface{} {
 	}{
 		Message:  s.Resolve(),
 		Loggable: s.Loggable(),
-		Priority: int(s.priority),
-		Level:    s.priority.String(),
+		Priority: int(p),
+		Level:    p.String(),
 	}
-}
-
-func (s *stringMessage) Priority() level.Priority {
-	return s.priority
 }

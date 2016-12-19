@@ -28,6 +28,7 @@ type Composer interface {
 
 	// Priority returns the priority of the message.
 	Priority() level.Priority
+	SetPriority(level.Priority) error
 }
 
 // ConvertToComposer can coerce unknown objects into Composer
@@ -35,6 +36,7 @@ type Composer interface {
 func ConvertToComposer(p level.Priority, message interface{}) Composer {
 	switch message := message.(type) {
 	case Composer:
+		message.SetPriority(p)
 		return message
 	case string:
 		return NewDefaultMessage(p, message)

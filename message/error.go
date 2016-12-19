@@ -3,18 +3,24 @@ package message
 import "github.com/tychoish/grip/level"
 
 type errorMessage struct {
-	Err error          `json:"error" bson:"error" yaml:"error"`
-	P   level.Priority `bson:"priority" json:"priority" yaml:"priority"`
+	Err  error `json:"error" bson:"error" yaml:"error"`
+	Base `bson:"metadata" json:"metadata" yaml:"metadata"`
 }
 
 // NewErrorMessage takes an error object and returns a Composer
 // instance that only renders a loggable message when the error is
 // non-nil.
 func NewErrorMessage(p level.Priority, err error) Composer {
-	return &errorMessage{
+	m := &errorMessage{
 		Err: err,
-		P:   p,
 	}
+
+	m.SetPriority(p)
+	return m
+}
+
+func NewError(err error) Composer {
+	return &errorMessage{Err: err}
 }
 
 func (e *errorMessage) Resolve() string {
@@ -30,8 +36,4 @@ func (e *errorMessage) Loggable() bool {
 
 func (e *errorMessage) Raw() interface{} {
 	return e
-}
-
-func (e *errorMessage) Priority() level.Priority {
-	return e.P
 }

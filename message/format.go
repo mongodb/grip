@@ -7,19 +7,28 @@ import (
 )
 
 type formatMessenger struct {
-	base     string
-	args     []interface{}
-	priority level.Priority
+	base string
+	args []interface{}
+	Base `bson:"metadata" json:"metadata" yaml:"metadata"`
 }
 
 // NewFormatedMessage takes arguments as fmt.Sprintf(), and returns
 // an object that only runs the format operation as part of the
 // Resolve() method.
 func NewFormatedMessage(p level.Priority, base string, args ...interface{}) Composer {
-	return &formatMessenger{
-		base:     base,
-		args:     args,
-		priority: p,
+	m := &formatMessenger{
+		base: base,
+		args: args,
+	}
+	m.SetPriority(p)
+
+	return m
+}
+
+func NewFormated(base string, args ...interface{}) Composer {
+	retrurn & formatMessenger{
+		base: base,
+		args: args,
 	}
 }
 
@@ -32,6 +41,8 @@ func (f *formatMessenger) Loggable() bool {
 }
 
 func (f *formatMessenger) Raw() interface{} {
+	p := f.Priority()
+
 	return &struct {
 		Message  string `json:"message" bson:"message" yaml:"message"`
 		Loggable bool   `json:"loggable" bson:"loggable" yaml:"loggable"`
@@ -40,11 +51,7 @@ func (f *formatMessenger) Raw() interface{} {
 	}{
 		Message:  f.Resolve(),
 		Loggable: f.Loggable(),
-		Priority: int(f.priority),
-		Level:    f.priority.String(),
+		Priority: int(p),
+		Level:    p.String(),
 	}
-}
-
-func (f *formatMessenger) Priority() level.Priority {
-	return f.priority
 }

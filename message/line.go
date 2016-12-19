@@ -8,8 +8,8 @@ import (
 )
 
 type lineMessenger struct {
-	Lines []interface{}  `yaml:"lines" json:"lines" bson:"lines"`
-	P     level.Priority `bson:"priority" json:"priority" yaml:"priority"`
+	Lines []interface{} `yaml:"lines" json:"lines" bson:"`
+	Base  `bson:"metadata" json:"metadata" yaml:"metadata"`
 }
 
 // NewLinesMessage is a basic constructor for a type that, given a
@@ -17,9 +17,16 @@ type lineMessenger struct {
 // the constructor during the Resolve() operation. Use in combination
 // with Compose[*] logging methods.
 func NewLinesMessage(p level.Priority, args ...interface{}) Composer {
+	m := &lineMessenger{
+		Lines: args,
+	}
+	m.SetPriority(p)
+	return m
+}
+
+func NewLines(args ...[]interface{}) Composer {
 	return &lineMessenger{
 		Lines: args,
-		P:     p,
 	}
 }
 
@@ -33,8 +40,4 @@ func (l *lineMessenger) Resolve() string {
 
 func (l *lineMessenger) Raw() interface{} {
 	return l
-}
-
-func (l *lineMessenger) Priority() level.Priority {
-	return l.P
 }
