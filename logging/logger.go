@@ -13,8 +13,6 @@ import (
 // provide a single, global logging interface that requires minimal
 // configuration.
 type Grip struct {
-	// an identifier for the log component.
-	name   string
 	sender send.Sender
 }
 
@@ -23,9 +21,8 @@ type Grip struct {
 // instance. The default level is "Notice" and the threshold level is
 // "info."
 func NewGrip(name string) *Grip {
-	return &Grip{
-		name: name,
-		sender: send.NewBootstrapLogger(send.LevelInfo{
+	return &Grip{send.NewBootstrapLogger(name,
+		send.LevelInfo{
 			Threshold: level.Info,
 			Default:   level.Notice,
 		}),
@@ -34,13 +31,12 @@ func NewGrip(name string) *Grip {
 
 // Name of the logger instance
 func (g *Grip) Name() string {
-	return g.name
+	return g.sender.Name()
 }
 
 // SetName declare a name string for the logger, including in the logging
 // message. Typically this is included on the output of the command.
 func (g *Grip) SetName(name string) {
-	g.name = name
 	g.sender.SetName(name)
 }
 

@@ -9,13 +9,13 @@ import (
 func (s *GripSuite) TestSenderGetterReturnsExpectedJournaler() {
 	grip := NewJournaler("sender_swap")
 	s.Equal(grip.Name(), "sender_swap")
-	s.Equal(grip.Sender().Name(), "bootstrap")
+	s.Equal(grip.Sender().Type(), send.Bootstrap)
 
 	err := grip.UseNativeLogger()
 	s.NoError(err)
 
 	s.Equal(grip.Name(), "sender_swap")
-	s.NotEqual(grip.Sender().Name(), "bootstrap")
+	s.NotEqual(grip.Sender().Type(), send.Bootstrap)
 	ns, _ := send.NewNativeLogger("native_sender", s.grip.Sender().Level())
 	defer ns.Close()
 	s.IsType(grip.Sender(), ns)

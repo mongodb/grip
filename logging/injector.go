@@ -22,12 +22,13 @@ func (g *Grip) Sender() send.Sender {
 // instance. For unsupported sender implementations, just injects the
 // sender itself into the Grip instance.
 func (g *Grip) CloneSender(s send.Sender) {
-	switch {
-	case s.Type() == send.Native:
+	switch s.Type() {
+	case send.Native:
 		g.UseNativeLogger()
-	case s.Type() == send.Systemd:
+	case send.Systemd:
 		g.UseSystemdLogger()
 	default:
+		s.SetLevel(g.sender.Level())
 		g.SetSender(s)
 	}
 }
@@ -36,7 +37,7 @@ func (g *Grip) CloneSender(s send.Sender) {
 // output, logging instance, without changing the configuration of the
 // Journaler.
 func (g *Grip) UseNativeLogger() error {
-	s, err := send.NewNativeLogger(g.name, g.sender.Level())
+	s, err := send.NewNativeLogger(g.sender.Name(), g.sender.Level())
 
 	return g.setSender(s, err)
 }
@@ -44,7 +45,7 @@ func (g *Grip) UseNativeLogger() error {
 // UseFileLogger creates a file-based logger that writes all log
 // output to a file, based on the standard library logging methods.
 func (g *Grip) UseFileLogger(filename string) error {
-	s, err := send.NewFileLogger(g.name, filename, g.sender.Level())
+	s, err := send.NewFileLogger(g.sender.Name(), filename, g.sender.Level())
 
 	return g.setSender(s, err)
 }
@@ -69,7 +70,9 @@ func (g *Grip) setSender(s send.Sender, err error) error {
 	}
 
 	if err != nil {
-		if g.Sender().Name() == "bootstrap" {
+		if s != nil && g.Sender().Type() == send.Bootstrap {
+			// a broken non-bootstrap sender is probably
+			// better than a bootstrap sender.
 			g.SetSender(s)
 		}
 
