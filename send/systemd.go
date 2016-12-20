@@ -69,7 +69,7 @@ func (s *systemdJournal) Send(p level.Priority, m message.Composer) {
 	}
 
 	msg := m.Resolve()
-	err := journal.Send(msg, s.convertPrioritySystemd(p), s.options)
+	err := journal.Send(msg, s.Level().convertPrioritySystemd(p), s.options)
 	if err != nil {
 		s.fallback.Println("systemd journaling error:", err.Error())
 		s.fallback.Printf("[p=%s]: %s\n", p, msg)
@@ -96,25 +96,25 @@ func (s *systemdJournal) Level() LevelInfo {
 	return s.level
 }
 
-func (s *systemdJournal) convertPrioritySystemd(p level.Priority) journal.Priority {
-	switch {
-	case p == level.Emergency:
+func (l LevelInfo) convertPrioritySystemd(p level.Priority) journal.Priority {
+	switch p {
+	case level.Emergency:
 		return journal.PriEmerg
-	case p == level.Alert:
+	case level.Alert:
 		return journal.PriAlert
-	case p == level.Critical:
+	case level.Critical:
 		return journal.PriCrit
-	case p == level.Error:
+	case level.Error:
 		return journal.PriErr
-	case p == level.Warning:
+	case level.Warning:
 		return journal.PriWarning
-	case p == level.Notice:
+	case level.Notice:
 		return journal.PriNotice
-	case p == level.Info:
+	case level.Info:
 		return journal.PriInfo
-	case p == level.Debug:
+	case level.Debug:
 		return journal.PriDebug
 	default:
-		return s.convertPrioritySystemd(s.level.defaultLevel)
+		return l.convertPrioritySystemd(l.Default)
 	}
 }

@@ -129,11 +129,13 @@ func (s *xmppLogger) Send(m message.Composer) {
 		return
 	}
 
+	s.RLock()
 	c := xmpp.Chat{
 		Remote: s.target,
 		Type:   "chat",
-		Text:   m.Resolve(),
+		Text:   fmt.Sprintf("[%s] (p=%s)  %s", s.name, m.Priority(), m.Resolve()),
 	}
+	s.RUnlock()
 
 	if _, err := s.client.Send(c); err != nil {
 		s.fallback.Println("xmpp error:", err.Error())

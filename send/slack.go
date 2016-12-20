@@ -112,12 +112,13 @@ func (s *slackJournal) doSend(m message.Composer) (string, error) {
 	msg := m.Resolve()
 
 	s.RLock()
-	defer s.RUnlock()
-
+	var channel string
+	*channel = *s.channel
 	params := getParams(s.name, s.hostName, m.Priority())
+	s.RUnlock()
 
-	if err := s.client.ChatPostMessage(s.channel, msg, params); err != nil {
-		return fmt.Sprint("%s: %s\n", params.Attachments[0].Fallback, msg), err
+	if err := s.client.ChatPostMessage(channel, msg, params); err != nil {
+		return fmt.Sprintf("%s: %s\n", params.Attachments[0].Fallback, msg), err
 	}
 
 	return "", nil
@@ -141,7 +142,7 @@ func getParams(log, host string, p level.Priority) *slack.ChatPostMessageOpt {
 						Short: true,
 					},
 					{
-						Title: "Level",
+						Title: "Priority",
 						Value: p.String(),
 						Short: true,
 					},
