@@ -90,7 +90,7 @@ logging the message. Use responsibly.
 thresholds, which provide the basis for verbosity control and sane
 default behavior. The default level defines the priority/level of any
 message with either an invalid priority specified *or* using the
-``SendDefault`` helper. The threshold level, defines the minimum
+``Default`` helper. The threshold level, defines the minimum
 priority or level that ``grip`` sends to the logging system. Consider
 the following behaviors:
 
@@ -181,8 +181,6 @@ levels:
 - ``CatchError``
 - ``CatchCritical``
 - ``CatchAlert``
-- ``CatchAlertPanic``
-- ``CatchAlertFatal``
 - ``CatchEmergency``
 - ``CatchEmergencyPanic``
 - ``CatchEmergencyFatal``
@@ -196,7 +194,7 @@ to the logging call. Use this to implement "log sometimes" messages to
 minimize verbosity without complicating the calling code around the
 logging.
 
-These methods have a ``<Level><,Panic,Fatal>When<>`` format. For
+These methods have a ``<Level>When<>`` format. For
 example: ``AlertWhen``, ``AlertWhenln``, ``AlertWhenf``.
 
 Composed Logging
