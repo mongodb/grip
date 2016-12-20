@@ -112,12 +112,12 @@ func (s *slackJournal) doSend(m message.Composer) (string, error) {
 	msg := m.Resolve()
 
 	s.RLock()
-	var channel string
-	*channel = *s.channel
+	var channel []byte
+	copy(channel, s.channel)
 	params := getParams(s.name, s.hostName, m.Priority())
 	s.RUnlock()
 
-	if err := s.client.ChatPostMessage(channel, msg, params); err != nil {
+	if err := s.client.ChatPostMessage(string(channel), msg, params); err != nil {
 		return fmt.Sprintf("%s: %s\n", params.Attachments[0].Fallback, msg), err
 	}
 
