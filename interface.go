@@ -10,18 +10,46 @@ import (
 // packages.
 type Journaler interface {
 	Name() string
-	Sender() send.Sender
-	SetDefaultLevel(interface{})
-	DefaultLevel() level.Priority
 	SetName(string)
+
+	// Methods to access the underlying message sending backend.
+	Sender() send.Sender
 	SetSender(send.Sender)
 	CloneSender(send.Sender)
+
+	// Configure the default and threshold levels of the current
+	// sender.
 	SetThreshold(level interface{})
 	ThresholdLevel() level.Priority
+	SetDefaultLevel(interface{})
+	DefaultLevel() level.Priority
+
+	// Switch to other basic (and easy to configure) message sending backends.
 	UseFileLogger(string) error
 	UseNativeLogger() error
 	UseSystemdLogger() error
 
+	// Specify a log level as an argument rather than a method
+	// name.
+	Send(level.Priority, interface{})
+	Sendf(level.Priority, string, ...interface{})
+	Sendln(level.Priority, ...interface{})
+	SendWhen(bool, level.Priority, interface{})
+	SendWhenf(bool, level.Priority, string, ...interface{})
+	SendWhenln(bool, level.Priority, ...interface{})
+
+	// Send at the default logging level. This might be below the
+	// threshold.
+	Default(interface{})
+	Defaultf(string, ...interface{})
+	Defaultln(...interface{})
+	DefaultWhen(bool, interface{})
+	DefaultWhenf(bool, string, ...interface{})
+	DefaultWhenln(bool, ...interface{})
+
+	// Log a message (the contents of the error,) only if the
+	// error is non-nil. These are redundant to the similar base
+	// methods. (e.g. Alert and CatchAlert have the same behavior.)
 	CatchSend(level.Priority, error)
 	CatchDefault(error)
 	CatchEmergency(error)
@@ -33,6 +61,14 @@ type Journaler interface {
 	CatchInfo(error)
 	CatchDebug(error)
 
+	// Methods for sending messages at specific levels. If you
+	// send a message at a level that is below the threshold, then it is a no-op.
+
+	// Emergency methods have "panic" and "fatal" variants that
+	// call panic or os.Exit(1). It is impossible for "Emergency"
+	// to be below threshold, however, if the message isn't
+	// loggable (e.g. error is nil, or message is empty,) these
+	// methods will not panic/error.
 	CatchEmergencyFatal(error)
 	CatchEmergencyPanic(error)
 	EmergencyFatal(interface{})
@@ -42,19 +78,11 @@ type Journaler interface {
 	EmergencyPanicf(string, ...interface{})
 	EmergencyPanicln(...interface{})
 
-	Send(level.Priority, interface{})
-	Sendf(level.Priority, string, ...interface{})
-	Sendln(level.Priority, ...interface{})
-	SendWhen(bool, level.Priority, interface{})
-	SendWhenf(bool, level.Priority, string, ...interface{})
-	SendWhenln(bool, level.Priority, ...interface{})
-
-	Default(interface{})
-	Defaultf(string, ...interface{})
-	Defaultln(...interface{})
-	DefaultWhen(bool, interface{})
-	DefaultWhenf(bool, string, ...interface{})
-	DefaultWhenln(bool, ...interface{})
+	// For each level, in addition to a basic logger that takes
+	// strings and message.Composer objects (and tries to do its best
+	// with everythingelse.) there are println and printf
+	// loggers. Each Level also has "When" variants that only log
+	// if the passed condition are true.
 
 	Emergency(interface{})
 	Emergencyf(string, ...interface{})
