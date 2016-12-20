@@ -6,15 +6,15 @@ import "github.com/tychoish/grip/send"
 // instance. Calls the Close() method on the existing instance before
 // changing the implementation for the current instance.
 func (g *Grip) SetSender(s send.Sender) {
-	g.sender.Close()
-	g.sender = s
+	g.Close()
+	g.Sender = s
 }
 
-// Sender returns the current Journaler's sender instance. Use this in
+// GetSender returns the current Journaler's sender instance. Use this in
 // combination with SetSender() to have multiple Journaler instances
 // backed by the same send.Sender instance.
-func (g *Grip) Sender() send.Sender {
-	return g.sender
+func (g *Grip) GetSender() send.Sender {
+	return g.Sender
 }
 
 // CloneSender, for the trivially constructable Sender
@@ -28,7 +28,7 @@ func (g *Grip) CloneSender(s send.Sender) {
 	case send.Systemd:
 		g.UseSystemdLogger()
 	default:
-		s.SetLevel(g.sender.Level())
+		s.SetLevel(g.Level())
 		g.SetSender(s)
 	}
 }
@@ -37,7 +37,7 @@ func (g *Grip) CloneSender(s send.Sender) {
 // output, logging instance, without changing the configuration of the
 // Journaler.
 func (g *Grip) UseNativeLogger() error {
-	s, err := send.NewNativeLogger(g.sender.Name(), g.sender.Level())
+	s, err := send.NewNativeLogger(g.Name(), g.Level())
 
 	return g.setSender(s, err)
 }
@@ -45,7 +45,7 @@ func (g *Grip) UseNativeLogger() error {
 // UseFileLogger creates a file-based logger that writes all log
 // output to a file, based on the standard library logging methods.
 func (g *Grip) UseFileLogger(filename string) error {
-	s, err := send.NewFileLogger(g.sender.Name(), filename, g.sender.Level())
+	s, err := send.NewFileLogger(g.Name(), filename, g.Level())
 
 	return g.setSender(s, err)
 }
@@ -57,7 +57,7 @@ func (g *Grip) UseFileLogger(filename string) error {
 ///////////////////////////////////
 
 func (g *Grip) inheritLevel(s send.Sender) error {
-	if err := s.SetLevel(g.sender.Level()); err != nil {
+	if err := s.SetLevel(g.Level()); err != nil {
 		return err
 	}
 
@@ -70,7 +70,7 @@ func (g *Grip) setSender(s send.Sender, err error) error {
 	}
 
 	if err != nil {
-		if s != nil && g.Sender().Type() == send.Bootstrap {
+		if s != nil && g.Type() == send.Bootstrap {
 			// a broken non-bootstrap sender is probably
 			// better than a bootstrap sender.
 			g.SetSender(s)

@@ -29,7 +29,7 @@ func (s *GripInternalSuite) SetupSuite() {
 
 func (s *GripInternalSuite) SetupTest() {
 	s.grip.SetName(s.name)
-	sender, err := send.NewNativeLogger(s.name, s.grip.Sender().Level())
+	sender, err := send.NewNativeLogger(s.grip.Name(), s.grip.GetSender().Level())
 	s.NoError(err)
 	s.grip.SetSender(sender)
 }
@@ -44,7 +44,7 @@ func (s *GripInternalSuite) TestPanicSenderActuallyPanics() {
 			s.Nil(recover())
 		}()
 
-		s.grip.Sender().Send(message.NewLinesMessage(s.grip.DefaultLevel(), "foo"))
+		s.grip.GetSender().Send(message.NewLinesMessage(s.grip.DefaultLevel(), "foo"))
 	}()
 
 	func() {
@@ -72,7 +72,7 @@ func (s *GripInternalSuite) TestConditionalSend() {
 	// because sink is an internal type (implementation of
 	// sender,) and "GetMessage" isn't in the interface, though it
 	// is exported, we can't pass the sink between functions.
-	sink, err := send.NewInternalLogger(s.grip.Sender().Level())
+	sink, err := send.NewInternalLogger(s.grip.GetSender().Level())
 	s.NoError(err)
 	s.grip.SetSender(sink)
 

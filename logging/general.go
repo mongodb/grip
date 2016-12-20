@@ -23,34 +23,34 @@ import (
 	"github.com/tychoish/grip/message"
 )
 
-func (g *Grip) Send(l level.Priority, msg interface{}) {
-	g.sender.Send(message.ConvertToComposer(l, msg))
+func (g *Grip) Log(l level.Priority, msg interface{}) {
+	g.Send(message.ConvertToComposer(l, msg))
 }
-func (g *Grip) Sendf(l level.Priority, msg string, a ...interface{}) {
-	g.sender.Send(message.NewFormatedMessage(l, msg, a...))
+func (g *Grip) Logf(l level.Priority, msg string, a ...interface{}) {
+	g.Send(message.NewFormatedMessage(l, msg, a...))
 }
-func (g *Grip) Sendln(l level.Priority, a ...interface{}) {
-	g.sender.Send(message.NewLinesMessage(l, a...))
+func (g *Grip) Logln(l level.Priority, a ...interface{}) {
+	g.Send(message.NewLinesMessage(l, a...))
 }
 
 func (g *Grip) Default(msg interface{}) {
-	g.sender.Send(message.ConvertToComposer(g.DefaultLevel(), msg))
+	g.Send(message.ConvertToComposer(g.DefaultLevel(), msg))
 }
 func (g *Grip) Defaultf(msg string, a ...interface{}) {
-	g.sender.Send(message.NewFormatedMessage(g.DefaultLevel(), msg, a...))
+	g.Send(message.NewFormatedMessage(g.DefaultLevel(), msg, a...))
 }
 func (g *Grip) Defaultln(a ...interface{}) {
-	g.sender.Send(message.NewLinesMessage(g.DefaultLevel(), a...))
+	g.Send(message.NewLinesMessage(g.DefaultLevel(), a...))
 }
 
 func (g *Grip) Emergency(msg interface{}) {
-	g.sender.Send(message.ConvertToComposer(level.Emergency, msg))
+	g.Send(message.ConvertToComposer(level.Emergency, msg))
 }
 func (g *Grip) Emergencyf(msg string, a ...interface{}) {
-	g.sender.Send(message.NewFormatedMessage(level.Emergency, msg, a...))
+	g.Send(message.NewFormatedMessage(level.Emergency, msg, a...))
 }
 func (g *Grip) Emergencyln(a ...interface{}) {
-	g.sender.Send(message.NewLinesMessage(level.Emergency, a...))
+	g.Send(message.NewLinesMessage(level.Emergency, a...))
 }
 func (g *Grip) EmergencyPanic(msg interface{}) {
 	g.sendPanic(message.ConvertToComposer(level.Emergency, msg))
@@ -72,71 +72,71 @@ func (g *Grip) EmergencyFatalln(a ...interface{}) {
 }
 
 func (g *Grip) Alert(msg interface{}) {
-	g.sender.Send(message.ConvertToComposer(level.Alert, msg))
+	g.Send(message.ConvertToComposer(level.Alert, msg))
 }
 func (g *Grip) Alertf(msg string, a ...interface{}) {
-	g.sender.Send(message.NewFormatedMessage(level.Alert, msg, a...))
+	g.Send(message.NewFormatedMessage(level.Alert, msg, a...))
 }
 func (g *Grip) Alertln(a ...interface{}) {
-	g.sender.Send(message.NewLinesMessage(level.Alert, a...))
+	g.Send(message.NewLinesMessage(level.Alert, a...))
 }
 
 func (g *Grip) Critical(msg interface{}) {
-	g.sender.Send(message.ConvertToComposer(level.Critical, msg))
+	g.Send(message.ConvertToComposer(level.Critical, msg))
 }
 func (g *Grip) Criticalf(msg string, a ...interface{}) {
-	g.sender.Send(message.NewFormatedMessage(level.Critical, msg, a...))
+	g.Send(message.NewFormatedMessage(level.Critical, msg, a...))
 }
 func (g *Grip) Criticalln(a ...interface{}) {
-	g.sender.Send(message.NewLinesMessage(level.Critical, a...))
+	g.Send(message.NewLinesMessage(level.Critical, a...))
 }
 
 func (g *Grip) Error(msg interface{}) {
-	g.sender.Send(message.ConvertToComposer(level.Error, msg))
+	g.Send(message.ConvertToComposer(level.Error, msg))
 }
 func (g *Grip) Errorf(msg string, a ...interface{}) {
-	g.sender.Send(message.NewFormatedMessage(level.Error, msg, a...))
+	g.Send(message.NewFormatedMessage(level.Error, msg, a...))
 }
 func (g *Grip) Errorln(a ...interface{}) {
-	g.sender.Send(message.NewLinesMessage(level.Error, a...))
+	g.Send(message.NewLinesMessage(level.Error, a...))
 }
 
 func (g *Grip) Warning(msg interface{}) {
-	g.sender.Send(message.ConvertToComposer(level.Warning, msg))
+	g.Send(message.ConvertToComposer(level.Warning, msg))
 }
 func (g *Grip) Warningf(msg string, a ...interface{}) {
-	g.sender.Send(message.NewFormatedMessage(level.Warning, msg, a...))
+	g.Send(message.NewFormatedMessage(level.Warning, msg, a...))
 }
 func (g *Grip) Warningln(a ...interface{}) {
-	g.sender.Send(message.NewLinesMessage(level.Warning, a...))
+	g.Send(message.NewLinesMessage(level.Warning, a...))
 }
 
 func (g *Grip) Notice(msg interface{}) {
-	g.sender.Send(message.ConvertToComposer(level.Notice, msg))
+	g.Send(message.ConvertToComposer(level.Notice, msg))
 }
 func (g *Grip) Noticef(msg string, a ...interface{}) {
-	g.sender.Send(message.NewFormatedMessage(level.Notice, msg, a...))
+	g.Send(message.NewFormatedMessage(level.Notice, msg, a...))
 }
 func (g *Grip) Noticeln(a ...interface{}) {
-	g.sender.Send(message.NewLinesMessage(level.Notice, a...))
+	g.Send(message.NewLinesMessage(level.Notice, a...))
 }
 
 func (g *Grip) Info(msg interface{}) {
-	g.sender.Send(message.ConvertToComposer(level.Info, msg))
+	g.Send(message.ConvertToComposer(level.Info, msg))
 }
 func (g *Grip) Infof(msg string, a ...interface{}) {
-	g.sender.Send(message.NewFormatedMessage(level.Info, msg, a...))
+	g.Send(message.NewFormatedMessage(level.Info, msg, a...))
 }
 func (g *Grip) Infoln(a ...interface{}) {
-	g.sender.Send(message.NewLinesMessage(level.Info, a...))
+	g.Send(message.NewLinesMessage(level.Info, a...))
 }
 
 func (g *Grip) Debug(msg interface{}) {
-	g.sender.Send(message.ConvertToComposer(level.Debug, msg))
+	g.Send(message.ConvertToComposer(level.Debug, msg))
 }
 func (g *Grip) Debugf(msg string, a ...interface{}) {
-	g.sender.Send(message.NewFormatedMessage(level.Debug, msg, a...))
+	g.Send(message.NewFormatedMessage(level.Debug, msg, a...))
 }
 func (g *Grip) Debugln(a ...interface{}) {
-	g.sender.Send(message.NewLinesMessage(level.Debug, a...))
+	g.Send(message.NewLinesMessage(level.Debug, a...))
 }

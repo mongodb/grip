@@ -13,7 +13,7 @@ type Journaler interface {
 	SetName(string)
 
 	// Methods to access the underlying message sending backend.
-	Sender() send.Sender
+	GetSender() send.Sender
 	SetSender(send.Sender)
 	CloneSender(send.Sender)
 
@@ -31,12 +31,12 @@ type Journaler interface {
 
 	// Specify a log level as an argument rather than a method
 	// name.
-	Send(level.Priority, interface{})
-	Sendf(level.Priority, string, ...interface{})
-	Sendln(level.Priority, ...interface{})
-	SendWhen(bool, level.Priority, interface{})
-	SendWhenf(bool, level.Priority, string, ...interface{})
-	SendWhenln(bool, level.Priority, ...interface{})
+	Log(level.Priority, interface{})
+	Logf(level.Priority, string, ...interface{})
+	Logln(level.Priority, ...interface{})
+	LogWhen(bool, level.Priority, interface{})
+	LogWhenf(bool, level.Priority, string, ...interface{})
+	LogWhenln(bool, level.Priority, ...interface{})
 
 	// Send at the default logging level. This might be below the
 	// threshold.
@@ -50,7 +50,7 @@ type Journaler interface {
 	// Log a message (the contents of the error,) only if the
 	// error is non-nil. These are redundant to the similar base
 	// methods. (e.g. Alert and CatchAlert have the same behavior.)
-	CatchSend(level.Priority, error)
+	CatchLog(level.Priority, error)
 	CatchDefault(error)
 	CatchEmergency(error)
 	CatchAlert(error)

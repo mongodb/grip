@@ -9,11 +9,11 @@ func SetSender(s send.Sender) {
 	std.SetSender(s)
 }
 
-// Sender returns the current Journaler's sender instance. Use this in
+// GetSender returns the current Journaler's sender instance. Use this in
 // combination with SetSender to have multiple Journaler instances
 // backed by the same send.Sender instance.
-func Sender() send.Sender {
-	return std.Sender()
+func GetSender() send.Sender {
+	return std.GetSender()
 }
 
 // CloneSender, for the trivially constructable Sender

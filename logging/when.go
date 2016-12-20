@@ -12,32 +12,32 @@ func (g *Grip) conditionalSend(conditional bool, m message.Composer) {
 		return
 	}
 
-	g.sender.Send(m)
+	g.Send(m)
 	return
 }
 
 /////////////
 
-func (g *Grip) SendWhen(conditional bool, l level.Priority, m interface{}) {
+func (g *Grip) LogWhen(conditional bool, l level.Priority, m interface{}) {
 	g.conditionalSend(conditional, message.ConvertToComposer(l, m))
 }
-func (g *Grip) SendWhenln(conditional bool, l level.Priority, msg ...interface{}) {
+func (g *Grip) LogWhenln(conditional bool, l level.Priority, msg ...interface{}) {
 	g.conditionalSend(conditional, message.NewLinesMessage(l, msg...))
 }
-func (g *Grip) SendWhenf(conditional bool, l level.Priority, msg string, args ...interface{}) {
+func (g *Grip) LogWhenf(conditional bool, l level.Priority, msg string, args ...interface{}) {
 	g.conditionalSend(conditional, message.NewFormatedMessage(l, msg, args...))
 }
 
 /////////////
 
 func (g *Grip) DefaultWhen(conditional bool, m interface{}) {
-	g.conditionalSend(conditional, message.ConvertToComposer(g.sender.Level().Default, m))
+	g.conditionalSend(conditional, message.ConvertToComposer(g.Level().Default, m))
 }
 func (g *Grip) DefaultWhenln(conditional bool, msg ...interface{}) {
-	g.conditionalSend(conditional, message.NewLinesMessage(g.sender.Level().Default, msg...))
+	g.conditionalSend(conditional, message.NewLinesMessage(g.Level().Default, msg...))
 }
 func (g *Grip) DefaultWhenf(conditional bool, msg string, args ...interface{}) {
-	g.conditionalSend(conditional, message.NewFormatedMessage(g.sender.Level().Default, msg, args...))
+	g.conditionalSend(conditional, message.NewFormatedMessage(g.Level().Default, msg, args...))
 }
 
 /////////////

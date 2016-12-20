@@ -10,16 +10,16 @@ import (
 	"github.com/tychoish/grip/message"
 )
 
-func (g *Grip) CatchSend(l level.Priority, err error) {
-	g.sender.Send(message.NewErrorMessage(l, err))
+func (g *Grip) CatchLog(l level.Priority, err error) {
+	g.Send(message.NewErrorMessage(l, err))
 }
 
 func (g *Grip) CatchDefault(err error) {
-	g.sender.Send(message.NewErrorMessage(g.DefaultLevel(), err))
+	g.Send(message.NewErrorMessage(g.DefaultLevel(), err))
 }
 
 func (g *Grip) CatchEmergency(err error) {
-	g.sender.Send(message.NewErrorMessage(level.Emergency, err))
+	g.Send(message.NewErrorMessage(level.Emergency, err))
 }
 func (g *Grip) CatchEmergencyPanic(err error) {
 	g.sendPanic(message.NewErrorMessage(level.Emergency, err))
@@ -29,29 +29,29 @@ func (g *Grip) CatchEmergencyFatal(err error) {
 }
 
 func (g *Grip) CatchAlert(err error) {
-	g.sender.Send(message.NewErrorMessage(level.Alert, err))
+	g.Send(message.NewErrorMessage(level.Alert, err))
 }
 
 func (g *Grip) CatchCritical(err error) {
-	g.sender.Send(message.NewErrorMessage(level.Critical, err))
+	g.Send(message.NewErrorMessage(level.Critical, err))
 }
 
 func (g *Grip) CatchError(err error) {
-	g.sender.Send(message.NewErrorMessage(level.Error, err))
+	g.Send(message.NewErrorMessage(level.Error, err))
 }
 
 func (g *Grip) CatchWarning(err error) {
-	g.sender.Send(message.NewErrorMessage(level.Warning, err))
+	g.Send(message.NewErrorMessage(level.Warning, err))
 }
 
 func (g *Grip) CatchNotice(err error) {
-	g.sender.Send(message.NewErrorMessage(level.Notice, err))
+	g.Send(message.NewErrorMessage(level.Notice, err))
 }
 
 func (g *Grip) CatchInfo(err error) {
-	g.sender.Send(message.NewErrorMessage(level.Info, err))
+	g.Send(message.NewErrorMessage(level.Info, err))
 }
 
 func (g *Grip) CatchDebug(err error) {
-	g.sender.Send(message.NewErrorMessage(level.Debug, err))
+	g.Send(message.NewErrorMessage(level.Debug, err))
 }

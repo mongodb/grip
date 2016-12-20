@@ -12,9 +12,7 @@ import (
 // interface is mirrored in the "grip" package's public interface, to
 // provide a single, global logging interface that requires minimal
 // configuration.
-type Grip struct {
-	sender send.Sender
-}
+type Grip struct{ send.Sender }
 
 // NewGrip takes the name for a logging instance and creates a new
 // Grip instance with configured with a Bootstrap logging
@@ -29,17 +27,6 @@ func NewGrip(name string) *Grip {
 	}
 }
 
-// Name of the logger instance
-func (g *Grip) Name() string {
-	return g.sender.Name()
-}
-
-// SetName declare a name string for the logger, including in the logging
-// message. Typically this is included on the output of the command.
-func (g *Grip) SetName(name string) {
-	g.sender.SetName(name)
-}
-
 // Internal
 
 // For sending logging messages, in most cases, use the
@@ -48,21 +35,21 @@ func (g *Grip) SetName(name string) {
 func (g *Grip) sendPanic(m message.Composer) {
 	// the Send method in the Sender interface will perform this
 	// check but to add fatal methods we need to do this here.
-	if g.sender.Level().ShouldLog(m) {
+	if g.Level().ShouldLog(m) {
 		return
 	}
 
-	g.sender.Send(m)
+	g.Send(m)
 	panic(m.Resolve())
 }
 
 func (g *Grip) sendFatal(m message.Composer) {
 	// the Send method in the Sender interface will perform this
 	// check but to add fatal methods we need to do this here.
-	if g.sender.Level().ShouldLog(m) {
+	if g.Level().ShouldLog(m) {
 		return
 	}
 
-	g.sender.Send(m)
+	g.Send(m)
 	os.Exit(1)
 }

@@ -16,8 +16,8 @@ import "github.com/tychoish/grip/level"
 // Info
 // Debug
 
-func CatchSend(l level.Priority, err error) {
-	std.CatchSend(l, err)
+func CatchLog(l level.Priority, err error) {
+	std.CatchLog(l, err)
 }
 
 func CatchDefault(err error) {

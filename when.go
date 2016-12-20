@@ -16,14 +16,14 @@ package grip
 
 import "github.com/tychoish/grip/level"
 
-func SendWhen(conditional bool, l level.Priority, m interface{}) {
-	std.SendWhen(conditional, l, m)
+func LogWhen(conditional bool, l level.Priority, m interface{}) {
+	std.LogWhen(conditional, l, m)
 }
-func SendWhenln(conditional bool, l level.Priority, msg ...interface{}) {
-	std.SendWhenln(conditional, l, msg...)
+func LogWhenln(conditional bool, l level.Priority, msg ...interface{}) {
+	std.LogWhenln(conditional, l, msg...)
 }
-func SendWhenf(conditional bool, l level.Priority, msg string, args ...interface{}) {
-	std.SendWhenf(conditional, l, msg, args...)
+func LogWhenf(conditional bool, l level.Priority, msg string, args ...interface{}) {
+	std.LogWhenf(conditional, l, msg, args...)
 }
 
 // Default-level Conditional Methods

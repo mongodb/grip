@@ -26,14 +26,14 @@ package grip
 
 import "github.com/tychoish/grip/level"
 
-func Send(l level.Priority, msg interface{}) {
-	std.Send(l, msg)
+func Log(l level.Priority, msg interface{}) {
+	std.Log(l, msg)
 }
-func Sendf(l level.Priority, msg string, a ...interface{}) {
-	std.Sendf(l, msg, a...)
+func Logf(l level.Priority, msg string, a ...interface{}) {
+	std.Logf(l, msg, a...)
 }
-func Sendln(l level.Priority, a ...interface{}) {
-	std.Sendln(l, a...)
+func Logln(l level.Priority, a ...interface{}) {
+	std.Logln(l, a...)
 }
 
 // default methods for sending messages at the default level.
