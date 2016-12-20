@@ -11,10 +11,9 @@ import (
 )
 
 type nativeLogger struct {
-	name     string
-	level    LevelInfo
-	logger   *log.Logger
-	template string
+	name   string
+	level  LevelInfo
+	logger *log.Logger
 
 	sync.RWMutex
 }
@@ -24,8 +23,7 @@ type nativeLogger struct {
 // standard library logging system.
 func NewNativeLogger(name string, l LevelInfo) (Sender, error) {
 	s := &nativeLogger{
-		name:     name,
-		template: "[p=%s]: %s",
+		name: name,
 	}
 	s.createLogger()
 
@@ -48,7 +46,7 @@ func (n *nativeLogger) Send(m message.Composer) {
 		return
 	}
 
-	n.logger.Printf(n.template, m.Priority(), m.Resolve())
+	n.logger.Printf("[p=%s]: %s", m.Priority(), m.Resolve())
 }
 
 func (n *nativeLogger) Name() string {

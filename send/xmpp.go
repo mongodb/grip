@@ -83,17 +83,18 @@ func NewXMPPDefault(name, target string, l LevelInfo) (Sender, error) {
 }
 
 func (s *xmppLogger) Name() string {
-	s.Lock()
-	defer s.Unlock()
+	s.RLock()
+	defer s.RUnlock()
 
 	return s.name
 }
 
 func (s *xmppLogger) SetName(n string) {
-	s.RLock()
-	defer s.RUnlock()
+	s.Lock()
+	defer s.Unlock()
 
 	s.name = n
+	s.createFallback()
 }
 
 func (s *xmppLogger) Type() SenderType { return Xmpp }

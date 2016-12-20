@@ -41,6 +41,10 @@ func NewJournaldLogger(name string, l LevelInfo) (Sender, error) {
 	return s, nil
 }
 
+func (s *systemdJournal) createFallback() {
+	s.fallback = log.New(os.Stdout, strings.Join([]string{"[", s.name, "] "}, ""), log.LstdFlags)
+}
+
 func (s *systemdJournal) Close()           {}
 func (s *systemdJournal) Type() SenderType { return Systemd }
 
@@ -49,10 +53,6 @@ func (s *systemdJournal) Name() string {
 	defer s.RUnlock()
 
 	return s.name
-}
-
-func (s *systemdJournal) createFallback() {
-	s.fallback = log.New(os.Stdout, strings.Join([]string{"[", s.name, "] "}, ""), log.LstdFlags)
 }
 
 func (s *systemdJournal) SetName(name string) {

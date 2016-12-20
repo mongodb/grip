@@ -87,6 +87,7 @@ func (s *slackJournal) SetName(n string) {
 	defer s.RUnlock()
 
 	s.name = n
+	s.createFallback()
 }
 
 func (s *slackJournal) Type() SenderType { return Slack }
@@ -101,16 +102,25 @@ func (s *slackJournal) Send(m message.Composer) {
 		return
 	}
 
+	if fallback, err := s.doSend(m); err != nil {
+		s.fallback.Println("slack error:", err.Error())
+		s.fallback.Println(fallback)
+	}
+}
+
+func (s *slackJournal) doSend(m message.Composer) (string, error) {
 	msg := m.Resolve()
 
 	s.RLock()
 	defer s.RUnlock()
+
 	params := getParams(s.name, s.hostName, m.Priority())
 
 	if err := s.client.ChatPostMessage(s.channel, msg, params); err != nil {
-		s.fallback.Println("slack error:", err.Error())
-		s.fallback.Printf("%s: %s\n", params.Attachments[0].Fallback, msg)
+		return fmt.Sprint("%s: %s\n", params.Attachments[0].Fallback, msg), err
 	}
+
+	return "", nil
 }
 
 func getParams(log, host string, p level.Priority) *slack.ChatPostMessageOpt {

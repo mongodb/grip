@@ -82,6 +82,7 @@ func (s *syslogger) SetName(name string) {
 	defer s.Unlock()
 
 	s.name = name
+	s.createFallback()
 }
 
 func (s *syslogger) Send(m message.Composer) {
@@ -90,9 +91,8 @@ func (s *syslogger) Send(m message.Composer) {
 	}
 
 	msg := m.Resolve()
-	err := s.sendToSysLog(m.Priority(), msg)
 
-	if err != nil {
+	if err := s.sendToSysLog(m.Priority(), msg); err != nil {
 		s.fallback.Println("syslog error:", err.Error())
 		s.fallback.Printf("[p=%d]: %s\n", m.Priority(), msg)
 	}
