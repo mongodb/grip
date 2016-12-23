@@ -45,7 +45,7 @@ func NewInternalLogger(l LevelInfo) (*internalSender, error) {
 
 func (s *internalSender) Name() string     { return s.name }
 func (s *internalSender) SetName(n string) { s.name = n }
-func (s *internalSender) Close()           { close(s.output) }
+func (s *internalSender) Close() error     { close(s.output); return nil }
 func (s *internalSender) Type() SenderType { return Internal }
 func (s *internalSender) Level() LevelInfo { return s.level }
 

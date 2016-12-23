@@ -3,11 +3,9 @@
 package send
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"strings"
-	"sync"
 
 	"github.com/coreos/go-systemd/journal"
 	"github.com/tychoish/grip/level"
@@ -15,12 +13,8 @@ import (
 )
 
 type systemdJournal struct {
-	name     string
-	level    LevelInfo
 	options  map[string]string
 	fallback *log.Logger
-
-	sync.RWMutex
 }
 
 // NewJournaldLogger creates a Sender object that writes log messages
@@ -29,71 +23,35 @@ type systemdJournal struct {
 // writing to standard output.
 func NewJournaldLogger(name string, l LevelInfo) (Sender, error) {
 	s := &systemdJournal{
-		name:    name,
 		options: make(map[string]string),
+		base:    newBase(name),
+	}
+
+	s.reset = func() {
+		s.fallback = log.New(os.Stdout, strings.Join([]string{"[", s.Name(), "] "}, ""), log.LstdFlags)
 	}
 
 	if err := s.SetLevel(l); err != nil {
 		return nil, err
 	}
 
-	s.createFallback()
+	s.reset()
+
 	return s, nil
 }
 
-func (s *systemdJournal) createFallback() {
-	s.fallback = log.New(os.Stdout, strings.Join([]string{"[", s.name, "] "}, ""), log.LstdFlags)
-}
-
-func (s *systemdJournal) Close()           {}
+func (s *systemdJournal) Close() error     { return nil }
 func (s *systemdJournal) Type() SenderType { return Systemd }
 
-func (s *systemdJournal) Name() string {
-	s.RLock()
-	defer s.RUnlock()
-
-	return s.name
-}
-
-func (s *systemdJournal) SetName(name string) {
-	s.Lock()
-	defer s.Unlock()
-
-	s.name = name
-	s.createFallback()
-}
-
 func (s *systemdJournal) Send(m message.Composer) {
-	if !s.level.ShouldLog(m) {
-		return
+	if s.level.ShouldLog(m) {
+		msg := m.Resolve()
+		err := journal.Send(msg, s.Level().convertPrioritySystemd(p), s.options)
+		if err != nil {
+			s.fallback.Println("systemd journaling error:", err.Error())
+			s.fallback.Printf("[p=%s]: %s", p, msg)
+		}
 	}
-
-	msg := m.Resolve()
-	err := journal.Send(msg, s.Level().convertPrioritySystemd(p), s.options)
-	if err != nil {
-		s.fallback.Println("systemd journaling error:", err.Error())
-		s.fallback.Printf("[p=%s]: %s\n", p, msg)
-	}
-}
-
-func (s *systemdJournal) SetLevel(l LevelInfo) error {
-	if !l.Valid() {
-		return fmt.Errorf("level settings are not valid: %+v", l)
-	}
-
-	s.Lock()
-	defer s.Unlock()
-
-	s.level = l
-
-	return nil
-}
-
-func (s *systemdJournal) Level() LevelInfo {
-	s.RLock()
-	defer s.RUnlock()
-
-	return s.level
 }
 
 func (l LevelInfo) convertPrioritySystemd(p level.Priority) journal.Priority {

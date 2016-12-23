@@ -15,10 +15,9 @@ import (
 )
 
 type syslogger struct {
-	name     string
 	logger   *syslog.Writer
 	fallback *log.Logger
-	level    LevelInfo
+	*base
 	sync.RWMutex
 }
 
@@ -30,21 +29,23 @@ type syslogger struct {
 // to the local syslog interface before writing messages to standard
 // output.
 func NewSyslogLogger(name, network, raddr string, l LevelInfo) (Sender, error) {
-	s := &syslogger{
-		name: name,
+	s := &syslogger{base: newBase(name)}
+
+	s.reset = func() {
+		s.fallback = log.New(os.Stdout, strings.Join([]string{"[", s.Name(), "] "}, ""), log.LstdFlags)
+		w, err := syslog.Dial(network, raddr, syslog.Priority(l.Default), s.Name())
+		if err != nil {
+			s.fallback.Printf("error restarting syslog [%s] for logger: %s", err.Error(), s.Name())
+			return
+		}
+		s.logger = w
 	}
 
 	if err := s.SetLevel(l); err != nil {
 		return nil, err
 	}
 
-	w, err := syslog.Dial(network, raddr, syslog.Priority(l.Default), s.name)
-	if err != nil {
-		return nil, err
-	}
-	s.logger = w
-
-	s.createFallback()
+	s.reset()
 	return s, nil
 }
 
@@ -57,86 +58,39 @@ func NewLocalSyslogLogger(name string, l LevelInfo) (Sender, error) {
 	return NewSyslogLogger(name, "", "", l)
 }
 
-func (s *syslogger) createFallback() {
-	s.fallback = log.New(os.Stdout, strings.Join([]string{"[", s.name, "] "}, ""), log.LstdFlags)
-}
-
-func (s *syslogger) Close()           { _ = s.logger.Close() }
+func (s *syslogger) Close() error     { return s.logger.Close() }
 func (s *syslogger) Type() SenderType { return Syslog }
 
-func (s *syslogger) setUpLocalSyslogConnection() error {
-	w, err := syslog.New(syslog.Priority(s.level.Default), s.name)
-	s.logger = w
-	return err
-}
-
-func (s *syslogger) Name() string {
-	s.RLock()
-	defer s.RUnlock()
-
-	return s.name
-}
-
-func (s *syslogger) SetName(name string) {
-	s.Lock()
-	defer s.Unlock()
-
-	s.name = name
-	s.createFallback()
-}
-
 func (s *syslogger) Send(m message.Composer) {
-	if !s.level.ShouldLog(m) {
-		return
-	}
+	if s.level.ShouldLog(m) {
+		msg := m.Resolve()
 
-	msg := m.Resolve()
-
-	if err := s.sendToSysLog(m.Priority(), msg); err != nil {
-		s.fallback.Println("syslog error:", err.Error())
-		s.fallback.Printf("[p=%d]: %s\n", m.Priority(), msg)
+		if err := s.sendToSysLog(m.Priority(), msg); err != nil {
+			s.fallback.Println("syslog error:", err.Error())
+			s.fallback.Printf("[p=%d]: %s\n", m.Priority(), msg)
+		}
 	}
 }
 
 func (s *syslogger) sendToSysLog(p level.Priority, message string) error {
-	switch {
-	case p == level.Emergency:
+	switch p {
+	case level.Emergency:
 		return s.logger.Emerg(message)
-	case p == level.Alert:
+	case level.Alert:
 		return s.logger.Alert(message)
-	case p == level.Critical:
+	case level.Critical:
 		return s.logger.Crit(message)
-	case p == level.Error:
+	case level.Error:
 		return s.logger.Err(message)
-	case p == level.Warning:
+	case level.Warning:
 		return s.logger.Warning(message)
-	case p == level.Notice:
+	case level.Notice:
 		return s.logger.Notice(message)
-	case p == level.Info:
+	case level.Info:
 		return s.logger.Info(message)
-	case p == level.Debug:
+	case level.Debug:
 		return s.logger.Debug(message)
 	}
 
 	return fmt.Errorf("encountered error trying to send: {%s}. Possibly, priority related", message)
-}
-
-func (s *syslogger) SetLevel(l LevelInfo) error {
-	if !l.Valid() {
-		return fmt.Errorf("level settings are not valid: %+v", l)
-	}
-
-	s.Lock()
-	defer s.Unlock()
-
-	s.level = l
-
-	return nil
-}
-
-func (s *syslogger) Level() LevelInfo {
-	s.RLock()
-	defer s.RUnlock()
-
-	return s.level
 }

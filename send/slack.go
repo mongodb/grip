@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"sync"
 
 	"github.com/bluele/slack"
 	"github.com/tychoish/grip/level"
@@ -17,13 +16,11 @@ const (
 )
 
 type slackJournal struct {
-	name     string
 	channel  string
 	hostName string
-	level    LevelInfo
 	fallback *log.Logger
 	client   *slack.Slack
-	sync.RWMutex
+	*base
 }
 
 // NewSlackLogger constructs a Sender that posts messages to a slack,
@@ -34,11 +31,10 @@ type slackJournal struct {
 // metadata.
 func NewSlackLogger(name, token, channel, hostname string, l LevelInfo) (Sender, error) {
 	s := &slackJournal{
-		name:     name,
 		hostName: hostname,
 		client:   slack.New(token),
+		base:     newBase(name),
 	}
-	s.createFallback()
 
 	if !strings.HasPrefix(channel, "#") {
 		s.channel = "#" + channel
@@ -53,6 +49,12 @@ func NewSlackLogger(name, token, channel, hostname string, l LevelInfo) (Sender,
 	if _, err := s.client.AuthTest(); err != nil {
 		return nil, fmt.Errorf("slack authentication error: %v", err)
 	}
+
+	s.reset = func() {
+		s.fallback = log.New(os.Stdout, strings.Join([]string{"[", s.Name(), "] "}, ""), log.LstdFlags)
+	}
+
+	s.reset()
 
 	return s, nil
 }
@@ -75,27 +77,8 @@ func NewSlackDefault(name, channel string, l LevelInfo) (Sender, error) {
 	return NewSlackLogger(name, token, channel, hostname, l)
 }
 
-func (s *slackJournal) Name() string {
-	s.Lock()
-	defer s.Unlock()
-
-	return s.name
-}
-
-func (s *slackJournal) SetName(n string) {
-	s.RLock()
-	defer s.RUnlock()
-
-	s.name = n
-	s.createFallback()
-}
-
 func (s *slackJournal) Type() SenderType { return Slack }
-func (s *slackJournal) Close()           {}
-
-func (s *slackJournal) createFallback() {
-	s.fallback = log.New(os.Stdout, strings.Join([]string{"[", s.name, "] "}, ""), log.LstdFlags)
-}
+func (s *slackJournal) Close() error     { return nil }
 
 func (s *slackJournal) Send(m message.Composer) {
 	if !s.level.ShouldLog(m) {
@@ -162,24 +145,4 @@ func getParams(log, host string, p level.Priority) *slack.ChatPostMessageOpt {
 	}
 
 	return &params
-}
-
-func (s *slackJournal) SetLevel(l LevelInfo) error {
-	if !l.Valid() {
-		return fmt.Errorf("level settings are not valid: %+v", l)
-	}
-
-	s.Lock()
-	defer s.Unlock()
-
-	s.level = l
-
-	return nil
-}
-
-func (s *slackJournal) Level() LevelInfo {
-	s.RLock()
-	defer s.RUnlock()
-
-	return s.level
 }

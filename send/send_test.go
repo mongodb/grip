@@ -39,3 +39,7 @@ func (s *SenderSuite) TestNativeSenderImplementsInterface() {
 func (s *SenderSuite) TestXmppSenderImplementsInterface() {
 	s.Implements((*Sender)(nil), new(xmppLogger), "native")
 }
+
+func (s *SenderSuite) TestJsonSenderImplementsInterface() {
+	s.Implements((*Sender)(nil), new(jsonLogger), "json")
+}

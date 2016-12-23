@@ -42,7 +42,7 @@ type Sender interface {
 	// desecration, they should be cleaned up tin the Close()
 	// method. Close() is called by the SetSender() method before
 	// changing loggers.
-	Close()
+	Close() error
 }
 
 // LevelInfo provides a sender-independent structure for storing
@@ -61,5 +61,6 @@ func (l LevelInfo) Valid() bool {
 // returns false if there is no message or if the message's priority
 // is below the logging threshold.
 func (l LevelInfo) ShouldLog(m message.Composer) bool {
-	return m.Loggable() && (m.Priority() >= l.Threshold)
+	// priorities are 0 = Emergency; 7 = debug
+	return m.Loggable() && (m.Priority() <= l.Threshold)
 }

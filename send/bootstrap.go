@@ -28,7 +28,7 @@ func NewBootstrapLogger(name string, l LevelInfo) Sender {
 func (b *bootstrapLogger) Name() string            { return b.name }
 func (b *bootstrapLogger) SetName(n string)        { b.name = n }
 func (b *bootstrapLogger) Send(_ message.Composer) {}
-func (b *bootstrapLogger) Close()                  {}
+func (b *bootstrapLogger) Close() error            { return nil }
 func (b *bootstrapLogger) Type() SenderType        { return Bootstrap }
 func (b *bootstrapLogger) Level() LevelInfo        { return b.level }
 

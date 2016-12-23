@@ -6,6 +6,8 @@ const (
 	Custom SenderType = iota
 	Systemd
 	Native
+	JsonConsole
+	JsonFile
 	Syslog
 	Internal
 	File
@@ -15,25 +17,29 @@ const (
 )
 
 func (t SenderType) String() string {
-	switch {
-	case t == Systemd:
+	switch t {
+	case Systemd:
 		return "systemd"
-	case t == Native:
+	case Native:
 		return "native"
-	case t == Syslog:
+	case Syslog:
 		return "syslog"
-	case t == Internal:
+	case Internal:
 		return "internal"
-	case t == File:
+	case File:
 		return "file"
-	case t == Bootstrap:
+	case Bootstrap:
 		return "bootstrap"
-	case t == Custom:
+	case Custom:
 		return "custom"
-	case t == Slack:
+	case Slack:
 		return "slack"
-	case t == Xmpp:
+	case Xmpp:
 		return "xmpp"
+	case JsonConsole:
+		return "json-console"
+	case JsonFile:
+		return "json-console"
 	default:
 		return "native"
 	}

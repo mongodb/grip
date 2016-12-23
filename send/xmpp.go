@@ -5,19 +5,16 @@ import (
 	"log"
 	"os"
 	"strings"
-	"sync"
 
 	xmpp "github.com/mattn/go-xmpp"
 	"github.com/tychoish/grip/message"
 )
 
 type xmppLogger struct {
-	name     string
 	target   string
-	level    LevelInfo
 	client   *xmpp.Client
 	fallback *log.Logger
-	sync.RWMutex
+	*base
 }
 
 type XMPPConnectionInfo struct {
@@ -39,7 +36,7 @@ const (
 // unencrypted connection if the the first attempt fails.
 func NewXMPPLogger(name, target string, info XMPPConnectionInfo, l LevelInfo) (Sender, error) {
 	s := &xmppLogger{
-		name:   name,
+		base:   newBase(name),
 		target: target,
 	}
 
@@ -47,7 +44,9 @@ func NewXMPPLogger(name, target string, info XMPPConnectionInfo, l LevelInfo) (S
 		return nil, err
 	}
 
-	s.createFallback()
+	s.reset = func() {
+		s.fallback = log.New(os.Stdout, strings.Join([]string{"[", s.Name(), "] "}, ""), log.LstdFlags)
+	}
 
 	client, err := xmpp.NewClient(info.Hostname, info.Username, info.Password, false)
 	if err != nil {
@@ -60,6 +59,8 @@ func NewXMPPLogger(name, target string, info XMPPConnectionInfo, l LevelInfo) (S
 		}
 	}
 	s.client = client
+
+	s.reset()
 
 	return s, nil
 }
@@ -82,63 +83,22 @@ func NewXMPPDefault(name, target string, l LevelInfo) (Sender, error) {
 	return NewXMPPLogger(name, target, info, l)
 }
 
-func (s *xmppLogger) Name() string {
-	s.RLock()
-	defer s.RUnlock()
-
-	return s.name
-}
-
-func (s *xmppLogger) SetName(n string) {
-	s.Lock()
-	defer s.Unlock()
-
-	s.name = n
-	s.createFallback()
-}
-
 func (s *xmppLogger) Type() SenderType { return Xmpp }
-func (s *xmppLogger) Close()           { _ = s.client.Close() }
-
-func (s *xmppLogger) createFallback() {
-	s.fallback = log.New(os.Stdout, strings.Join([]string{"[", s.name, "] "}, ""), log.LstdFlags)
-}
-
-func (s *xmppLogger) SetLevel(l LevelInfo) error {
-	if !l.Valid() {
-		return fmt.Errorf("level settings are not valid: %+v", l)
-	}
-
-	s.Lock()
-	defer s.Unlock()
-
-	s.level = l
-
-	return nil
-}
-
-func (s *xmppLogger) Level() LevelInfo {
-	s.RLock()
-	defer s.RUnlock()
-
-	return s.level
-}
+func (s *xmppLogger) Close() error     { return s.client.Close() }
 
 func (s *xmppLogger) Send(m message.Composer) {
-	if !s.level.ShouldLog(m) {
-		return
-	}
+	if s.level.ShouldLog(m) {
+		s.RLock()
+		c := xmpp.Chat{
+			Remote: s.target,
+			Type:   "chat",
+			Text:   fmt.Sprintf("[%s] (p=%s)  %s", s.name, m.Priority(), m.Resolve()),
+		}
+		s.RUnlock()
 
-	s.RLock()
-	c := xmpp.Chat{
-		Remote: s.target,
-		Type:   "chat",
-		Text:   fmt.Sprintf("[%s] (p=%s)  %s", s.name, m.Priority(), m.Resolve()),
-	}
-	s.RUnlock()
-
-	if _, err := s.client.Send(c); err != nil {
-		s.fallback.Println("xmpp error:", err.Error())
-		s.fallback.Printf("[p=%s]: %s\n", m.Priority(), c.Text)
+		if _, err := s.client.Send(c); err != nil {
+			s.fallback.Println("xmpp error:", err.Error())
+			s.fallback.Printf("[p=%s]: %s\n", m.Priority(), c.Text)
+		}
 	}
 }
