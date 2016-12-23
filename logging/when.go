@@ -25,7 +25,7 @@ func (g *Grip) LogWhenln(conditional bool, l level.Priority, msg ...interface{})
 	g.conditionalSend(conditional, message.NewLinesMessage(l, msg...))
 }
 func (g *Grip) LogWhenf(conditional bool, l level.Priority, msg string, args ...interface{}) {
-	g.conditionalSend(conditional, message.NewFormatedMessage(l, msg, args...))
+	g.conditionalSend(conditional, message.NewFormattedMessage(l, msg, args...))
 }
 
 /////////////
@@ -37,7 +37,7 @@ func (g *Grip) DefaultWhenln(conditional bool, msg ...interface{}) {
 	g.conditionalSend(conditional, message.NewLinesMessage(g.Level().Default, msg...))
 }
 func (g *Grip) DefaultWhenf(conditional bool, msg string, args ...interface{}) {
-	g.conditionalSend(conditional, message.NewFormatedMessage(g.Level().Default, msg, args...))
+	g.conditionalSend(conditional, message.NewFormattedMessage(g.Level().Default, msg, args...))
 }
 
 /////////////
@@ -49,7 +49,7 @@ func (g *Grip) EmergencyWhenln(conditional bool, msg ...interface{}) {
 	g.conditionalSend(conditional, message.NewLinesMessage(level.Emergency, msg...))
 }
 func (g *Grip) EmergencyWhenf(conditional bool, msg string, args ...interface{}) {
-	g.conditionalSend(conditional, message.NewFormatedMessage(level.Emergency, msg, args...))
+	g.conditionalSend(conditional, message.NewFormattedMessage(level.Emergency, msg, args...))
 }
 
 /////////////
@@ -61,7 +61,7 @@ func (g *Grip) AlertWhenln(conditional bool, msg ...interface{}) {
 	g.conditionalSend(conditional, message.NewLinesMessage(level.Alert, msg...))
 }
 func (g *Grip) AlertWhenf(conditional bool, msg string, args ...interface{}) {
-	g.conditionalSend(conditional, message.NewFormatedMessage(level.Alert, msg, args...))
+	g.conditionalSend(conditional, message.NewFormattedMessage(level.Alert, msg, args...))
 }
 
 /////////////
@@ -73,7 +73,7 @@ func (g *Grip) CriticalWhenln(conditional bool, msg ...interface{}) {
 	g.conditionalSend(conditional, message.NewLinesMessage(level.Critical, msg...))
 }
 func (g *Grip) CriticalWhenf(conditional bool, msg string, args ...interface{}) {
-	g.conditionalSend(conditional, message.NewFormatedMessage(level.Critical, msg, args...))
+	g.conditionalSend(conditional, message.NewFormattedMessage(level.Critical, msg, args...))
 }
 
 /////////////
@@ -85,7 +85,7 @@ func (g *Grip) ErrorWhenln(conditional bool, msg ...interface{}) {
 	g.conditionalSend(conditional, message.NewLinesMessage(level.Critical, msg...))
 }
 func (g *Grip) ErrorWhenf(conditional bool, msg string, args ...interface{}) {
-	g.conditionalSend(conditional, message.NewFormatedMessage(level.Critical, msg, args...))
+	g.conditionalSend(conditional, message.NewFormattedMessage(level.Critical, msg, args...))
 }
 
 /////////////
@@ -97,7 +97,7 @@ func (g *Grip) WarningWhenln(conditional bool, msg ...interface{}) {
 	g.conditionalSend(conditional, message.NewLinesMessage(level.Warning, msg...))
 }
 func (g *Grip) WarningWhenf(conditional bool, msg string, args ...interface{}) {
-	g.conditionalSend(conditional, message.NewFormatedMessage(level.Warning, msg, args...))
+	g.conditionalSend(conditional, message.NewFormattedMessage(level.Warning, msg, args...))
 }
 
 /////////////
@@ -109,7 +109,7 @@ func (g *Grip) NoticeWhenln(conditional bool, msg ...interface{}) {
 	g.conditionalSend(conditional, message.NewLinesMessage(level.Notice, msg...))
 }
 func (g *Grip) NoticeWhenf(conditional bool, msg string, args ...interface{}) {
-	g.conditionalSend(conditional, message.NewFormatedMessage(level.Notice, msg, args...))
+	g.conditionalSend(conditional, message.NewFormattedMessage(level.Notice, msg, args...))
 }
 
 /////////////
@@ -121,7 +121,7 @@ func (g *Grip) InfoWhenln(conditional bool, msg ...interface{}) {
 	g.conditionalSend(conditional, message.NewLinesMessage(level.Info, msg...))
 }
 func (g *Grip) InfoWhenf(conditional bool, msg string, args ...interface{}) {
-	g.conditionalSend(conditional, message.NewFormatedMessage(level.Info, msg, args...))
+	g.conditionalSend(conditional, message.NewFormattedMessage(level.Info, msg, args...))
 }
 
 /////////////
@@ -133,5 +133,5 @@ func (g *Grip) DebugWhenln(conditional bool, msg ...interface{}) {
 	g.conditionalSend(conditional, message.NewLinesMessage(level.Debug, msg...))
 }
 func (g *Grip) DebugWhenf(conditional bool, msg string, args ...interface{}) {
-	g.conditionalSend(conditional, message.NewFormatedMessage(level.Debug, msg, args...))
+	g.conditionalSend(conditional, message.NewFormattedMessage(level.Debug, msg, args...))
 }

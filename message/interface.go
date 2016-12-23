@@ -45,6 +45,6 @@ func ConvertToComposer(p level.Priority, message interface{}) Composer {
 	case error:
 		return NewErrorMessage(p, message)
 	default:
-		return NewFormatedMessage(p, "%+v", message)
+		return NewFormattedMessage(p, "%+v", message)
 	}
 }
