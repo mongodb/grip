@@ -1,10 +1,16 @@
 package message
 
-import "github.com/tychoish/grip/level"
+import (
+	"fmt"
+
+	"github.com/tychoish/grip/level"
+)
 
 type errorMessage struct {
-	Err  error `json:"error" bson:"error" yaml:"error"`
-	Base `bson:"metadata" json:"metadata" yaml:"metadata"`
+	err      error
+	Error    string `bson:"error" json:"error" yaml:"error"`
+	Extended string `bson:"extended,omitempty" json:"extended,omitempty" yaml:"extended,omitempty"`
+	Base     `bson:"metadata" json:"metadata" yaml:"metadata"`
 }
 
 // NewErrorMessage takes an error object and returns a Composer
@@ -12,28 +18,40 @@ type errorMessage struct {
 // non-nil.
 func NewErrorMessage(p level.Priority, err error) Composer {
 	m := &errorMessage{
-		Err: err,
+		err: err,
 	}
 
 	m.SetPriority(p)
 	return m
 }
 
+// NewError returns an error composer, like NewErrorMessage, but
+// without the requirement to specify priority, which you may wish to
+// specify directly.
 func NewError(err error) Composer {
-	return &errorMessage{Err: err}
+	return &errorMessage{err: err}
 }
 
 func (e *errorMessage) Resolve() string {
-	if e.Err == nil {
+	if e.err == nil {
 		return ""
 	}
-	return e.Err.Error()
+	e.Error = e.err.Error()
+	return e.Error
 }
 
 func (e *errorMessage) Loggable() bool {
-	return e.Err != nil
+	return e.err != nil
 }
 
 func (e *errorMessage) Raw() interface{} {
+	_ = e.Collect()
+	_ = e.Resolve()
+
+	extended := fmt.Sprintf("%+v", e.err)
+	if extended != e.Error {
+		e.Extended = extended
+	}
+
 	return e
 }

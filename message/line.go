@@ -39,5 +39,6 @@ func (l *lineMessenger) Resolve() string {
 }
 
 func (l *lineMessenger) Raw() interface{} {
+	_ = l.Collect()
 	return l
 }

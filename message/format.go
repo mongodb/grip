@@ -7,9 +7,10 @@ import (
 )
 
 type formatMessenger struct {
-	base string
-	args []interface{}
-	Base `bson:"metadata" json:"metadata" yaml:"metadata"`
+	base    string
+	args    []interface{}
+	Base    `bson:"metadata" json:"metadata" yaml:"metadata"`
+	Message string `bson:"message" json:"message" yaml:"message"`
 }
 
 // NewFormatedMessage takes arguments as fmt.Sprintf(), and returns
@@ -33,7 +34,11 @@ func NewFormated(base string, args ...interface{}) Composer {
 }
 
 func (f *formatMessenger) Resolve() string {
-	return fmt.Sprintf(f.base, f.args...)
+	if f.Message == "" {
+		f.Message = fmt.Sprintf(f.base, f.args...)
+	}
+
+	return f.Message
 }
 
 func (f *formatMessenger) Loggable() bool {
@@ -41,17 +46,8 @@ func (f *formatMessenger) Loggable() bool {
 }
 
 func (f *formatMessenger) Raw() interface{} {
-	p := f.Priority()
+	_ = f.Collect()
+	_ = f.Resolve()
 
-	return &struct {
-		Message  string `json:"message" bson:"message" yaml:"message"`
-		Loggable bool   `json:"loggable" bson:"loggable" yaml:"loggable"`
-		Priority int    `bson:"priority" json:"priority" yaml:"priority"`
-		Level    string `bson:"level" json:"level" yaml:"level"`
-	}{
-		Message:  f.Resolve(),
-		Loggable: f.Loggable(),
-		Priority: int(p),
-		Level:    p.String(),
-	}
+	return f
 }
