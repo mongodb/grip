@@ -13,6 +13,7 @@ const (
 	File
 	Slack
 	Xmpp
+	Stream
 	Bootstrap
 )
 
@@ -39,7 +40,9 @@ func (t SenderType) String() string {
 	case JsonConsole:
 		return "json-console"
 	case JsonFile:
-		return "json-console"
+		return "json-file"
+	case Stream:
+		return "stream"
 	default:
 		return "native"
 	}
