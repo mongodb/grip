@@ -63,7 +63,7 @@ func (s *systemdJournal) SetName(name string) {
 	s.createFallback()
 }
 
-func (s *systemdJournal) Send(p level.Priority, m message.Composer) {
+func (s *systemdJournal) Send(m message.Composer) {
 	if !s.level.ShouldLog(m) {
 		return
 	}
