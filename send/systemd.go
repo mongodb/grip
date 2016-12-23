@@ -15,6 +15,7 @@ import (
 type systemdJournal struct {
 	options  map[string]string
 	fallback *log.Logger
+	*base
 }
 
 // NewJournaldLogger creates a Sender object that writes log messages
@@ -46,6 +47,7 @@ func (s *systemdJournal) Type() SenderType { return Systemd }
 func (s *systemdJournal) Send(m message.Composer) {
 	if s.level.ShouldLog(m) {
 		msg := m.Resolve()
+		p := m.Priority()
 		err := journal.Send(msg, s.Level().convertPrioritySystemd(p), s.options)
 		if err != nil {
 			s.fallback.Println("systemd journaling error:", err.Error())

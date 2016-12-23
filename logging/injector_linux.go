@@ -7,12 +7,12 @@ import "github.com/tychoish/grip/send"
 // changing the configuration of the Journaler.
 func (g *Grip) UseSystemdLogger() error {
 	// name, threshold, default
-	sender, err := send.NewJournaldLogger(g.sender.Name(), g.sender.Level())
+	sender, err := send.NewJournaldLogger(g.GetSender().Name(), g.GetSender().Level())
 
 	if err != nil {
 		// as long as a sender isn't nil, its better to use it
 		// than bootstrap, even if there were errors.
-		if sender != nil && g.Sender().Type() == send.Bootstrap {
+		if sender != nil && g.GetSender().Type() == send.Bootstrap {
 			g.SetSender(sender)
 		}
 		return err
