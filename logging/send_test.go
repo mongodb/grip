@@ -108,6 +108,6 @@ func TestSendFatalExits(t *testing.T) {
 	cmd.Env = append(os.Environ(), "SHOULD_CRASH=1")
 	err := cmd.Run()
 	if err == nil {
-		t.Errorf("sendFatal should have exited 0, instead: %s", err.Error())
+		t.Errorf("sendFatal should have exited 0, instead: %+v", err)
 	}
 }

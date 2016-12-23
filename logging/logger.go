@@ -36,20 +36,16 @@ func (g *Grip) sendPanic(m message.Composer) {
 	// the Send method in the Sender interface will perform this
 	// check but to add fatal methods we need to do this here.
 	if g.Level().ShouldLog(m) {
-		return
+		g.Send(m)
+		panic(m.Resolve())
 	}
-
-	g.Send(m)
-	panic(m.Resolve())
 }
 
 func (g *Grip) sendFatal(m message.Composer) {
 	// the Send method in the Sender interface will perform this
 	// check but to add fatal methods we need to do this here.
 	if g.Level().ShouldLog(m) {
-		return
+		g.Send(m)
+		os.Exit(1)
 	}
-
-	g.Send(m)
-	os.Exit(1)
 }
