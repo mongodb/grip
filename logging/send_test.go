@@ -58,7 +58,7 @@ func (s *GripInternalSuite) TestPanicSenderActuallyPanics() {
 }
 
 func (s *GripInternalSuite) TestPanicSenderRespectsTThreshold() {
-	s.True(level.Debug > s.grip.DefaultLevel())
+	s.True(level.Debug < s.grip.DefaultLevel())
 
 	// test that there is a no panic if the message isn't "logabble"
 	defer func() {

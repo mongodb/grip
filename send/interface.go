@@ -62,5 +62,5 @@ func (l LevelInfo) Valid() bool {
 // is below the logging threshold.
 func (l LevelInfo) ShouldLog(m message.Composer) bool {
 	// priorities are 0 = Emergency; 7 = debug
-	return m.Loggable() && (m.Priority() <= l.Threshold)
+	return m.Loggable() && (m.Priority() >= l.Threshold)
 }
