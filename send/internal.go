@@ -1,6 +1,8 @@
 package send
 
 import (
+	"errors"
+
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
 )
@@ -50,6 +52,10 @@ func (s *internalSender) Type() SenderType { return Internal }
 func (s *internalSender) Level() LevelInfo { return s.level }
 
 func (s *internalSender) SetLevel(l LevelInfo) error {
+	if !l.Valid() {
+		return errors.New("invalid level")
+	}
+
 	s.level = l
 	return nil
 }

@@ -32,7 +32,6 @@ func NewNativeLogger(name string, l LevelInfo) (Sender, error) {
 	return s, nil
 }
 
-func (s *nativeLogger) Close() error     { return nil }
 func (s *nativeLogger) Type() SenderType { return Native }
 func (s *nativeLogger) Send(m message.Composer) {
 	if s.Level().ShouldLog(m) {

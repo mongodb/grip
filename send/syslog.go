@@ -8,7 +8,6 @@ import (
 	"log/syslog"
 	"os"
 	"strings"
-	"sync"
 
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
@@ -18,7 +17,6 @@ type syslogger struct {
 	logger   *syslog.Writer
 	fallback *log.Logger
 	*base
-	sync.RWMutex
 }
 
 // NewSyslogLogger creates a new Sender object taht writes all
@@ -33,11 +31,21 @@ func NewSyslogLogger(name, network, raddr string, l LevelInfo) (Sender, error) {
 
 	s.reset = func() {
 		s.fallback = log.New(os.Stdout, strings.Join([]string{"[", s.Name(), "] "}, ""), log.LstdFlags)
+
+		if err := s.Close(); err != nil {
+			s.fallback.Printf("problem closing existing syslogger: %+v", err)
+		}
+
 		w, err := syslog.Dial(network, raddr, syslog.Priority(l.Default), s.Name())
 		if err != nil {
 			s.fallback.Printf("error restarting syslog [%s] for logger: %s", err.Error(), s.Name())
 			return
 		}
+
+		s.closer = func() error {
+			return w.Close()
+		}
+
 		s.logger = w
 	}
 
@@ -88,7 +96,7 @@ func (s *syslogger) sendToSysLog(p level.Priority, message string) error {
 		return s.logger.Notice(message)
 	case level.Info:
 		return s.logger.Info(message)
-	case level.Debug:
+	case level.Debug, level.Trace:
 		return s.logger.Debug(message)
 	}
 

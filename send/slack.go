@@ -78,7 +78,6 @@ func NewSlackDefault(name, channel string, l LevelInfo) (Sender, error) {
 }
 
 func (s *slackJournal) Type() SenderType { return Slack }
-func (s *slackJournal) Close() error     { return nil }
 
 func (s *slackJournal) Send(m message.Composer) {
 	if !s.level.ShouldLog(m) {

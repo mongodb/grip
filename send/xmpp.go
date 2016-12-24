@@ -60,6 +60,10 @@ func NewXMPPLogger(name, target string, info XMPPConnectionInfo, l LevelInfo) (S
 	}
 	s.client = client
 
+	s.closer = func() error {
+		return client.Close()
+	}
+
 	s.reset()
 
 	return s, nil
@@ -84,7 +88,6 @@ func NewXMPPDefault(name, target string, l LevelInfo) (Sender, error) {
 }
 
 func (s *xmppLogger) Type() SenderType { return Xmpp }
-func (s *xmppLogger) Close() error     { return s.client.Close() }
 
 func (s *xmppLogger) Send(m message.Composer) {
 	if s.level.ShouldLog(m) {

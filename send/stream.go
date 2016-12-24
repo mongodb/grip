@@ -27,7 +27,6 @@ func NewStreamLogger(name string, ws WriteStringer, l LevelInfo) (Sender, error)
 	return s, nil
 }
 
-func (s *streamLogger) Close() error     { return nil }
 func (s *streamLogger) Type() SenderType { return Stream }
 func (s *streamLogger) Send(m message.Composer) {
 	if s.level.ShouldLog(m) {

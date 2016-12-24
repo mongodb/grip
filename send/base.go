@@ -6,18 +6,22 @@ import (
 )
 
 type base struct {
-	name  string
-	level LevelInfo
-	reset func()
+	name   string
+	level  LevelInfo
+	reset  func()
+	closer func() error
 	sync.RWMutex
 }
 
 func newBase(n string) *base {
 	return &base{
-		name:  n,
-		reset: func() {},
+		name:   n,
+		reset:  func() {},
+		closer: func() error { return nil },
 	}
 }
+
+func (b *base) Close() error { return b.closer() }
 
 func (b *base) Name() string {
 	b.RLock()

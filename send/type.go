@@ -6,8 +6,7 @@ const (
 	Custom SenderType = iota
 	Systemd
 	Native
-	JsonConsole
-	JsonFile
+	Json
 	Syslog
 	Internal
 	Multi
@@ -38,10 +37,8 @@ func (t SenderType) String() string {
 		return "slack"
 	case Xmpp:
 		return "xmpp"
-	case JsonConsole:
-		return "json-console"
-	case JsonFile:
-		return "json-file"
+	case Json:
+		return "json"
 	case Stream:
 		return "stream"
 	case Multi:

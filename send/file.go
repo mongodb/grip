@@ -10,8 +10,7 @@ import (
 )
 
 type fileLogger struct {
-	logger  *log.Logger
-	fileObj *os.File
+	logger *log.Logger
 	*base
 }
 
@@ -30,10 +29,13 @@ func NewFileLogger(name, filePath string, l LevelInfo) (Sender, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error opening logging file, %s", err.Error())
 	}
-	s.fileObj = f
 
 	s.reset = func() {
-		s.logger = log.New(s.fileObj, strings.Join([]string{"[", s.Name(), "] "}, ""), log.LstdFlags)
+		s.logger = log.New(f, strings.Join([]string{"[", s.Name(), "] "}, ""), log.LstdFlags)
+	}
+
+	s.closer = func() error {
+		return f.Close()
 	}
 
 	s.reset()
@@ -41,7 +43,6 @@ func NewFileLogger(name, filePath string, l LevelInfo) (Sender, error) {
 	return s, nil
 }
 
-func (f *fileLogger) Close() error     { return f.fileObj.Close() }
 func (f *fileLogger) Type() SenderType { return File }
 func (f *fileLogger) Send(m message.Composer) {
 	if f.level.ShouldLog(m) {

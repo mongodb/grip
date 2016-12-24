@@ -72,7 +72,7 @@ func (l LevelInfo) convertPrioritySystemd(p level.Priority) journal.Priority {
 		return journal.PriNotice
 	case level.Info:
 		return journal.PriInfo
-	case level.Debug:
+	case level.Debug, level.Trace:
 		return journal.PriDebug
 	default:
 		return l.convertPrioritySystemd(l.Default)

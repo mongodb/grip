@@ -61,8 +61,7 @@ func NewJSONFileLogger(name, file string, l LevelInfo) (Sender, error) {
 	return s, nil
 }
 
-func (s *jsonLogger) Close() error     { return s.closer() }
-func (s *jsonLogger) Type() SenderType { return Native }
+func (s *jsonLogger) Type() SenderType { return Json }
 func (s *jsonLogger) Send(m message.Composer) {
 	if s.Level().ShouldLog(m) {
 		out, err := json.Marshal(m.Raw())
@@ -72,12 +71,12 @@ func (s *jsonLogger) Send(m message.Composer) {
 
 			out, err = json.Marshal(message.NewDefaultMessage(m.Priority(), m.Resolve()).Raw())
 			if err == nil {
-				s.logger.Println(out)
+				s.logger.Println(string(out))
 			}
 
 			return
 		}
 
-		s.logger.Println(out)
+		s.logger.Println(string(out))
 	}
 }
