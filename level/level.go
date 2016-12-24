@@ -17,15 +17,15 @@ type Priority int
 // Constants defined for easy access to
 const (
 	Emergency Priority = 100
-	Alert              = 90
-	Critical           = 80
-	Error              = 70
-	Warning            = 60
-	Notice             = 50
-	Info               = 40
-	Debug              = 30
-	Trace              = 20
-	Invalid            = 0
+	Alert     Priority = 90
+	Critical  Priority = 80
+	Error     Priority = 70
+	Warning   Priority = 60
+	Notice    Priority = 50
+	Info      Priority = 40
+	Debug     Priority = 30
+	Trace     Priority = 20
+	Invalid   Priority = 0
 )
 
 // String implements the Stringer interface and makes it possible to
