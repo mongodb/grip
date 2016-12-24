@@ -67,7 +67,7 @@ func (m *errorWrapMessage) Raw() interface{} {
 }
 
 func (m *errorWrapMessage) Loggable() bool {
-	if m.err == nil && m.base == "" {
+	if m.err == nil {
 		return false
 	}
 
