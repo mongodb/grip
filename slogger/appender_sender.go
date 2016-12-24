@@ -26,9 +26,6 @@ type appenderSender struct {
 // is to use a slogger.Appender. This allows using the grip package,
 // either via the slogger interface or the normal grip Jouernaler
 // interface, while continuing to use existing slogger code.
-//
-// Following from the behavior of original Appenders, and contrary to these sender
-// objects do *not* filter messages
 func NewAppenderSender(name string, a Appender) send.Sender {
 	return &appenderSender{
 		appender: a,
@@ -40,9 +37,6 @@ func NewAppenderSender(name string, a Appender) send.Sender {
 // WrapAppender takes an Appender instance and returns a send.Sender
 // instance that wraps it. The name defaults to the name of the
 // process (argc).
-//
-// Following from the behavior of original Appenders, and contrary to these sender
-// objects do *not* filter messages
 func WrapAppender(a Appender) send.Sender {
 	return &appenderSender{
 		appender: a,
@@ -52,12 +46,11 @@ func WrapAppender(a Appender) send.Sender {
 }
 
 // TODO: we may want to add a mutex here
-func (a *appenderSender) Close() error            { return nil }
-func (a *appenderSender) Name() string            { return a.name }
-func (a *appenderSender) SetName(n string)        { a.name = n }
-func (a *appenderSender) Type() send.SenderType   { return send.Custom }
-func (a *appenderSender) Send(m message.Composer) { _ = a.appender.Append(NewLog(m)) }
-func (a *appenderSender) Level() send.LevelInfo   { return a.level }
+func (a *appenderSender) Close() error          { return nil }
+func (a *appenderSender) Name() string          { return a.name }
+func (a *appenderSender) SetName(n string)      { a.name = n }
+func (a *appenderSender) Type() send.SenderType { return send.Custom }
+func (a *appenderSender) Level() send.LevelInfo { return a.level }
 func (a *appenderSender) SetLevel(l send.LevelInfo) error {
 	if !l.Valid() {
 		return fmt.Errorf("level settings are not valid: %+v", l)
@@ -65,4 +58,10 @@ func (a *appenderSender) SetLevel(l send.LevelInfo) error {
 
 	a.level = l
 	return nil
+}
+
+func (a *appenderSender) Send(m message.Composer) {
+	if a.level.ShouldLog(m) {
+		_ = a.appender.Append(NewLog(m))
+	}
 }
