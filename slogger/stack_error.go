@@ -34,6 +34,10 @@ func (s *StackError) Raw() interface{} {
 
 func (s *StackError) Error() string { return s.Resolve() }
 func (s *StackError) Resolve() string {
+	if !s.Composer.Loggable() {
+		return ""
+	}
+
 	if s.message != "" {
 		return s.message
 	}

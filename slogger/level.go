@@ -44,7 +44,7 @@ func (l Level) Priority() level.Priority {
 
 func convertFromPriority(l level.Priority) Level {
 	switch l {
-	case level.Emergency, level.Alert, level.Critical, level.Error:
+	case level.Emergency, level.Alert, level.Critical, level.Error, level.Warning:
 		return WARN
 	case level.Notice, level.Info:
 		return INFO
