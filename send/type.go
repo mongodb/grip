@@ -10,6 +10,7 @@ const (
 	JsonFile
 	Syslog
 	Internal
+	Multi
 	File
 	Slack
 	Xmpp
@@ -43,6 +44,8 @@ func (t SenderType) String() string {
 		return "json-file"
 	case Stream:
 		return "stream"
+	case Multi:
+		return "multi"
 	default:
 		return "native"
 	}

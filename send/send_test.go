@@ -43,3 +43,11 @@ func (s *SenderSuite) TestXmppSenderImplementsInterface() {
 func (s *SenderSuite) TestJsonSenderImplementsInterface() {
 	s.Implements((*Sender)(nil), new(jsonLogger), "json")
 }
+
+func (s *SenderSuite) TestMultiSenderImplementsInterface() {
+	s.Implements((*Sender)(nil), new(multiSender), "json")
+}
+
+func (s *SenderSuite) TestMultiSenderImplementsInterface() {
+	s.Implements((*Sender)(nil), new(multiSender), "json")
+}
