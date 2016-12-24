@@ -22,7 +22,6 @@ func TestLogType(t *testing.T) {
 	assert.Implements((*message.Composer)(nil), plog)
 
 	// make sure that the constructors handle level setting
-	fmt.Printf("%T %T", log.Priority(), level.Info)
 	assert.Equal(log.Priority(), level.Info)
 	assert.Equal(plog.Priority(), level.Info)
 

@@ -28,7 +28,7 @@ func (s *AppenderSenderSuite) SetupSuite() {
 func (s *AppenderSenderSuite) SetupTest() {
 	s.buffer = bytes.NewBuffer([]byte{})
 	s.appender = NewStringAppender(s.buffer)
-	s.sender = NewAppenderSender("gripTest", s.appender)
+	s.sender = NewAppenderSender("gripTest", SenderAppender{s.appender})
 }
 
 func (s *AppenderSenderSuite) TearDownSuite() {
@@ -38,6 +38,5 @@ func (s *AppenderSenderSuite) TearDownSuite() {
 }
 
 func (s *AppenderSenderSuite) Test() {
-	s.Test(true)
 	s.require.False(false)
 }

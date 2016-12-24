@@ -59,3 +59,13 @@ func LevelFilter(threshold Level, sender send.Sender) send.Sender {
 
 	return sender
 }
+
+type SenderAppender struct {
+	send.Sender
+}
+
+func (s SenderAppender) Append(log *Log) error {
+	s.Send(log)
+
+	return nil
+}

@@ -51,6 +51,6 @@ func TestLoggerStackf(t *testing.T) {
 	assert.True(len(errs) == 0)
 	assert.NotNil(l)
 
-	assert.Equal(sink.GetMessage().Rendered, "foo bar\nbaz")
+	assert.True(strings.HasSuffix(sink.GetMessage().Rendered, "foo bar\nbaz\n"))
 
 }

@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/tychoish/grip/level"
+	"github.com/tychoish/grip/message"
 	"github.com/tychoish/grip/send"
 )
 
@@ -51,12 +52,12 @@ func WrapAppender(a Appender) send.Sender {
 }
 
 // TODO: we may want to add a mutex here
-func (a *appenderSender) Close() error             { return nil }
-func (a *appenderSender) Name() string             { return a.name }
-func (a *appenderSender) SetName(n string)         { a.name = n }
-func (a *appenderSender) Type() send.SenderType    { return send.Custom }
-func (a *appenderSender) Send(m messoage.Composer) { _ = a.appender.Log(NewLog(m)) }
-func (a *appenderSender) Level() send.LevelInfo    { return a.level }
+func (a *appenderSender) Close() error            { return nil }
+func (a *appenderSender) Name() string            { return a.name }
+func (a *appenderSender) SetName(n string)        { a.name = n }
+func (a *appenderSender) Type() send.SenderType   { return send.Custom }
+func (a *appenderSender) Send(m message.Composer) { _ = a.appender.Append(NewLog(m)) }
+func (a *appenderSender) Level() send.LevelInfo   { return a.level }
 func (a *appenderSender) SetLevel(l send.LevelInfo) error {
 	if !l.Valid() {
 		return fmt.Errorf("level settings are not valid: %+v", l)
