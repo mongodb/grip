@@ -10,6 +10,14 @@ import (
 	"github.com/tychoish/grip/message"
 )
 
+// Log is a representation of a logging event, which matches the
+// structure and interface of the original slogger Log
+// type. Additionally implements grip's "message.Composer" interface
+// for use with other logging mechanisms.
+//
+// Note that the Resolve() method, which Sender's use to format the
+// output of the log lines includes timestamp and component
+// (name/prefix) information.
 type Log struct {
 	Prefix    string    `bson:"prefix,omitempty" json:"prefix,omitempty" yaml:"prefix,omitempty"`
 	Level     Level     `bson:"level" json:"level" yaml:"level"`
@@ -20,10 +28,13 @@ type Log struct {
 	msg       message.Composer
 }
 
+// FormatLog provides compatibility with the original slogger
+// implementation.
 func FormatLog(log *Log) string {
 	return log.Resolve()
 }
 
+// Message returns the formatted log message.
 func (l *Log) Message() string                      { return l.msg.Resolve() }
 func (l *Log) Priority() level.Priority             { return l.Level.Priority() }
 func (l *Log) SetPriority(lvl level.Priority) error { l.Level = convertFromPriority(lvl); return nil }
@@ -44,6 +55,10 @@ func (l *Log) Resolve() string {
 
 	return l.Output
 }
+
+// TODO(tycho) have the public constructors call appendCallerInfo at
+// current-1 so they're usable generally, and then have one to use in
+// the loggers which is private and matches the current settings
 
 func NewLog(m message.Composer) *Log {
 	l := &Log{

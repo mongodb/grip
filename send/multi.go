@@ -65,7 +65,7 @@ func AddToMulti(multi Sender, s Sender) error {
 		return fmt.Errorf("%s is not a multi sender", multi.Name())
 	}
 
-	sender.add(s)
+	return sender.add(s)
 }
 
 func (s *multiSender) Close() error {
@@ -76,7 +76,7 @@ func (s *multiSender) Close() error {
 		}
 	}
 	if len(errs) > 0 {
-		return errors.New(strings.Join(errs))
+		return errors.New(strings.Join(errs, "\n"))
 	}
 
 	return nil
@@ -94,7 +94,7 @@ func (s *multiSender) add(sender Sender) error {
 }
 
 func (s *multiSender) Type() SenderType { return Multi }
-func (s *multiSender) Name() string     { s.base.Name() }
+func (s *multiSender) Name() string     { return s.base.Name() }
 func (s *multiSender) SetName(n string) {
 	s.base.SetName(n)
 
@@ -112,6 +112,8 @@ func (s *multiSender) SetLevel(l LevelInfo) error {
 	for _, sender := range s.senders {
 		_ = sender.SetLevel(l)
 	}
+
+	return nil
 }
 
 func (s *multiSender) Send(m message.Composer) {

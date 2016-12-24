@@ -14,20 +14,14 @@ type Journaler interface {
 
 	// Methods to access the underlying message sending backend.
 	GetSender() send.Sender
-	SetSender(send.Sender)
-	CloneSender(send.Sender)
+	SetSender(send.Sender) error
 
 	// Configure the default and threshold levels of the current
 	// sender.
-	SetThreshold(level interface{})
+	SetThreshold(interface{})
 	ThresholdLevel() level.Priority
 	SetDefaultLevel(interface{})
 	DefaultLevel() level.Priority
-
-	// Switch to other basic (and easy to configure) message sending backends.
-	UseFileLogger(string) error
-	UseNativeLogger() error
-	UseSystemdLogger() error
 
 	// Specify a log level as an argument rather than a method
 	// name.

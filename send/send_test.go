@@ -48,6 +48,6 @@ func (s *SenderSuite) TestMultiSenderImplementsInterface() {
 	s.Implements((*Sender)(nil), new(multiSender), "json")
 }
 
-func (s *SenderSuite) TestMultiSenderImplementsInterface() {
-	s.Implements((*Sender)(nil), new(multiSender), "json")
+func (s *SenderSuite) TestStreamSenderImplementsInterface() {
+	s.Implements((*Sender)(nil), new(streamLogger), "json")
 }

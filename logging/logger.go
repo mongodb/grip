@@ -24,7 +24,7 @@ type Grip struct{ send.Sender }
 // Grip instance with configured with a Bootstrap logging
 // instance. The default level is "Notice" and the threshold level is
 // "info."
-func NewSingleGrip(name string) *Grip {
+func NewGrip(name string) *Grip {
 	return &Grip{send.NewBootstrapLogger(name,
 		send.LevelInfo{
 			Threshold: level.Info,
@@ -34,10 +34,6 @@ func NewSingleGrip(name string) *Grip {
 }
 
 // Internal
-
-func (g *Grip) send(m message.Composer) {
-	g.Send(m)
-}
 
 // For sending logging messages, in most cases, use the
 // Journaler.sender.Send() method, but we have a couple of methods to
@@ -57,62 +53,5 @@ func (g *Grip) sendFatal(m message.Composer) {
 	if g.Level().ShouldLog(m) {
 		g.Send(m)
 		os.Exit(1)
-	}
-}
-
-///////////////////////////////////////////////////////////////////////////
-//
-//
-//
-///////////////////////////////////////////////////////////////////////////
-
-type MultiGrip struct {
-	senders []send.Sender
-}
-
-func NewMultiGrip(name string, senders ...send.Sender) *MultiGrip {
-	g := *MultiGrip{}
-
-	for _, s := range senders {
-		s.SetName(name)
-		g.senders = append(g.senders, s)
-	}
-
-	return g
-}
-
-func (g *MultiGrip) send(m message.Composer) {
-	for _, s := range g.senders {
-		s.Send(m)
-	}
-}
-
-func (g *MultiGrip) sendPantic(m message.Composer) {
-	var shouldPanic bool
-
-	for _, s := range g.senders {
-		if s.Level().ShouldLog(m) {
-			shouldPanic = true
-			s.Send(m)
-		}
-	}
-
-	if shouldPanic {
-		panic(m.Resolve())
-	}
-}
-
-func (g *MultiGrip) sendPantic(m message.Composer) {
-	var shouldPanic bool
-
-	for _, s := range g.senders {
-		if s.Level().ShouldLog(m) {
-			shouldPanic = true
-			s.Send(m)
-		}
-	}
-
-	if shouldPanic {
-		panic(m.Resolve())
 	}
 }
