@@ -62,29 +62,43 @@ func (l *Log) Resolve() string {
 
 func NewLog(m message.Composer) *Log {
 	l := &Log{
-		Level: convertFromPriority(m.Priority()),
-		msg:   m,
+		Level:     convertFromPriority(m.Priority()),
+		Timestamp: time.Now(),
+		msg:       m,
 	}
-	l.appendCallerInfo()
+	l.appendCallerInfo(2)
+	return l
+}
+
+func newLog(m message.Composer) *Log {
+	l := &Log{
+		Level:     convertFromPriority(m.Priority()),
+		Timestamp: time.Now(),
+		msg:       m,
+	}
+	l.appendCallerInfo(3)
 	return l
 }
 
 func NewPrefixedLog(prefix string, m message.Composer) *Log {
 	l := NewLog(m)
 	l.Prefix = prefix
-	l.appendCallerInfo()
+	l.appendCallerInfo(2)
 	return l
 }
 
-func (l *Log) appendCallerInfo() {
-	// depending on where we call this from, this 2 could be quite
-	// wrong and lead to weird references.
-	//
-	// It'll be correct if called from within one of the logging
-	// methods, and is one level too far if called directly.
-	_, file, line, ok := runtime.Caller(3)
+func newPrefixedLog(prefix string, m message.Composer) *Log {
+	l := newLog(m)
+	l.Prefix = prefix
+	l.appendCallerInfo(3)
+	return l
+
+}
+
+func (l *Log) appendCallerInfo(skip int) {
+	_, file, line, ok := runtime.Caller(skip)
 	if ok {
-		l.Filename = stripDirectories(file, 2)
+		l.Filename = stripDirectories(file, 1)
 		l.Line = line
 	}
 }
@@ -99,7 +113,7 @@ func stacktrace() []string {
 			break
 		}
 
-		ret = append(ret, fmt.Sprintf("at %s:%d", stripDirectories(file, 2), line))
+		ret = append(ret, fmt.Sprintf("at %s:%d", stripDirectories(file, 1), line))
 	}
 
 	return ret

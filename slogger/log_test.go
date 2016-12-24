@@ -39,9 +39,9 @@ func TestLogType(t *testing.T) {
 	// prefixing should persist
 	assert.Equal(log.Prefix, "")
 	assert.Equal(plog.Prefix, "grip")
-	assert.True(strings.Contains(plog.Resolve(), "grip"))
-	assert.False(strings.Contains(log.Resolve(), "grip"))
-
+	assert.True(strings.Contains(plog.Resolve(), "grip"), fmt.Sprintf("%+v", log))
+	assert.False(strings.Contains(log.Resolve(), "grip"), fmt.Sprintf("%+v", log))
+	fmt.Println(fmt.Sprintf("%+v", log))
 	assert.Equal(FormatLog(log), log.Resolve())
 	assert.Equal(FormatLog(plog), plog.Resolve())
 

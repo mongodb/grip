@@ -25,7 +25,7 @@ type Logger struct {
 // In this implementation, Logf will never return an error. This part
 // of the type definition was retained for backwards compatibility
 func (l *Logger) Logf(level Level, messageFmt string, args ...interface{}) (*Log, []error) {
-	m := NewPrefixedLog(l.Name, message.NewFormattedMessage(level.Priority(), messageFmt, args...))
+	m := newPrefixedLog(l.Name, message.NewFormattedMessage(level.Priority(), messageFmt, args...))
 
 	for _, send := range l.Appenders {
 		send.Send(m)
@@ -45,7 +45,7 @@ func (l *Logger) Logf(level Level, messageFmt string, args ...interface{}) (*Log
 // }
 func (l *Logger) Errorf(level Level, messageFmt string, args ...interface{}) error {
 	m := message.NewFormattedMessage(level.Priority(), messageFmt, args...)
-	log := NewPrefixedLog(l.Name, m)
+	log := newPrefixedLog(l.Name, m)
 
 	for _, send := range l.Appenders {
 		send.Send(log)
@@ -65,7 +65,7 @@ func (l *Logger) Errorf(level Level, messageFmt string, args ...interface{}) err
 // An additional difference is that the new implementation, will not
 // log if the error is nil, and the previous implementation would.
 func (l *Logger) Stackf(level Level, stackErr error, messageFmt string, args ...interface{}) (*Log, []error) {
-	m := NewPrefixedLog(l.Name, message.NewErrorWrapMessage(level.Priority(), stackErr, messageFmt, args...))
+	m := newPrefixedLog(l.Name, message.NewErrorWrapMessage(level.Priority(), stackErr, messageFmt, args...))
 
 	// this check is not neccessary, but prevents redundancy if
 	// there are multiple senders, as each might need to perform this
