@@ -63,8 +63,8 @@ func NewSlackLogger(name, token, channel, hostname string, l LevelInfo) (Sender,
 // Sender reading the slack token from the environment variable
 // "GRIP_SLACK_CLIENT_TOKEN".
 func NewSlackDefault(name, channel string, l LevelInfo) (Sender, error) {
-	token, ok := os.LookupEnv(slackClientToken)
-	if !ok {
+	token := os.Getenv(slackClientToken)
+	if token == "" {
 		return nil, fmt.Errorf("environment variable %s not defined, cannot create slack client",
 			"foo")
 	}
