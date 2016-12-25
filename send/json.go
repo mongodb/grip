@@ -63,7 +63,7 @@ func NewJSONFileLogger(name, file string, l LevelInfo) (Sender, error) {
 
 func (s *jsonLogger) Type() SenderType { return Json }
 func (s *jsonLogger) Send(m message.Composer) {
-	if s.Level().ShouldLog(m) {
+	if s.level.ShouldLog(m) {
 		out, err := json.Marshal(m.Raw())
 		if err != nil {
 			errMsg, _ := json.Marshal(message.NewError(err).Raw())
