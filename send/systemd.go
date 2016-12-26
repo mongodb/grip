@@ -22,23 +22,32 @@ type systemdJournal struct {
 // to the system's systemd journald logging facility. If there's an
 // error with the sending to the journald, messages fallback to
 // writing to standard output.
-func NewJournaldLogger(name string, l LevelInfo) (Sender, error) {
+func NewSystemdLogger(name string, l LevelInfo) (Sender, error) {
+	s := MakeSystemdLogger()
+
+	if err := s.SetLevel(l); err != nil {
+		return nil, err
+	}
+
+	s.SetName(name)
+	s.reset()
+
+	return s, nil
+}
+
+// MakeSystemdLogger constructs an unconfigured systemd journald
+// logger. Pass to Journaler.SetSender or call SetName before using.
+func MakeSystemdLogger() Sender {
 	s := &systemdJournal{
 		options: make(map[string]string),
-		base:    newBase(name),
+		base:    newBase(""),
 	}
 
 	s.reset = func() {
 		s.fallback = log.New(os.Stdout, strings.Join([]string{"[", s.Name(), "] "}, ""), log.LstdFlags)
 	}
 
-	if err := s.SetLevel(l); err != nil {
-		return nil, err
-	}
-
-	s.reset()
-
-	return s, nil
+	return s
 }
 
 func (s *systemdJournal) Close() error     { return nil }
@@ -48,7 +57,7 @@ func (s *systemdJournal) Send(m message.Composer) {
 	if s.level.ShouldLog(m) {
 		msg := m.Resolve()
 		p := m.Priority()
-		err := journal.Send(msg, s.Level().convertPrioritySystemd(p), s.options)
+		err := journal.Send(msg, s.level.convertPrioritySystemd(p), s.options)
 		if err != nil {
 			s.fallback.Println("systemd journaling error:", err.Error())
 			s.fallback.Printf("[p=%s]: %s", p, msg)

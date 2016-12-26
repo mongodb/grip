@@ -27,16 +27,31 @@ type syslogger struct {
 // to the local syslog interface before writing messages to standard
 // output.
 func NewSyslogLogger(name, network, raddr string, l LevelInfo) (Sender, error) {
-	s := &syslogger{base: newBase(name)}
+	s := MakeSysLogger(network, raddr)
+
+	if err := s.SetLevel(l); err != nil {
+		return nil, err
+	}
+
+	s.SetName(name)
+
+	return s, nil
+}
+
+// MakeSysLogger constructs a minimal and unconfigured logger that
+// posts to systemd's journal.
+// Pass to Journaler.SetSender or call SetName before using.
+func MakeSysLogger(network, raddr string) Sender {
+	s := &syslogger{base: newBase("")}
 
 	s.reset = func() {
-		s.fallback = log.New(os.Stdout, strings.Join([]string{"[", s.Name(), "] "}, ""), log.LstdFlags)
+		s.fallback = log.New(os.Stderr, strings.Join([]string{"[", s.Name(), "] "}, ""), log.LstdFlags)
 
 		if err := s.Close(); err != nil {
 			s.fallback.Printf("problem closing existing syslogger: %+v", err)
 		}
 
-		w, err := syslog.Dial(network, raddr, syslog.Priority(l.Default), s.Name())
+		w, err := syslog.Dial(network, raddr, syslog.LOG_DEBUG, s.Name())
 		if err != nil {
 			s.fallback.Printf("error restarting syslog [%s] for logger: %s", err.Error(), s.Name())
 			return
@@ -49,21 +64,16 @@ func NewSyslogLogger(name, network, raddr string, l LevelInfo) (Sender, error) {
 		s.logger = w
 	}
 
-	if err := s.SetLevel(l); err != nil {
-		return nil, err
-	}
-
-	s.reset()
-	return s, nil
+	return s
 }
 
-// NewLocalSyslogLogger is a constructor for creating the same kind of
+// MakeLocalSyslogLogger is a constructor for creating the same kind of
 // Sender instance as NewSyslogLogger, except connecting directly to
 // the local syslog service. If there is no local syslog service, or
 // there are issues connecting to it, writes logging messages to
-// standard error.
-func NewLocalSyslogLogger(name string, l LevelInfo) (Sender, error) {
-	return NewSyslogLogger(name, "", "", l)
+// standard error. Pass to Journaler.SetSender or call SetName before using.
+func MakeLocalSyslogLogger() Sender {
+	return MakeSysLogger("", "")
 }
 
 func (s *syslogger) Close() error     { return s.logger.Close() }

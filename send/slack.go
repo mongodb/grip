@@ -59,10 +59,10 @@ func NewSlackLogger(name, token, channel, hostname string, l LevelInfo) (Sender,
 	return s, nil
 }
 
-// NewSlackDefault is equivalent to NewSlackLogger, but constructs a
+// MakeSlackLogger is equivalent to NewSlackLogger, but constructs a
 // Sender reading the slack token from the environment variable
 // "GRIP_SLACK_CLIENT_TOKEN".
-func NewSlackDefault(name, channel string, l LevelInfo) (Sender, error) {
+func MakeSlackLogger(channel string) (Sender, error) {
 	token := os.Getenv(slackClientToken)
 	if token == "" {
 		return nil, fmt.Errorf("environment variable %s not defined, cannot create slack client",
@@ -74,7 +74,7 @@ func NewSlackDefault(name, channel string, l LevelInfo) (Sender, error) {
 		return nil, fmt.Errorf("error resolving hostname for slack logger: %v", err)
 	}
 
-	return NewSlackLogger(name, token, channel, hostname, l)
+	return NewSlackLogger("", token, channel, hostname, LevelInfo{level.Trace, level.Trace})
 }
 
 func (s *slackJournal) Type() SenderType { return Slack }

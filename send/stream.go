@@ -14,17 +14,22 @@ type streamLogger struct {
 }
 
 func NewStreamLogger(name string, ws WriteStringer, l LevelInfo) (Sender, error) {
-	s := &streamLogger{
-		fobj: ws,
-		base: newBase(name),
-	}
+	s := MakeStreamLogger(ws)
 
 	if err := s.SetLevel(l); err != nil {
 		return nil, err
 	}
-	s.reset = func() {}
+
+	s.SetName(name)
 
 	return s, nil
+}
+
+func MakeStreamLogger(ws WriteStringer) Sender {
+	return &streamLogger{
+		fobj: ws,
+		base: newBase(""),
+	}
 }
 
 func (s *streamLogger) Type() SenderType { return Stream }

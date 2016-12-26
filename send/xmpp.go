@@ -35,17 +35,66 @@ const (
 // a connection to the server via SSL, falling back automatically to an
 // unencrypted connection if the the first attempt fails.
 func NewXMPPLogger(name, target string, info XMPPConnectionInfo, l LevelInfo) (Sender, error) {
-	s := &xmppLogger{
-		base:   newBase(name),
-		target: target,
+	s, err := constructXMPPLogger(target, info)
+	if err != nil {
+		return nil, err
 	}
 
 	if err := s.SetLevel(l); err != nil {
 		return nil, err
 	}
 
-	s.reset = func() {
-		s.fallback = log.New(os.Stdout, strings.Join([]string{"[", s.Name(), "] "}, ""), log.LstdFlags)
+	s.SetName(name)
+
+	return s, nil
+}
+
+// MakeXMPPLogger constructs an XMPP logging backend that reads the
+// hostname, username, and password from environment variables:
+//
+//    - GRIP_XMPP_HOSTNAME
+//    - GRIP_XMPP_USERNAME
+//    - GRIP_XMPP_PASSWORD
+//
+// The instance is otherwise unconquered. Call SetName or inject it
+// into a Journaler instance using SetSender before using.
+func MakeXMPP(target string) (Sender, error) {
+	info := XMPPConnectionInfo{
+		Hostname: os.Getenv(xmppHostEnvVar),
+		Username: os.Getenv(xmppUsernameEnvVar),
+		Password: os.Getenv(xmppUsernameEnvVar),
+	}
+
+	s, err := constructXMPPLogger(target, info)
+	if err != nil {
+		return nil, err
+	}
+
+	return s, nil
+}
+
+// NewXMPP constructs an XMPP logging backend that reads the
+// hostname, username, and password from environment variables:
+//
+//    - GRIP_XMPP_HOSTNAME
+//    - GRIP_XMPP_USERNAME
+//    - GRIP_XMPP_PASSWORD
+//
+// Otherwise, the semantics of NewXMPPDefault are the same as NewXMPPLogger.
+func NewXMPP(name, target string, l LevelInfo) (Sender, error) {
+	info := XMPPConnectionInfo{
+		Hostname: os.Getenv(xmppHostEnvVar),
+		Username: os.Getenv(xmppUsernameEnvVar),
+		Password: os.Getenv(xmppUsernameEnvVar),
+	}
+
+	return NewXMPPLogger(name, target, info, l)
+}
+
+func constructXMPPLogger(target string, info XMPPConnectionInfo) (Sender, error) {
+	s := &xmppLogger{
+		base:   newBase(""),
+		target: target,
 	}
 
 	client, err := xmpp.NewClient(info.Hostname, info.Username, info.Password, false)
@@ -60,31 +109,15 @@ func NewXMPPLogger(name, target string, info XMPPConnectionInfo, l LevelInfo) (S
 	}
 	s.client = client
 
+	s.reset = func() {
+		s.fallback = log.New(os.Stdout, strings.Join([]string{"[", s.Name(), "] "}, ""), log.LstdFlags)
+	}
+
 	s.closer = func() error {
 		return client.Close()
 	}
 
-	s.reset()
-
 	return s, nil
-}
-
-// NewXMPPDefault constructs an XMPP logging backend that reads the
-// hostname, username, and password from environment variables:
-//
-//    - GRIP_XMPP_HOSTNAME
-//    - GRIP_XMPP_USERNAME
-//    - GRIP_XMPP_PASSWORD
-//
-// Otherwise, the semantics of NewXMPPDefault are the same as NewXMPPLogger.
-func NewXMPPDefault(name, target string, l LevelInfo) (Sender, error) {
-	info := XMPPConnectionInfo{
-		Hostname: os.Getenv(xmppHostEnvVar),
-		Username: os.Getenv(xmppUsernameEnvVar),
-		Password: os.Getenv(xmppUsernameEnvVar),
-	}
-
-	return NewXMPPLogger(name, target, info, l)
 }
 
 func (s *xmppLogger) Type() SenderType { return Xmpp }

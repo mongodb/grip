@@ -72,7 +72,7 @@ func (s *GripInternalSuite) TestConditionalSend() {
 	// because sink is an internal type (implementation of
 	// sender,) and "GetMessage" isn't in the interface, though it
 	// is exported, we can't pass the sink between functions.
-	sink, err := send.NewInternalLogger(s.grip.GetSender().Level())
+	sink, err := send.NewInternalLogger("sink", s.grip.GetSender().Level())
 	s.NoError(err)
 	s.grip.SetSender(sink)
 

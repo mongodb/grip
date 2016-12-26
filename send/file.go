@@ -19,11 +19,25 @@ type fileLogger struct {
 // output logger if there's problems with the file. Internally using
 // the go standard library logging system.
 func NewFileLogger(name, filePath string, l LevelInfo) (Sender, error) {
-	s := &fileLogger{base: newBase(name)}
+	s, err := MakeFileLogger(filePath)
+	if err != nil {
+		return nil, err
+	}
 
 	if err := s.SetLevel(l); err != nil {
 		return nil, err
 	}
+
+	s.SetName(name)
+
+	return s, nil
+}
+
+// MakeFileLogger creates a file-based logger, writing output to
+// the specified file. The Sender instance is not configured: Pass to
+// Journaler.SetSender or call SetName before using.
+func MakeFileLogger(filePath string) (Sender, error) {
+	s := &fileLogger{base: newBase("")}
 
 	f, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
@@ -37,8 +51,6 @@ func NewFileLogger(name, filePath string, l LevelInfo) (Sender, error) {
 	s.closer = func() error {
 		return f.Close()
 	}
-
-	s.reset()
 
 	return s, nil
 }
