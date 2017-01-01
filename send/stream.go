@@ -1,6 +1,10 @@
 package send
 
-import "github.com/tychoish/grip/message"
+import (
+	"strings"
+
+	"github.com/tychoish/grip/message"
+)
 
 // this file contains tools to support the slogger interface
 
@@ -35,6 +39,12 @@ func MakeStreamLogger(ws WriteStringer) Sender {
 func (s *streamLogger) Type() SenderType { return Stream }
 func (s *streamLogger) Send(m message.Composer) {
 	if s.level.ShouldLog(m) {
-		_, _ = s.fobj.WriteString(m.Resolve())
+		msg := m.Resolve()
+
+		if !strings.HasSuffix(msg, "\n") {
+			msg += "\n"
+		}
+
+		_, _ = s.fobj.WriteString(msg)
 	}
 }

@@ -65,7 +65,7 @@ type SenderAppender struct {
 }
 
 func (s SenderAppender) Append(log *Log) error {
-	s.Send(log)
+	s.Send(log.msg)
 
 	return nil
 }

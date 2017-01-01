@@ -45,7 +45,7 @@ func (l *Log) Resolve() string {
 		year, month, day := l.Timestamp.Date()
 		hour, min, sec := l.Timestamp.Clock()
 
-		l.Output = fmt.Sprintf("[%.4d/%.2d/%.2d %.2d:%.2d:%.2d] [%v.%v] [%v:%d] %v\n",
+		l.Output = fmt.Sprintf("[%.4d/%.2d/%.2d %.2d:%.2d:%.2d] [%v.%v] [%v:%d] %v",
 			year, month, day,
 			hour, min, sec,
 			l.Prefix, l.Level.String(),
