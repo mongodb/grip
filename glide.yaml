@@ -6,3 +6,4 @@ import:
   - journal
 - package: github.com/bluele/slack
 - package: github.com/mattn/go-xmpp
+- package: github.com/shirou/gopsutil
