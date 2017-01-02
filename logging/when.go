@@ -114,8 +114,8 @@ func (g *Grip) NoticeWhenf(conditional bool, msg string, args ...interface{}) {
 
 /////////////
 
-func (g *Grip) InfoWhen(conditional bool, msg interface{}) {
-	g.conditionalSend(conditional, message.ConvertToComposer(level.Info, msg))
+func (g *Grip) InfoWhen(conditional bool, m interface{}) {
+	g.conditionalSend(conditional, message.ConvertToComposer(level.Info, m))
 }
 func (g *Grip) InfoWhenln(conditional bool, msg ...interface{}) {
 	g.conditionalSend(conditional, message.NewLinesMessage(level.Info, msg...))
