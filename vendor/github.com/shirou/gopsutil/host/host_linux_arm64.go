@@ -1,5 +1,6 @@
 // Created by cgo -godefs - DO NOT EDIT
 // cgo -godefs types_linux.go
+// +build go1.6,arm64
 
 package host
 
