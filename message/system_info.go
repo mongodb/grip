@@ -27,7 +27,6 @@ func CollectSystemInfo() Composer {
 }
 
 func NewSystemInfo(priority level.Priority, message string) Composer {
-	var err error
 	s := &SystemInfo{
 		Message: message,
 		NumCPU:  runtime.NumCPU(),

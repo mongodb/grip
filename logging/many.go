@@ -9,7 +9,7 @@ import (
 
 func (g *Grip) multiSend(l level.Priority, msgs []message.Composer) {
 	for _, m := range msgs {
-		m.SetPriority(l)
+		_ = m.SetPriority(l)
 		g.Send(m)
 	}
 }

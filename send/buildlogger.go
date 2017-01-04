@@ -16,15 +16,11 @@ import (
 	"github.com/tychoish/grip/message"
 )
 
-const buildloggerRealm = "buildlogs"
-
 type buildlogger struct {
 	conf   *BuildloggerConfig
 	name   string
 	testID string
 	client *http.Client
-	stdOut Sender
-	stdErr Sender
 	*base
 }
 
@@ -46,6 +42,10 @@ type BuildloggerConfig struct {
 	Builder string
 	Test    string
 	Command string
+
+	// Configure a local sender for "fallback" operations and to
+	// collect the location (URLS) of the buildlogger output
+	Local Sender
 
 	buildID  string
 	username string
@@ -78,6 +78,10 @@ func (c *BuildloggerConfig) ReadCredentialsFromFile(fn string) error {
 	return nil
 }
 
+// SetCredentials configures the username and password of the
+// BuildLoggerConfig object. Use to programatically update the
+// credentials in a configuration object instead of reading from the
+// credentials file with ReadCredentialsFromFile(),
 func (c *BuildloggerConfig) SetCredentials(username, password string) {
 	c.username = username
 	c.password = password
@@ -167,9 +171,11 @@ func MakeBuildlogger(name string, conf *BuildloggerConfig) (Sender, error) {
 		name:   name,
 		conf:   conf,
 		client: &http.Client{Timeout: 10 * time.Second},
-		stdOut: MakeStreamLogger(os.Stdout),
-		stdErr: MakeStreamLogger(os.Stderr),
 		base:   newBase(name),
+	}
+
+	if b.conf.Local == nil {
+		b.conf.Local = MakeNative()
 	}
 
 	if b.conf.buildID == "" {
@@ -183,13 +189,13 @@ func MakeBuildlogger(name string, conf *BuildloggerConfig) (Sender, error) {
 
 		out, err := b.doPost(data)
 		if err != nil {
-			b.stdErr.Send(message.NewErrorMessage(level.Error, err))
+			b.conf.Local.Send(message.NewErrorMessage(level.Error, err))
 			return nil, err
 		}
 
 		b.conf.buildID = out.ID
 
-		b.stdOut.Send(message.NewFormattedMessage(level.Notice,
+		b.conf.Local.Send(message.NewFormattedMessage(level.Notice,
 			"Writing logs to buildlogger global log at %s/build/%s",
 			b.conf.URL, b.conf.buildID))
 	}
@@ -207,13 +213,13 @@ func MakeBuildlogger(name string, conf *BuildloggerConfig) (Sender, error) {
 
 		out, err := b.doPost(data)
 		if err != nil {
-			b.stdErr.Send(message.NewErrorMessage(level.Error, err))
+			b.conf.Local.Send(message.NewErrorMessage(level.Error, err))
 			return nil, err
 		}
 
 		b.testID = out.ID
 
-		b.stdOut.Send(message.NewFormattedMessage(level.Notice,
+		b.conf.Local.Send(message.NewFormattedMessage(level.Notice,
 			"Writing logs to buildlogger test log at %s/build/%s/test/%s",
 			conf.URL, b.conf.buildID, b.testID))
 	}
@@ -229,12 +235,12 @@ func (b *buildlogger) Send(m message.Composer) {
 		line := [][]interface{}{{float64(time.Now().Unix()), msg}}
 		out, err := json.Marshal(line)
 		if err != nil {
-			b.stdErr.Send(message.NewErrorMessage(m.Priority(), err))
+			b.conf.Local.Send(message.NewErrorMessage(m.Priority(), err))
 		}
 
 		if err := b.postLines(bytes.NewBuffer(out)); err != nil {
-			b.stdErr.Send(message.NewErrorMessage(m.Priority(), err))
-			b.stdOut.Send(m)
+			b.conf.Local.Send(message.NewErrorMessage(m.Priority(), err))
+			b.conf.Local.Send(m)
 		}
 	}
 }
@@ -244,8 +250,7 @@ func (b *buildlogger) SetLevel(l LevelInfo) error {
 		return err
 	}
 
-	_ = b.stdOut.SetLevel(l)
-	_ = b.stdErr.SetLevel(l)
+	_ = b.conf.Local.SetLevel(l)
 	return nil
 }
 
@@ -255,11 +260,11 @@ func (b *buildlogger) SetLevel(l LevelInfo) error {
 //
 ///////////////////////////////////////////////////////////////////////////
 
-type buildLoggerIdResponse struct {
+type buildLoggerIDResponse struct {
 	ID string `json:"id"`
 }
 
-func (b *buildlogger) doPost(data interface{}) (*buildLoggerIdResponse, error) {
+func (b *buildlogger) doPost(data interface{}) (*buildLoggerIDResponse, error) {
 	body, err := json.Marshal(data)
 	if err != nil {
 		return nil, err
@@ -279,7 +284,7 @@ func (b *buildlogger) doPost(data interface{}) (*buildLoggerIdResponse, error) {
 	defer resp.Body.Close()
 	decoder := json.NewDecoder(resp.Body)
 
-	out := &buildLoggerIdResponse{}
+	out := &buildLoggerIDResponse{}
 	if err := decoder.Decode(out); err != nil {
 		return nil, err
 	}

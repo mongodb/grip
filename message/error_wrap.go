@@ -22,7 +22,8 @@ func NewErrorWrapMessage(p level.Priority, err error, base string, args ...inter
 		args: args,
 		err:  err,
 	}
-	m.SetPriority(p)
+
+	_ = m.SetPriority(p)
 
 	return m
 }
@@ -67,9 +68,5 @@ func (m *errorWrapMessage) Raw() interface{} {
 }
 
 func (m *errorWrapMessage) Loggable() bool {
-	if m.err == nil {
-		return false
-	}
-
-	return true
+	return m.err != nil
 }

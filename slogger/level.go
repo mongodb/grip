@@ -4,6 +4,9 @@ import "github.com/tychoish/grip/level"
 
 type Level uint8
 
+// slogger has its own system of priorities/log levels. These
+// constants represent those levels, and the Level type can be
+// converted to grip level.Priority values.
 const (
 	OFF Level = iota
 	DEBUG

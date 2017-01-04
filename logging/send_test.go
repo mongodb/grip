@@ -31,7 +31,7 @@ func (s *GripInternalSuite) SetupTest() {
 	s.grip.SetName(s.name)
 	sender, err := send.NewNativeLogger(s.grip.Name(), s.grip.GetSender().Level())
 	s.NoError(err)
-	s.grip.SetSender(sender)
+	s.NoError(s.grip.SetSender(sender))
 }
 
 func (s *GripInternalSuite) TestPanicSenderActuallyPanics() {
@@ -39,7 +39,7 @@ func (s *GripInternalSuite) TestPanicSenderActuallyPanics() {
 	// cover the correct area.
 
 	func() {
-		// first make sure that the defualt send method doesn't panic
+		// first make sure that the default send method doesn't panic
 		defer func() {
 			s.Nil(recover())
 		}()
@@ -74,7 +74,7 @@ func (s *GripInternalSuite) TestConditionalSend() {
 	// is exported, we can't pass the sink between functions.
 	sink, err := send.NewInternalLogger("sink", s.grip.GetSender().Level())
 	s.NoError(err)
-	s.grip.SetSender(sink)
+	s.NoError(s.grip.SetSender(sink))
 
 	msg := message.NewLineMessage(level.Info, "foo")
 	msgTwo := message.NewLineMessage(level.Notice, "bar")
