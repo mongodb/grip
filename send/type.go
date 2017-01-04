@@ -15,6 +15,7 @@ const (
 	Xmpp
 	Stream
 	Bootstrap
+	Buildlogger
 )
 
 func (t SenderType) String() string {
@@ -31,6 +32,8 @@ func (t SenderType) String() string {
 		return "file"
 	case Bootstrap:
 		return "bootstrap"
+	case Buildlogger:
+		return "buildlogger"
 	case Custom:
 		return "custom"
 	case Slack:
