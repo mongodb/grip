@@ -35,7 +35,6 @@ func CollectSystemInfo() Composer {
 // specified message.
 func MakeSystemInfo(message string) Composer {
 	return NewSystemInfo(level.Info, message)
-
 }
 
 // NewSystemInfo returns a fully configured and populated SystemInfo
