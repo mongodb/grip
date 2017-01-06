@@ -11,10 +11,13 @@ import (
 	"github.com/tychoish/grip/level"
 )
 
+// SystemInfo is a type that implements message.Composer but also
+// collects system-wide resource utilization statistics about memory,
+// CPU, and network use, along with an optional message.
 type SystemInfo struct {
 	Message  string                 `json:"message,omitempty"`
 	CPU      cpu.TimesStat          `json:"cpu,omitempty"`
-	NumCPU   int                    `json:"num_cpus"`
+	NumCPU   int                    `json:"num_cpus,omitempty"`
 	VMStat   *mem.VirtualMemoryStat `json:"vmstat,omitempty"`
 	NetStat  net.IOCountersStat     `json:"netstat,omitempty"`
 	Errors   []string               `json:"errors,omitempty"`
@@ -22,10 +25,21 @@ type SystemInfo struct {
 	loggable bool
 }
 
+// CollectSystemInfo returns a populated SystemInfo object,
+// without a message.
 func CollectSystemInfo() Composer {
 	return NewSystemInfo(level.Trace, "")
 }
 
+// MakeSystemInfo builds a populated SystemInfo object with the
+// specified message.
+func MakeSystemInfo(message string) Composer {
+	return NewSystemInfo(level.Info, message)
+
+}
+
+// NewSystemInfo returns a fully configured and populated SystemInfo
+// object.
 func NewSystemInfo(priority level.Priority, message string) Composer {
 	s := &SystemInfo{
 		Message: message,

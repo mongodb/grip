@@ -16,6 +16,11 @@ type errorWrapMessage struct {
 	Base     `bson:"metadata" json:"metadata" yaml:"metadata"`
 }
 
+// NewErrorWrapMessage produces a fully configured message.Composer
+// that combines the functionality of an Error composer that renders a
+// loggable error message for non-nil errors with a normal formatted
+// message (e.g. fmt.Sprintf). These messages only log if the error is
+// non-nil.
 func NewErrorWrapMessage(p level.Priority, err error, base string, args ...interface{}) Composer {
 	m := &errorWrapMessage{
 		base: base,
@@ -28,6 +33,11 @@ func NewErrorWrapMessage(p level.Priority, err error, base string, args ...inter
 	return m
 }
 
+// NewErrorWrapDefault produces a message.Composer that combines the
+// functionality of an Error composer that renders a loggable error
+// message for non-nil errors with a normal formatted message
+// (e.g. fmt.Sprintf). These messages only log if the error is
+// non-nil.
 func NewErrorWrapDefault(err error, base string, args ...interface{}) Composer {
 	return &errorWrapMessage{
 		base: base,

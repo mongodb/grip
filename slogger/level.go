@@ -2,6 +2,8 @@ package slogger
 
 import "github.com/tychoish/grip/level"
 
+// Level represents slogger's level types. In the original
+// implementation there are four levels and an "OFF" value.
 type Level uint8
 
 // slogger has its own system of priorities/log levels. These
@@ -30,6 +32,7 @@ func (l Level) String() string {
 	}
 }
 
+// Priority returns grip's native level.Priority for a slogger.Level.
 func (l Level) Priority() level.Priority {
 	switch l {
 	case OFF:
