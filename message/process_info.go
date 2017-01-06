@@ -66,7 +66,7 @@ func CollectProcessInfoWithChildren(pid int32) []Composer {
 		return results
 	}
 
-	parentMsg := &ProcessInfo{Pid: pid}
+	parentMsg := &ProcessInfo{}
 	parentMsg.loggable = true
 	parentMsg.populate(parent)
 	results = append(results, parentMsg)
@@ -155,6 +155,8 @@ func (p *ProcessInfo) Resolve() string {
 
 func (p *ProcessInfo) populate(proc *process.Process) {
 	var err error
+
+	p.Pid = proc.Pid
 
 	p.Parent, err = proc.Ppid()
 	p.saveError(err)
