@@ -2,7 +2,9 @@ package send
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
+	"os"
 	"testing"
 	"time"
 
@@ -42,6 +44,10 @@ func (s *SenderSuite) SetupTest() {
 	internal.name = "internal"
 	internal.output = make(chan *internalMessage)
 	s.senders[Internal] = internal
+
+	callsite := &callSiteLogger{base: newBase("callsite"), depth: 1}
+	callsite.logger = log.New(os.Stdout, "callsite", log.LstdFlags)
+	s.senders[CallSite] = callsite
 
 	native, err := NewNativeLogger("native", l)
 	s.require.NoError(err)
