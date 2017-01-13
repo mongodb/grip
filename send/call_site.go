@@ -99,29 +99,9 @@ func callerInfo(depth int) (string, int) {
 	// get caller info.
 	_, file, line, _ := runtime.Caller(depth)
 
+	// get the directory and filename
 	dir, fileName := filepath.Split(file)
 	file = filepath.Join(filepath.Base(dir), fileName)
 
-	// file = stripDirectories(file, 1)
 	return file, line
-}
-
-// borrowed from slogger. might be able to come up with something simpler.
-func stripDirectories(filepath string, toKeep int) string {
-	var idxCutoff int
-	if idxCutoff = strings.LastIndex(filepath, "/"); idxCutoff == -1 {
-		return filepath
-	}
-
-outer:
-	for dirToKeep := 0; dirToKeep < toKeep; dirToKeep++ {
-		switch idx := strings.LastIndex(filepath[:idxCutoff], "/"); idx {
-		case -1:
-			break outer
-		default:
-			idxCutoff = idx
-		}
-	}
-
-	return filepath[idxCutoff+1:]
 }
