@@ -16,7 +16,6 @@ const (
 	Syslog
 	Internal
 	Multi
-	File
 	Slack
 	XMPP
 	Stream
@@ -37,8 +36,6 @@ func (t SenderType) String() string {
 		return "syslog"
 	case Internal:
 		return "internal"
-	case File:
-		return "file"
 	case Bootstrap:
 		return "bootstrap"
 	case Buildlogger:

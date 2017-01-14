@@ -33,7 +33,6 @@ func (s *SenderSuite) SetupTest() {
 	l := LevelInfo{level.Info, level.Notice}
 	s.senders = map[SenderType]Sender{
 		Slack:     &slackJournal{base: newBase("slack")},
-		File:      &fileLogger{base: newBase("file")},
 		XMPP:      &xmppLogger{base: newBase("xmpp")},
 		JSON:      &jsonLogger{base: newBase("json")},
 		Stream:    &streamLogger{base: newBase("stream")},
@@ -70,7 +69,7 @@ func (s *SenderSuite) SetupTest() {
 func (s *SenderSuite) functionalMockSenders() map[SenderType]Sender {
 	out := map[SenderType]Sender{}
 	for t, sender := range s.senders {
-		if t == Slack || t == File || t == Stream || t == Internal || t == XMPP {
+		if t == Slack || t == Stream || t == Internal || t == XMPP {
 			continue
 		} else if t == JSON {
 			var err error
