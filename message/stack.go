@@ -29,21 +29,21 @@ type stackFrame struct {
 //
 ////////////////////////////////////////////////////////////////////////
 
-func NewStackMessage(skip int, message string) Composer {
+func NewStack(skip int, message string) Composer {
 	return &stackMessage{
 		trace:   captureStack(skip),
 		message: message,
 	}
 }
 
-func NewStackMessageLines(skip int, messages ...interface{}) Composer {
+func NewStackLines(skip int, messages ...interface{}) Composer {
 	return &stackMessage{
 		trace: captureStack(skip),
 		args:  messages,
 	}
 }
 
-func NewStackMessageFormatted(skip int, message string, args ...interface{}) Composer {
+func NewStackFormatted(skip int, message string, args ...interface{}) Composer {
 	return &stackMessage{
 		trace:   captureStack(skip),
 		message: message,
