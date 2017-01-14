@@ -50,15 +50,7 @@ type callSiteLogger struct {
 // format that includes the filename and line number of the call site
 // of the logger.
 func NewCallSiteConsoleLogger(name string, depth int, l LevelInfo) (Sender, error) {
-	s := MakeCallSiteConsoleLogger(depth)
-
-	if err := s.SetLevel(l); err != nil {
-		return nil, err
-	}
-
-	s.SetName(name)
-
-	return s, nil
+	return setup(MakeCallSiteConsoleLogger(depth), name, l)
 }
 
 // MakeCallSiteConsoleLogger constructs an unconfigured call site
@@ -90,13 +82,7 @@ func NewCallSiteFileLogger(name, fileName string, depth int, l LevelInfo) (Sende
 		return nil, err
 	}
 
-	if err := s.SetLevel(l); err != nil {
-		return nil, err
-	}
-
-	s.SetName(name)
-
-	return s, nil
+	return setup(s, name, l)
 }
 
 // MakeCallSiteFileLogger constructs an unconfigured call site logger

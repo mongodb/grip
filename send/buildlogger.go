@@ -151,11 +151,7 @@ func NewBuildlogger(name string, conf *BuildloggerConfig, l LevelInfo) (Sender, 
 		return nil, err
 	}
 
-	if err := s.SetLevel(l); err != nil {
-		return nil, err
-	}
-
-	return s, nil
+	return setup(s, name, l)
 }
 
 // MakeBuildlogger constructs a buildlogger targeting sender using the
