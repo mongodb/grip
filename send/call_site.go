@@ -10,7 +10,7 @@ call site information is only logged when formatting the message
 itself. Additionally the call site includes the file name and its
 enclosing directory.
 
-When constructing the Sender you must specifiy a "depth"
+When constructing the Sender you must specify a "depth"
 argument This sets the offset for the call site relative to the
 Sender's Send() method. Grip's default logger (e.g. the grip.Info()
 methods and friends) requires a depth of 2, while in *most* other

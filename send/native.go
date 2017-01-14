@@ -78,6 +78,8 @@ func MakeNative() Sender {
 	return s
 }
 
+// MakeErrorLogger returns an unconfigured Sender implementation that
+// writes all logging output to standard error.
 func MakeErrorLogger() Sender {
 	s := &nativeLogger{
 		base: newBase(""),
@@ -92,6 +94,8 @@ func MakeErrorLogger() Sender {
 	return s
 }
 
+// NewErrorLogger constructs a configured Sender that writes all
+// output to standard error.
 func NewErrorLogger(name string, l LevelInfo) (Sender, error) {
 	return setup(MakeErrorLogger(), name, l)
 }
