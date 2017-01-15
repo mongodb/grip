@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -235,9 +234,8 @@ func MakeBuildlogger(name string, conf *BuildloggerConfig) (Sender, error) {
 		for {
 			select {
 			case stop <- signal:
-				fmt.Println("sent stop")
+				continue
 			case <-finished:
-				fmt.Println("done waiting for finish")
 				return nil
 			}
 		}
@@ -297,7 +295,6 @@ func (b *buildlogger) sendMessages(buffer [][]interface{}) {
 		b.conf.Local.Send(message.NewDefaultMessage(b.Level().Default, string(out)))
 	}
 
-	fmt.Println("sent", len(buffer), "messages")
 }
 
 func (b *buildlogger) SetLevel(l LevelInfo) error {
