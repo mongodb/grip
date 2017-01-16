@@ -39,7 +39,7 @@ func MakeFileLogger(filePath string) (Sender, error) {
 	}
 
 	s.reset = func() {
-		prefix := fmt.Sprintf("[%s]", s.Name())
+		prefix := fmt.Sprintf("[%s] ", s.Name())
 		s.logger = log.New(f, prefix, log.LstdFlags)
 	}
 
@@ -67,7 +67,7 @@ func MakeNative() Sender {
 	s.level = LevelInfo{level.Trace, level.Trace}
 
 	s.reset = func() {
-		prefix := fmt.Sprintf("[%s]", s.Name())
+		prefix := fmt.Sprintf("[%s] ", s.Name())
 		s.logger = log.New(os.Stdout, prefix, log.LstdFlags)
 	}
 
@@ -87,7 +87,7 @@ func MakeErrorLogger() Sender {
 	s.level = LevelInfo{level.Trace, level.Trace}
 
 	s.reset = func() {
-		prefix := fmt.Sprintf("[%s]", s.Name())
+		prefix := fmt.Sprintf("[%s] ", s.Name())
 		s.logger = log.New(os.Stderr, prefix, log.LstdFlags)
 	}
 
