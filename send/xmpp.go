@@ -130,7 +130,7 @@ func (s *xmppLogger) Send(m message.Composer) {
 		c := xmpp.Chat{
 			Remote: s.target,
 			Type:   "chat",
-			Text:   fmt.Sprintf("[%s] (p=%s)  %s", s.name, m.Priority(), m.Resolve()),
+			Text:   fmt.Sprintf("[%s] (p=%s)  %s", s.name, m.Priority(), m.String()),
 		}
 		s.RUnlock()
 

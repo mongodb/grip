@@ -126,9 +126,9 @@ func (p *ProcessInfo) Loggable() bool { return p.loggable }
 // Collect method of the base operation first.
 func (p *ProcessInfo) Raw() interface{} { _ = p.Collect(); return p }
 
-// Resolve returns a string representation of the message, lazily
+// String returns a string representation of the message, lazily
 // rendering the message, and caching it privately.
-func (p *ProcessInfo) Resolve() string {
+func (p *ProcessInfo) String() string {
 	if p.rendered != "" {
 		return p.rendered
 	}

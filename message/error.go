@@ -32,7 +32,7 @@ func NewError(err error) Composer {
 	return &errorMessage{err: err}
 }
 
-func (e *errorMessage) Resolve() string {
+func (e *errorMessage) String() string {
 	if e.err == nil {
 		return ""
 	}
@@ -46,7 +46,7 @@ func (e *errorMessage) Loggable() bool {
 
 func (e *errorMessage) Raw() interface{} {
 	_ = e.Collect()
-	_ = e.Resolve()
+	_ = e.String()
 
 	extended := fmt.Sprintf("%+v", e.err)
 	if extended != e.Error {

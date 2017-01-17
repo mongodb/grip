@@ -74,7 +74,7 @@ func NewSystemInfo(priority level.Priority, message string) Composer {
 
 func (s *SystemInfo) Loggable() bool   { return s.loggable }
 func (s *SystemInfo) Raw() interface{} { _ = s.Collect(); return s }
-func (s *SystemInfo) Resolve() string {
+func (s *SystemInfo) String() string {
 	data, err := json.MarshalIndent(s, "  ", " ")
 	if err != nil {
 		return s.Message

@@ -79,7 +79,7 @@ func (s *internalSender) Send(m message.Composer) {
 	s.output <- &internalMessage{
 		Message:  m,
 		Priority: m.Priority(),
-		Rendered: m.Resolve(),
+		Rendered: m.String(),
 		Logged:   s.level.ShouldLog(m),
 	}
 }

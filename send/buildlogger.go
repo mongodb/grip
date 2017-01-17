@@ -248,7 +248,7 @@ func MakeBuildlogger(name string, conf *BuildloggerConfig) (Sender, error) {
 func (b *buildlogger) Type() SenderType { return Buildlogger }
 func (b *buildlogger) Send(m message.Composer) {
 	if b.level.ShouldLog(m) {
-		b.cache <- []interface{}{float64(time.Now().Unix()), m.Resolve()}
+		b.cache <- []interface{}{float64(time.Now().Unix()), m.String()}
 	}
 }
 

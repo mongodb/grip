@@ -83,7 +83,7 @@ func (s *jsonLogger) Send(m message.Composer) {
 			errMsg, _ := json.Marshal(message.NewError(err).Raw())
 			s.logger.Println(errMsg)
 
-			out, err = json.Marshal(message.NewDefaultMessage(m.Priority(), m.Resolve()).Raw())
+			out, err = json.Marshal(message.NewDefaultMessage(m.Priority(), m.String()).Raw())
 			if err == nil {
 				s.logger.Println(string(out))
 			}

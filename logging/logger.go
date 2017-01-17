@@ -37,7 +37,7 @@ func (g *Grip) sendPanic(m message.Composer) {
 	// check but to add fatal methods we need to do this here.
 	if g.Level().ShouldLog(m) {
 		g.Send(m)
-		panic(m.Resolve())
+		panic(m.String())
 	}
 }
 

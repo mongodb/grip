@@ -88,7 +88,7 @@ func NewStackFormatted(skip int, message string, args ...interface{}) Composer {
 ////////////////////////////////////////////////////////////////////////
 
 func (m *stackMessage) Loggable() bool { return m.message != "" || len(m.args) > 0 }
-func (m *stackMessage) Resolve() string {
+func (m *stackMessage) String() string {
 	if len(m.args) > 0 && m.message == "" {
 		m.message = fmt.Sprintln(append([]interface{}{m.getTag()}, m.args...))
 		m.args = []interface{}{}
@@ -111,7 +111,7 @@ func (m *stackMessage) Raw() interface{} {
 		Name    string        `bson:"name" json:"name" yaml:"name"`
 		Trace   []*stackFrame `bson:"trace" json:"trace" yaml:"trace"`
 	}{
-		Message: m.Resolve(),
+		Message: m.String(),
 		Time:    m.Time,
 		Name:    m.Logger,
 		Trace:   m.trace,

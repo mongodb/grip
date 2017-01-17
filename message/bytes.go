@@ -24,7 +24,7 @@ func NewBytes(b []byte) Composer {
 	return &bytesMessage{data: b}
 }
 
-func (s *bytesMessage) Resolve() string {
+func (s *bytesMessage) String() string {
 	return string(s.data)
 }
 

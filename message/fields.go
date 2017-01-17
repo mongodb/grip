@@ -50,10 +50,10 @@ func MakeFieldsMessage(message string, f Fields) Composer {
 func MakeFields(f Fields) Composer { return &fieldMessage{fields: f} }
 
 func (m *fieldMessage) Loggable() bool { return m.message != "" || len(m.fields) > 0 }
-func (m *fieldMessage) Resolve() string {
+func (m *fieldMessage) String() string {
 	if m.cachedOutput == "" {
 		const tmpl = "%s='%s'"
-		out := make([]string, len(m.fields)+1)
+		out := []string{}
 		out = append(out, fmt.Sprintf(tmpl, "msg", m.message))
 		for k, v := range m.fields {
 			if k == "msg" && v == m.message {
@@ -66,7 +66,7 @@ func (m *fieldMessage) Resolve() string {
 			out = append(out, fmt.Sprintf(tmpl, k, v))
 		}
 
-		m.cachedOutput = fmt.Sprintf("[%s]", strings.Join(out, "; "))
+		m.cachedOutput = fmt.Sprintf("[%s]", strings.Join(out, " "))
 	}
 
 	return m.cachedOutput

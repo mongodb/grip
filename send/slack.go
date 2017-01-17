@@ -91,7 +91,7 @@ func (s *slackJournal) Send(m message.Composer) {
 }
 
 func (s *slackJournal) doSend(m message.Composer) (string, error) {
-	msg := m.Resolve()
+	msg := m.String()
 
 	s.RLock()
 	var channel []byte

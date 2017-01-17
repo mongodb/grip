@@ -209,7 +209,11 @@ logging function an instance of a type that implements the
 ``MessageComposer`` interface: ::
 
    type MessageComposer interface {
-        Resolve() string
+        String() string
+        Raw() interface{}
+        Loggable() bool
+        Priority() level.Priority
+        SetPriority(level.Priority) error
    }
 
 Composed logging may be useful for some debugging logging that depends

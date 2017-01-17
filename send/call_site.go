@@ -117,7 +117,7 @@ func (s *callSiteLogger) Type() SenderType { return CallSite }
 func (s *callSiteLogger) Send(m message.Composer) {
 	if s.level.ShouldLog(m) {
 		file, line := callerInfo(s.depth)
-		s.logger.Printf("[p=%s] [%s:%d]: %s", m.Priority(), file, line, m.Resolve())
+		s.logger.Printf("[p=%s] [%s:%d]: %s", m.Priority(), file, line, m.String())
 	}
 }
 

@@ -73,7 +73,7 @@ func (s *syslogger) Type() SenderType { return Syslog }
 
 func (s *syslogger) Send(m message.Composer) {
 	if s.level.ShouldLog(m) {
-		msg := m.Resolve()
+		msg := m.String()
 
 		if err := s.sendToSysLog(m.Priority(), msg); err != nil {
 			s.fallback.Println("syslog error:", err.Error())

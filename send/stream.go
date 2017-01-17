@@ -38,7 +38,7 @@ func MakeStreamLogger(ws WriteStringer) Sender {
 func (s *streamLogger) Type() SenderType { return Stream }
 func (s *streamLogger) Send(m message.Composer) {
 	if s.level.ShouldLog(m) {
-		msg := m.Resolve()
+		msg := m.String()
 
 		if !strings.HasSuffix(msg, "\n") {
 			msg += "\n"
