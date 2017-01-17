@@ -9,21 +9,29 @@ import (
 	"github.com/tychoish/grip/level"
 )
 
-const testMsg = "hello"
-
-func TestMessageComposerImplementations(t *testing.T) {
+func TestMessageComposerConstructors(t *testing.T) {
+	const testMsg = "hello"
 	assert := assert.New(t)
 	// map objects to output
 	cases := map[Composer]string{
-		NewString(testMsg):                                        testMsg,
-		NewDefaultMessage(level.Error, testMsg):                   testMsg,
-		NewBytes([]byte(testMsg)):                                 testMsg,
-		NewBytesMessage(level.Error, []byte(testMsg)):             testMsg,
-		NewError(errors.New(testMsg)):                             testMsg,
-		NewErrorMessage(level.Error, errors.New(testMsg)):         testMsg,
-		NewErrorWrap(errors.New(testMsg), ""):                     testMsg,
-		NewErrorWrapMessage(level.Error, errors.New(testMsg), ""): testMsg,
-		MakeFieldsMessage(testMsg, Fields{}):                      fmt.Sprintf("[msg='%s']", testMsg),
+		NewString(testMsg):                                                     testMsg,
+		NewDefaultMessage(level.Error, testMsg):                                testMsg,
+		NewBytes([]byte(testMsg)):                                              testMsg,
+		NewBytesMessage(level.Error, []byte(testMsg)):                          testMsg,
+		NewError(errors.New(testMsg)):                                          testMsg,
+		NewErrorMessage(level.Error, errors.New(testMsg)):                      testMsg,
+		NewErrorWrap(errors.New(testMsg), ""):                                  testMsg,
+		NewErrorWrapMessage(level.Error, errors.New(testMsg), ""):              testMsg,
+		NewFieldsMessage(level.Error, testMsg, Fields{}):                       fmt.Sprintf("[msg='%s']", testMsg),
+		NewFields(level.Error, Fields{"test": testMsg}):                        fmt.Sprintf("[test='%s']", testMsg),
+		MakeFieldsMessage(testMsg, Fields{}):                                   fmt.Sprintf("[msg='%s']", testMsg),
+		MakeFields(Fields{"test": testMsg}):                                    fmt.Sprintf("[test='%s']", testMsg),
+		NewFormatted(string(testMsg[0])+"%s", testMsg[1:]):                     testMsg,
+		NewFormattedMessage(level.Error, string(testMsg[0])+"%s", testMsg[1:]): testMsg,
+		NewLine(testMsg, ""):                                                   testMsg,
+		NewLineMessage(level.Error, testMsg, ""):                               testMsg,
+		NewLine(testMsg):                                                       testMsg,
+		NewLineMessage(level.Error, testMsg):                                   testMsg,
 	}
 
 	for msg, output := range cases {

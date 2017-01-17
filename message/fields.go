@@ -54,7 +54,10 @@ func (m *fieldMessage) String() string {
 	if m.cachedOutput == "" {
 		const tmpl = "%s='%s'"
 		out := []string{}
-		out = append(out, fmt.Sprintf(tmpl, "msg", m.message))
+		if m.message != "" {
+			out = append(out, fmt.Sprintf(tmpl, "msg", m.message))
+		}
+
 		for k, v := range m.fields {
 			if k == "msg" && v == m.message {
 				continue

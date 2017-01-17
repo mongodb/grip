@@ -39,7 +39,7 @@ func (l *lineMessenger) Loggable() bool {
 
 func (l *lineMessenger) String() string {
 	if l.message == "" {
-		l.message = strings.Trim(fmt.Sprintln(l.Lines...), "\n")
+		l.message = strings.Trim(fmt.Sprintln(l.Lines...), "\n ")
 	}
 
 	return l.message
