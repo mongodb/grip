@@ -46,6 +46,10 @@ func ConvertToComposer(p level.Priority, message interface{}) Composer {
 		return NewLineMessage(p, message)
 	case []byte:
 		return NewBytesMessage(p, message)
+	case map[string]interface{}:
+		return NewFields(p, Fields(message))
+	case Fields:
+		return NewFields(p, message)
 	case nil:
 		return NewLineMessage(p)
 	default:
