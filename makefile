@@ -1,7 +1,7 @@
 # project configuration
 name := grip
 buildDir := build
-packages := logging send slogger $(name)
+packages := logging message send slogger $(name)
 orgPath := github.com/tychoish
 projectPath := $(orgPath)/$(name)
 # end project configuration
