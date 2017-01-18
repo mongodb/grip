@@ -39,7 +39,8 @@ type stackMessage struct {
 	Base
 }
 
-// StackFrame
+// StackFrame captures a single item in a stack trace, and is used
+// internally and in the StackTrace output.
 type StackFrame struct {
 	Function string `bson:"function" json:"function" yaml:"function"`
 	File     string `bson:"file" json:"file" yaml:"file"`
