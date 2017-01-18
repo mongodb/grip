@@ -18,9 +18,7 @@ type lineMessenger struct {
 // the constructor during the String() operation. Use in combination
 // with Compose[*] logging methods.
 func NewLineMessage(p level.Priority, args ...interface{}) Composer {
-	m := &lineMessenger{
-		Lines: args,
-	}
+	m := NewLine(args...)
 	_ = m.SetPriority(p)
 	return m
 }
@@ -28,9 +26,14 @@ func NewLineMessage(p level.Priority, args ...interface{}) Composer {
 // NewLine returns a message Composer roughly equivalent to
 // fmt.Sprintln().
 func NewLine(args ...interface{}) Composer {
-	return &lineMessenger{
-		Lines: args,
+	m := &lineMessenger{}
+	for _, arg := range args {
+		if arg != nil {
+			m.Lines = append(m.Lines, arg)
+		}
 	}
+
+	return m
 }
 
 func (l *lineMessenger) Loggable() bool {
