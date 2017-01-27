@@ -15,13 +15,13 @@ import (
 // collects system-wide resource utilization statistics about memory,
 // CPU, and network use, along with an optional message.
 type SystemInfo struct {
-	Message  string                 `json:"message,omitempty"`
-	CPU      cpu.TimesStat          `json:"cpu,omitempty"`
-	NumCPU   int                    `json:"num_cpus,omitempty"`
-	VMStat   *mem.VirtualMemoryStat `json:"vmstat,omitempty"`
-	NetStat  net.IOCountersStat     `json:"netstat,omitempty"`
-	Errors   []string               `json:"errors,omitempty"`
-	Base     `json:"metadata"`
+	Message  string                 `json:"message,omitempty" bson:"message,omitempty"`
+	CPU      cpu.TimesStat          `json:"cpu,omitempty" bson:"cpu,omitempty"`
+	NumCPU   int                    `json:"num_cpus,omitempty" bson:"num_cpus,omitempty"`
+	VMStat   *mem.VirtualMemoryStat `json:"vmstat,omitempty" bson:"vmstat,omitempty"`
+	NetStat  net.IOCountersStat     `json:"netstat,omitempty" bson:"netstat,omitempty"`
+	Errors   []string               `json:"errors,omitempty" bson:"errors,omitempty"`
+	Base     `json:"metadata" bson:"metadata"`
 	loggable bool
 }
 

@@ -15,18 +15,18 @@ import (
 // memory, io). The Process info composers produce messages in this
 // form.
 type ProcessInfo struct {
-	Message        string                        `json:"message,omitempty"`
-	Pid            int32                         `json:"pid"`
-	Parent         int32                         `json:"parentPid,omitempty"`
-	Threads        int                           `json:"numThreads,omitempty"`
-	Command        string                        `json:"command,omitempty"`
-	IoStat         *process.IOCountersStat       `json:"io,omitempty"`
-	MemoryPlatform *process.MemoryInfoExStat     `json:"memExtra,omitempty"`
-	Memory         *process.MemoryInfoStat       `json:"mem,omitempty"`
-	Network        map[string]net.IOCountersStat `json:"net,omitempty"`
-	CPU            *cpu.TimesStat                `json:"cpu,omitempty"`
-	Errors         []string                      `json:"errors,omitempty"`
-	Base           `json:"metadata"`
+	Message        string                        `json:"message,omitempty" bson:"message,omitempty"`
+	Pid            int32                         `json:"pid" bson:"pid"`
+	Parent         int32                         `json:"parentPid,omitempty" bson:"parentPid,omitempty"`
+	Threads        int                           `json:"numThreads,omitempty" bson:"numThreads,omitempty"`
+	Command        string                        `json:"command,omitempty" bson:"command,omitempty"`
+	IoStat         *process.IOCountersStat       `json:"io,omitempty" bson:"io,omitempty"`
+	MemoryPlatform *process.MemoryInfoExStat     `json:"memExtra,omitempty" bson:"memExtra,omitempty"`
+	Memory         *process.MemoryInfoStat       `json:"mem,omitempty" bson:"mem,omitempty"`
+	Network        map[string]net.IOCountersStat `json:"net,omitempty" bson:"net,omitempty"`
+	CPU            *cpu.TimesStat                `json:"cpu,omitempty" bson:"cpu,omitempty"`
+	Errors         []string                      `json:"errors,omitempty" bson:"errors,omitempty"`
+	Base           `json:"metadata" bson:"metadata"`
 	loggable       bool
 	rendered       string
 }
