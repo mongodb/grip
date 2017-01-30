@@ -21,7 +21,7 @@ type SystemInfo struct {
 	VMStat   *mem.VirtualMemoryStat `json:"vmstat,omitempty" bson:"vmstat,omitempty"`
 	NetStat  net.IOCountersStat     `json:"netstat,omitempty" bson:"netstat,omitempty"`
 	Errors   []string               `json:"errors,omitempty" bson:"errors,omitempty"`
-	Base     `json:"metadata" bson:"metadata"`
+	Base     `json:"metadata,omitempty" bson:"metadata,omitempty"`
 	loggable bool
 }
 

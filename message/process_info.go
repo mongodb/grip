@@ -26,7 +26,7 @@ type ProcessInfo struct {
 	Network        map[string]net.IOCountersStat `json:"net,omitempty" bson:"net,omitempty"`
 	CPU            *cpu.TimesStat                `json:"cpu,omitempty" bson:"cpu,omitempty"`
 	Errors         []string                      `json:"errors,omitempty" bson:"errors,omitempty"`
-	Base           `json:"metadata" bson:"metadata"`
+	Base           `json:"metadata,omitempty" bson:"metadata,omitempty"`
 	loggable       bool
 	rendered       string
 }
