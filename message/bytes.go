@@ -1,3 +1,6 @@
+// Bytes Messages
+//
+// The bytes types make it possible to send a byte slice as a message.
 package message
 
 import "github.com/tychoish/grip/level"

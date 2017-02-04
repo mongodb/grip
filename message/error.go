@@ -1,3 +1,8 @@
+// Error Messages
+//
+// The error message composers underpin the Catch<> logging messages,
+// which allow you to log error messages but let the logging system
+// elide logging for nil errors.
 package message
 
 import (
