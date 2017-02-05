@@ -65,7 +65,6 @@ func MakeSMTPLogger(opts *SMTPOptions) (Sender, error) {
 	return s, nil
 }
 
-func (s *smtpLogger) Type() SenderType { return SMTP }
 func (s *smtpLogger) Send(m message.Composer) {
 	if !s.level.ShouldLog(m) {
 		return

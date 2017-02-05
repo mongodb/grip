@@ -73,9 +73,8 @@ func MakeJSONFileLogger(file string) (Sender, error) {
 	return s, nil
 }
 
-// Implementation of required methods not implemented in BASE
+// Implementation of required methods not implemented in Base
 
-func (s *jsonLogger) Type() SenderType { return JSON }
 func (s *jsonLogger) Send(m message.Composer) {
 	if s.level.ShouldLog(m) {
 		out, err := json.Marshal(m.Raw())

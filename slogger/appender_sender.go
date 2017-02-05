@@ -49,7 +49,6 @@ func WrapAppender(a Appender) send.Sender {
 func (a *appenderSender) Close() error          { return nil }
 func (a *appenderSender) Name() string          { return a.name }
 func (a *appenderSender) SetName(n string)      { a.name = n }
-func (a *appenderSender) Type() send.SenderType { return send.Custom }
 func (a *appenderSender) Level() send.LevelInfo { return a.level }
 func (a *appenderSender) SetLevel(l send.LevelInfo) error {
 	if !l.Valid() {

@@ -69,8 +69,6 @@ func MakeSlackLogger(opts *SlackOptions) (Sender, error) {
 	return NewSlackLogger(opts, token, LevelInfo{level.Trace, level.Trace})
 }
 
-func (s *slackJournal) Type() SenderType { return Slack }
-
 func (s *slackJournal) Send(m message.Composer) {
 	if !s.level.ShouldLog(m) {
 		return

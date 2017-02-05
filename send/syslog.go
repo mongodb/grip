@@ -68,8 +68,7 @@ func MakeLocalSyslogLogger() Sender {
 	return MakeSysLogger("", "")
 }
 
-func (s *syslogger) Close() error     { return s.logger.Close() }
-func (s *syslogger) Type() SenderType { return Syslog }
+func (s *syslogger) Close() error { return s.logger.Close() }
 
 func (s *syslogger) Send(m message.Composer) {
 	if s.level.ShouldLog(m) {

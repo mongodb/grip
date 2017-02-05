@@ -41,8 +41,7 @@ func MakeSystemdLogger() Sender {
 	return s
 }
 
-func (s *systemdJournal) Close() error     { return nil }
-func (s *systemdJournal) Type() SenderType { return Systemd }
+func (s *systemdJournal) Close() error { return nil }
 
 func (s *systemdJournal) Send(m message.Composer) {
 	if s.level.ShouldLog(m) {

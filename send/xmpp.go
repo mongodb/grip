@@ -122,8 +122,6 @@ func constructXMPPLogger(target string, info XMPPConnectionInfo) (Sender, error)
 	return s, nil
 }
 
-func (s *xmppLogger) Type() SenderType { return XMPP }
-
 func (s *xmppLogger) Send(m message.Composer) {
 	if s.level.ShouldLog(m) {
 		s.RLock()

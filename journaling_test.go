@@ -28,15 +28,15 @@ func (s *GripSuite) SetupTest() {
 }
 
 func (s *GripSuite) TestDefaultJournalerIsBootstrap() {
-	s.Equal(s.grip.GetSender().Type(), send.Bootstrap)
-
+	firstName := s.grip.Name()
 	// the bootstrap sender is a bit special because you can't
 	// change it's name, therefore:
 	secondName := "something_else"
 	s.grip.SetName(secondName)
 
-	s.Equal(s.grip.GetSender().Type(), send.Bootstrap)
 	s.Equal(s.grip.Name(), secondName)
+	s.NotEqual(s.grip.Name(), firstName)
+	s.NotEqual(firstName, secondName)
 }
 
 func (s *GripSuite) TestNameSetterAndGetter() {
