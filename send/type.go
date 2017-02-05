@@ -18,6 +18,7 @@ const (
 	Multi
 	Slack
 	XMPP
+	SMTP
 	Stream
 	Bootstrap
 	Buildlogger
@@ -46,6 +47,8 @@ func (t SenderType) String() string {
 		return "slack"
 	case XMPP:
 		return "xmpp"
+	case SMTP:
+		return "smtp"
 	case JSON:
 		return "json"
 	case Stream:
