@@ -105,6 +105,13 @@ func (c *BuildloggerConfig) SetCredentials(username, password string) {
 // use a single Buildlogger config instance to create individual
 // Sender instances that target each of these output formats.
 //
+// The Buildlogger config has a Local attribute which is used by the
+// logger config when: the Buildlogger instance cannot contact the
+// messages sent to the buildlogger. Additional the Local Sender also
+// logs the remote location of the build logs. This Sender
+// implementation is used in the default ErrorHandler for this
+// implementation.
+//
 // Create a BuildloggerConfig instance, set up the crednetials if
 // needed, and create a sender. This will be the "global" log, in
 // buildlogger terminology. Then, set set the CreateTest attribute,
@@ -179,6 +186,10 @@ func MakeBuildlogger(name string, conf *BuildloggerConfig) (Sender, error) {
 
 	if b.conf.Local == nil {
 		b.conf.Local = MakeNative()
+	}
+
+	if err := b.SetErrorHandler(ErrorHandlerFromSender(b.conf.Local)); err != nil {
+		return nil, err
 	}
 
 	if b.conf.buildID == "" {
@@ -290,10 +301,13 @@ func (b *buildlogger) sendMessages(buffer [][]interface{}) {
 	}
 
 	if err := b.postLines(bytes.NewBuffer(out)); err != nil {
-		b.conf.Local.Send(message.NewErrorMessage(level.Error, err))
-		b.conf.Local.Send(message.NewDefaultMessage(b.Level().Default, string(out)))
+		b.errHandler(err, message.NewBytesMessage(b.level.Default, out))
 	}
+}
 
+func (b *buildlogger) SetName(n string) {
+	b.conf.Local.SetName(n)
+	b.base.SetName(n)
 }
 
 func (b *buildlogger) SetLevel(l LevelInfo) error {
@@ -301,7 +315,10 @@ func (b *buildlogger) SetLevel(l LevelInfo) error {
 		return err
 	}
 
-	_ = b.conf.Local.SetLevel(l)
+	if err := b.conf.Local.SetLevel(l); err != nil {
+		return err
+	}
+
 	return nil
 }
 

@@ -34,6 +34,12 @@ type Sender interface {
 	// Level returns the level configuration document.
 	Level() LevelInfo
 
+	// SetErrorHandler provides a method to inject error handling
+	// behavior to a sender. Not all sender implementations use
+	// the error handler, although some, use a default handler to
+	// write logging errors to standard output.
+	SetErrorHandler(ErrorHandler) error
+
 	// If the logging sender holds any resources that require
 	// desecration, they should be cleaned up tin the Close()
 	// method. Close() is called by the SetSender() method before

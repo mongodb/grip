@@ -17,8 +17,7 @@ import (
 )
 
 type smtpLogger struct {
-	opts     *SMTPOptions
-	fallback *log.Logger
+	opts *SMTPOptions
 	*base
 }
 
@@ -54,13 +53,16 @@ func MakeSMTPLogger(opts *SMTPOptions) (Sender, error) {
 		base: newBase(opts.Name),
 	}
 
-	s.SetName(opts.Name)
-
-	s.reset = func() {
-		s.fallback = log.New(os.Stdout, strings.Join([]string{"[", s.Name(), "] "}, ""), log.LstdFlags)
+	fallback := log.New(os.Stdout, "", log.LstdFlags)
+	if err := s.SetErrorHandler(ErrorHandlerFromLogger(fallback)); err != nil {
+		return nil, err
 	}
 
-	s.reset()
+	s.reset = func() {
+		fallback.SetPrefix(fmt.Sprintf("[%s]", s.Name()))
+	}
+
+	s.SetName(opts.Name)
 
 	return s, nil
 }
@@ -71,8 +73,7 @@ func (s *smtpLogger) Send(m message.Composer) {
 	}
 
 	if err := s.opts.sendMail(m); err != nil {
-		s.fallback.Println("smtp error:", err.Error())
-		s.fallback.Println(m)
+		s.errHandler(err, m)
 	}
 }
 

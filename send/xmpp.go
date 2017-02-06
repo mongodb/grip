@@ -11,9 +11,8 @@ import (
 )
 
 type xmppLogger struct {
-	target   string
-	client   *xmpp.Client
-	fallback *log.Logger
+	target string
+	client *xmpp.Client
 	*base
 }
 
@@ -111,12 +110,17 @@ func constructXMPPLogger(target string, info XMPPConnectionInfo) (Sender, error)
 	}
 	s.client = client
 
-	s.reset = func() {
-		s.fallback = log.New(os.Stdout, strings.Join([]string{"[", s.Name(), "] "}, ""), log.LstdFlags)
-	}
-
 	s.closer = func() error {
 		return client.Close()
+	}
+
+	fallback := log.New(os.Stdout, "", log.LstdFlags)
+	if err := s.SetErrorHandler(ErrorHandlerFromLogger(fallback)); err != nil {
+		return nil, err
+	}
+
+	s.reset = func() {
+		fallback.SetPrefix(fmt.Sprintf("[%s]", s.Name()))
 	}
 
 	return s, nil
@@ -124,17 +128,14 @@ func constructXMPPLogger(target string, info XMPPConnectionInfo) (Sender, error)
 
 func (s *xmppLogger) Send(m message.Composer) {
 	if s.level.ShouldLog(m) {
-		s.RLock()
 		c := xmpp.Chat{
 			Remote: s.target,
 			Type:   "chat",
-			Text:   fmt.Sprintf("[%s] (p=%s)  %s", s.name, m.Priority(), m.String()),
+			Text:   fmt.Sprintf("[%s] (p=%s)  %s", s.Name(), m.Priority(), m.String()),
 		}
-		s.RUnlock()
 
 		if _, err := s.client.Send(c); err != nil {
-			s.fallback.Println("xmpp error:", err.Error())
-			s.fallback.Println(c.Text)
+			s.errHandler(err, m)
 		}
 	}
 }

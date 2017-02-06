@@ -32,11 +32,10 @@ func (s *SenderSuite) SetupSuite() {
 func (s *SenderSuite) SetupTest() {
 	l := LevelInfo{level.Info, level.Notice}
 	s.senders = map[string]Sender{
-		"slack":     &slackJournal{base: newBase("slack")},
-		"xmpp":      &xmppLogger{base: newBase("xmpp")},
-		"json":      &jsonLogger{base: newBase("json")},
-		"stream":    &streamLogger{base: newBase("stream")},
-		"bootstrap": &bootstrapLogger{},
+		"slack":  &slackJournal{base: newBase("slack")},
+		"xmpp":   &xmppLogger{base: newBase("xmpp")},
+		"json":   &jsonLogger{base: newBase("json")},
+		"stream": &streamLogger{base: newBase("stream")},
 	}
 
 	internal := new(internalSender)

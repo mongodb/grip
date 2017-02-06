@@ -18,9 +18,8 @@ const (
 )
 
 type slackJournal struct {
-	opts     *SlackOptions
-	fallback *log.Logger
-	client   *slack.Slack
+	opts   *SlackOptions
+	client *slack.Slack
 	*base
 }
 
@@ -41,17 +40,20 @@ func NewSlackLogger(opts *SlackOptions, token string, l LevelInfo) (Sender, erro
 		return nil, err
 	}
 
-	s.SetName(opts.Name)
-
 	if _, err := s.client.AuthTest(); err != nil {
 		return nil, fmt.Errorf("slack authentication error: %v", err)
 	}
 
-	s.reset = func() {
-		s.fallback = log.New(os.Stdout, strings.Join([]string{"[", s.Name(), "] "}, ""), log.LstdFlags)
+	fallback := log.New(os.Stdout, "", log.LstdFlags)
+	if err := s.SetErrorHandler(ErrorHandlerFromLogger(fallback)); err != nil {
+		return nil, err
 	}
 
-	s.reset()
+	s.reset = func() {
+		fallback.SetPrefix(fmt.Sprintf("[%s]", s.Name()))
+	}
+
+	s.SetName(opts.Name)
 
 	return s, nil
 }
@@ -74,25 +76,16 @@ func (s *slackJournal) Send(m message.Composer) {
 		return
 	}
 
-	if fallback, err := s.doSend(m); err != nil {
-		s.fallback.Println("slack error:", err.Error())
-		s.fallback.Println(fallback)
-	}
-}
-
-func (s *slackJournal) doSend(m message.Composer) (string, error) {
 	msg := m.String()
 
 	s.RLock()
 	defer s.RUnlock()
 
 	params := s.opts.getParams(m)
-
 	if err := s.client.ChatPostMessage(s.opts.Channel, msg, params); err != nil {
-		return fmt.Sprintf("%s: %s\n", params.Attachments[0].Fallback, msg), err
+		s.errHandler(err, message.NewFormattedMessage(m.Priority(),
+			"%s: %s\n", params.Attachments[0].Fallback, msg))
 	}
-
-	return "", nil
 }
 
 // SlackOptions configures the behavior for constructing messages sent
@@ -176,6 +169,9 @@ func (o *SlackOptions) Validate() error {
 }
 
 func (o *SlackOptions) getParams(m message.Composer) *slack.ChatPostMessageOpt {
+	o.mutex.RLock()
+	defer o.mutex.RUnlock()
+
 	attachment := slack.Attachment{}
 	fallbacks := []string{}
 

@@ -116,7 +116,7 @@ func MakeCallSiteFileLogger(fileName string, depth int) (Sender, error) {
 func (s *callSiteLogger) Send(m message.Composer) {
 	if s.level.ShouldLog(m) {
 		file, line := callerInfo(s.depth)
-		s.logger.Printf("[p=%s] [%s:%d]: %s", m.Priority(), file, line, m.String())
+		s.logger.Printf("[p=%s] [%s:%d]: %s", m.Priority(), file, line, m)
 	}
 }
 
