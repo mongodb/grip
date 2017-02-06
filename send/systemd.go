@@ -37,7 +37,7 @@ func MakeSystemdLogger() Sender {
 	s.SetErrorHandler(ErrorHandlerFromLogger(fallback))
 
 	s.reset = func() {
-		l.SetPrefix(fmt.Sprintf("[%s]", s.Name()))
+		fallback.SetPrefix(fmt.Sprintf("[%s]", s.Name()))
 	}
 
 	return s
