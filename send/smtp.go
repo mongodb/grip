@@ -141,7 +141,7 @@ type SMTPOptions struct {
 	client   *smtp.Client
 	fromAddr *mail.Address
 	toAddrs  []*mail.Address
-	parser   *mail.AddressParser
+	parser   emailAddressParser
 	mutex    sync.Mutex
 }
 
@@ -198,7 +198,8 @@ func (o *SMTPOptions) AddRecipients(addresses ...string) error {
 
 func (o *SMTPOptions) init() {
 	if o.parser == nil {
-		o.parser = &mail.AddressParser{}
+		o.parser = &emailAddressParserImpl{}
+		o.parser.Init()
 	}
 }
 
