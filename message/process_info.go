@@ -20,11 +20,11 @@ type ProcessInfo struct {
 	Parent         int32                         `json:"parentPid,omitempty" bson:"parentPid,omitempty"`
 	Threads        int                           `json:"numThreads,omitempty" bson:"numThreads,omitempty"`
 	Command        string                        `json:"command,omitempty" bson:"command,omitempty"`
-	IoStat         *process.IOCountersStat       `json:"io,omitempty" bson:"io,omitempty"`
-	MemoryPlatform *process.MemoryInfoExStat     `json:"memExtra,omitempty" bson:"memExtra,omitempty"`
-	Memory         *process.MemoryInfoStat       `json:"mem,omitempty" bson:"mem,omitempty"`
+	CPU            cpu.TimesStat                 `json:"cpu,omitempty" bson:"cpu,omitempty"`
+	IoStat         process.IOCountersStat        `json:"io,omitempty" bson:"io,omitempty"`
+	Memory         process.MemoryInfoStat        `json:"mem,omitempty" bson:"mem,omitempty"`
+	MemoryPlatform process.MemoryInfoExStat      `json:"memExtra,omitempty" bson:"memExtra,omitempty"`
 	Network        map[string]net.IOCountersStat `json:"net,omitempty" bson:"net,omitempty"`
-	CPU            *cpu.TimesStat                `json:"cpu,omitempty" bson:"cpu,omitempty"`
 	Errors         []string                      `json:"errors,omitempty" bson:"errors,omitempty"`
 	Base           `json:"metadata,omitempty" bson:"metadata,omitempty"`
 	loggable       bool
@@ -161,11 +161,17 @@ func (p *ProcessInfo) populate(proc *process.Process) {
 	p.Parent, err = proc.Ppid()
 	p.saveError(err)
 
-	p.Memory, err = proc.MemoryInfo()
+	memInfo, err := proc.MemoryInfo()
 	p.saveError(err)
+	if err != nil {
+		p.Memory = *memInfo
+	}
 
-	p.MemoryPlatform, err = proc.MemoryInfoEx()
+	memInfoEx, err := proc.MemoryInfoEx()
 	p.saveError(err)
+	if err != nil {
+		p.MemoryPlatform = *memInfoEx
+	}
 
 	threads, err := proc.NumThreads()
 	p.Threads = int(threads)
@@ -183,11 +189,18 @@ func (p *ProcessInfo) populate(proc *process.Process) {
 	p.Command, err = proc.Cmdline()
 	p.saveError(err)
 
-	p.CPU, err = proc.Times()
+	cpuTimes, err := proc.Times()
 	p.saveError(err)
+	if err != nil {
+		p.CPU = *cpuTimes
+	}
 
-	p.IoStat, err = proc.IOCounters()
+	ioStat, err := proc.IOCounters()
 	p.saveError(err)
+	if err != nil {
+		p.IoStat = *ioStat
+	}
+
 }
 
 func (p *ProcessInfo) saveError(err error) {
