@@ -8,17 +8,17 @@ import (
 	"github.com/tychoish/grip/message"
 )
 
-type base struct {
+type Base struct {
 	name       string
 	level      LevelInfo
 	reset      func()
 	closer     func() error
 	errHandler ErrorHandler
-	sync.RWMutex
+	mutex      sync.RWMutex
 }
 
-func newBase(n string) *base {
-	return &base{
+func NewBase(n string) *Base {
+	return &Base{
 		name:       n,
 		reset:      func() {},
 		closer:     func() error { return nil },
@@ -26,51 +26,51 @@ func newBase(n string) *base {
 	}
 }
 
-func (b *base) Close() error { return b.closer() }
+func (b *Base) Close() error { return b.closer() }
 
-func (b *base) Name() string {
-	b.RLock()
-	defer b.RUnlock()
+func (b *Base) Name() string {
+	b.mutex.RLock()
+	defer b.mutex.RUnlock()
 
 	return b.name
 }
 
-func (b *base) SetName(name string) {
-	b.Lock()
+func (b *Base) SetName(name string) {
+	b.mutex.Lock()
 	b.name = name
-	b.Unlock()
+	b.mutex.Unlock()
 
 	b.reset()
 }
 
-func (b *base) SetErrorHandler(eh ErrorHandler) error {
+func (b *Base) SetErrorHandler(eh ErrorHandler) error {
 	if eh == nil {
 		return errors.New("error handler must be non-nil")
 	}
 
-	b.Lock()
-	defer b.Unlock()
+	b.mutex.Lock()
+	defer b.mutex.Unlock()
 	b.errHandler = eh
 
 	return nil
 }
 
-func (b *base) SetLevel(l LevelInfo) error {
+func (b *Base) SetLevel(l LevelInfo) error {
 	if !l.Valid() {
 		return fmt.Errorf("level settings are not valid: %+v", l)
 	}
 
-	b.Lock()
-	defer b.Unlock()
+	b.mutex.Lock()
+	defer b.mutex.Unlock()
 
 	b.level = l
 
 	return nil
 }
 
-func (b *base) Level() LevelInfo {
-	b.RLock()
-	defer b.RUnlock()
+func (b *Base) Level() LevelInfo {
+	b.mutex.RLock()
+	defer b.mutex.RUnlock()
 
 	return b.level
 }
