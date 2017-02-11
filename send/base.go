@@ -8,13 +8,21 @@ import (
 	"github.com/tychoish/grip/message"
 )
 
+type BaseResetFunc func()
+type BaseCloseFunc func() error
+
 type Base struct {
-	name       string
-	level      LevelInfo
-	reset      func()
-	closer     func() error
+	// data exposed via the interface and tools to track them
+	name  string
+	level LevelInfo
+	mutex sync.RWMutex
+
+	// function literals which allow customizable functionality.
+	// they are set either in the constructor (e.g. MakeBase) of
+	// via the SetErrorHandler injector.
 	errHandler ErrorHandler
-	mutex      sync.RWMutex
+	reset      BaseResetFunc
+	closer     BaseCloseFunc
 }
 
 func NewBase(n string) *Base {
@@ -24,6 +32,12 @@ func NewBase(n string) *Base {
 		closer:     func() error { return nil },
 		errHandler: func(error, message.Composer) {},
 	}
+}
+
+func MakeBase(n string, r BaseResetFunc, c BaseCloseFunc) {
+	b := NewBase(n)
+	b.reset = r
+	b.closer = c
 }
 
 func (b *Base) Close() error { return b.closer() }
@@ -53,6 +67,15 @@ func (b *Base) SetErrorHandler(eh ErrorHandler) error {
 	b.errHandler = eh
 
 	return nil
+}
+
+// ErrorHandler calls the error handler, and is a wrapper around the
+// embedded ErrorHandler function. It is not part of the Sender interface.
+func (b *Base) ErrorHandler(err error, m message.Composer) {
+	b.mutex.RLock()
+	defer b.mutex.RUnlock()
+
+	b.errHandler(err, m)
 }
 
 func (b *Base) SetLevel(l LevelInfo) error {
