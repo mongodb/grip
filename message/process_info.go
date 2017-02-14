@@ -156,8 +156,6 @@ func (p *ProcessInfo) String() string {
 func (p *ProcessInfo) populate(proc *process.Process) {
 	var err error
 
-	fmt.Println(p.Pid, proc.Pid)
-
 	if p.Pid == 0 {
 		p.Pid = proc.Pid
 	}
