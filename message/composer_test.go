@@ -3,7 +3,10 @@ package message
 import (
 	"errors"
 	"fmt"
+	"os"
 	"testing"
+
+	"strings"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/tychoish/grip/level"
@@ -43,5 +46,47 @@ func TestMessageComposerConstructors(t *testing.T) {
 		if msg.Priority() != level.Invalid {
 			assert.Equal(msg.Priority(), level.Error)
 		}
+	}
+}
+
+func TestDataCollecterComposerConstructors(t *testing.T) {
+	const testMsg = "hello"
+	assert := assert.New(t)
+	// map objects to output (prefix)
+	cases := map[Composer]string{
+		NewProcessInfo(level.Error, int32(os.Getpid()), testMsg): "",
+		MakeSystemInfo(testMsg):                                  testMsg,
+		CollectSystemInfo():                                      ":",
+	}
+
+	for msg, prefix := range cases {
+		assert.NotNil(msg)
+		assert.Implements((*Composer)(nil), msg)
+
+		assert.True(strings.HasPrefix(msg.String(), prefix), fmt.Sprintf("%T: %s", msg, msg))
+	}
+
+}
+
+func TestStackMessages(t *testing.T) {
+	const testMsg = "hello"
+	const stackMsg = "message/composer_test"
+	assert := assert.New(t)
+	// map objects to output (prefix)
+	cases := map[Composer]string{
+		NewStack(1, testMsg):                                       testMsg,
+		NewStackLines(1, testMsg):                                  testMsg,
+		NewStackLines(1):                                           "",
+		NewStackFormatted(1, "%s", testMsg):                        testMsg,
+		NewStackFormatted(1, string(testMsg[0])+"%s", testMsg[1:]): testMsg,
+	}
+
+	for msg, text := range cases {
+		assert.NotNil(msg)
+		assert.Implements((*Composer)(nil), msg)
+
+		diagMsg := fmt.Sprintf("%T: %+v", msg, msg)
+		assert.True(strings.Contains(msg.String(), text), diagMsg)
+		assert.True(strings.Contains(msg.String(), stackMsg), diagMsg)
 	}
 }
