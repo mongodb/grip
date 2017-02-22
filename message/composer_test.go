@@ -55,8 +55,10 @@ func TestDataCollecterComposerConstructors(t *testing.T) {
 	// map objects to output (prefix)
 	cases := map[Composer]string{
 		NewProcessInfo(level.Error, int32(os.Getpid()), testMsg): "",
+		NewSystemInfo(level.Error, testMsg):                      testMsg,
 		MakeSystemInfo(testMsg):                                  testMsg,
-		CollectSystemInfo():                                      ":",
+		MakeDiskStats(testMsg):                                   testMsg,
+		NewDiskStats(level.Error, testMsg):                       testMsg,
 	}
 
 	for msg, prefix := range cases {
@@ -65,7 +67,6 @@ func TestDataCollecterComposerConstructors(t *testing.T) {
 
 		assert.True(strings.HasPrefix(msg.String(), prefix), fmt.Sprintf("%T: %s", msg, msg))
 	}
-
 }
 
 func TestStackMessages(t *testing.T) {

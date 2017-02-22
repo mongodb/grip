@@ -23,6 +23,7 @@ type SystemInfo struct {
 	Errors   []string              `json:"errors,omitempty" bson:"errors,omitempty"`
 	Base     `json:"metadata,omitempty" bson:"metadata,omitempty"`
 	loggable bool
+	rendered string
 }
 
 // CollectSystemInfo returns a populated SystemInfo object,
@@ -75,15 +76,22 @@ func NewSystemInfo(priority level.Priority, message string) Composer {
 	return s
 }
 
-func (s *SystemInfo) Loggable() bool   { return s.loggable }
+// Loggable returns true when the Processinfo structure has been
+// populated.
+func (s *SystemInfo) Loggable() bool { return s.loggable }
+
+// Raw always returns the SystemInfo object, however it will call the
+// Collect method of the base operation first.
 func (s *SystemInfo) Raw() interface{} { _ = s.Collect(); return s }
+
+// String returns a string representation of the message, lazily
+// rendering the message, and caching it privately.
 func (s *SystemInfo) String() string {
-	data, err := json.MarshalIndent(s, "  ", " ")
-	if err != nil {
-		return s.Message
+	if s.rendered == "" {
+		s.rendered = renderStatsString(s.Message, s)
 	}
 
-	return fmt.Sprintf("%s:\n%s", s.Message, string(data))
+	return s.rendered
 }
 
 func (s *SystemInfo) saveError(err error) {
@@ -95,4 +103,17 @@ func (s *SystemInfo) saveError(err error) {
 // helper function
 func shouldSaveError(err error) bool {
 	return err != nil && err.Error() != "not implemented yet"
+}
+
+func renderStatsString(msg string, data interface{}) string {
+	out, err := json.Marshal(data)
+	if err != nil {
+		return msg
+	}
+
+	if msg == "" {
+		return string(out)
+	}
+
+	return fmt.Sprintf("%s:\n%s", msg, string(out))
 }
