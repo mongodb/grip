@@ -14,7 +14,7 @@ expensive message building operations.
 */
 package grip
 
-import "github.com/tychoish/grip/level"
+import "github.com/mongodb/grip/level"
 
 func LogWhen(conditional bool, l level.Priority, m interface{}) {
 	std.LogWhen(conditional, l, m)

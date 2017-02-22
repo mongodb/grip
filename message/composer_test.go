@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/tychoish/grip/level"
+	"github.com/mongodb/grip/level"
 )
 
 func TestMessageComposerConstructors(t *testing.T) {

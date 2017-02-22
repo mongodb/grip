@@ -1,6 +1,6 @@
 package logging
 
-import "github.com/tychoish/grip/level"
+import "github.com/mongodb/grip/level"
 
 // DefaultLevel returns the current default level for the logger. The
 // default level is used for the Default logging methods and as a

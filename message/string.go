@@ -1,6 +1,6 @@
 package message
 
-import "github.com/tychoish/grip/level"
+import "github.com/mongodb/grip/level"
 
 type stringMessage struct {
 	Message string `bson:"message" json:"message" yaml:"message"`

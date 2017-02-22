@@ -13,7 +13,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/tychoish/grip/message"
+	"github.com/mongodb/grip/message"
 )
 
 type smtpLogger struct {

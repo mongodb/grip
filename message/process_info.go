@@ -6,7 +6,7 @@ import (
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/net"
 	"github.com/shirou/gopsutil/process"
-	"github.com/tychoish/grip/level"
+	"github.com/mongodb/grip/level"
 )
 
 // ProcessInfo holds the data for per-process statistics (e.g. cpu,

@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tychoish/grip/level"
-	"github.com/tychoish/grip/message"
+	"github.com/mongodb/grip/level"
+	"github.com/mongodb/grip/message"
 )
 
 // Log is a representation of a logging event, which matches the

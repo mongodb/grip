@@ -1,6 +1,6 @@
 package message
 
-import "github.com/tychoish/grip/level"
+import "github.com/mongodb/grip/level"
 
 // Composer defines an interface with a "String()" method that
 // returns the message in string format. Objects that implement this

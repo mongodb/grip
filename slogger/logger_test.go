@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/tychoish/grip/level"
-	"github.com/tychoish/grip/send"
+	"github.com/mongodb/grip/level"
+	"github.com/mongodb/grip/send"
 )
 
 func TestLoggerLogf(t *testing.T) {

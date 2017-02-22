@@ -8,9 +8,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	"github.com/tychoish/grip/level"
-	"github.com/tychoish/grip/message"
-	"github.com/tychoish/grip/send"
+	"github.com/mongodb/grip/level"
+	"github.com/mongodb/grip/message"
+	"github.com/mongodb/grip/send"
 )
 
 type AppenderSenderSuite struct {

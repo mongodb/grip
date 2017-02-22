@@ -8,8 +8,8 @@ import (
 	"log/syslog"
 	"os"
 
-	"github.com/tychoish/grip/level"
-	"github.com/tychoish/grip/message"
+	"github.com/mongodb/grip/level"
+	"github.com/mongodb/grip/message"
 )
 
 type syslogger struct {

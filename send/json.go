@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/tychoish/grip/message"
+	"github.com/mongodb/grip/message"
 )
 
 type jsonLogger struct {

@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tychoish/grip/level"
-	"github.com/tychoish/grip/message"
+	"github.com/mongodb/grip/level"
+	"github.com/mongodb/grip/message"
 )
 
 type buildlogger struct {

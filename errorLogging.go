@@ -5,7 +5,7 @@
 // global logger and for Journaler logging objects.
 package grip
 
-import "github.com/tychoish/grip/level"
+import "github.com/mongodb/grip/level"
 
 // Emergency + (fatal/panic)
 // Alert + (fatal/panic)

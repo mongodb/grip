@@ -6,8 +6,8 @@ package logging
 // for the following levels, with helpers defined both globally for the
 // global logger and for Journaler logging objects.
 import (
-	"github.com/tychoish/grip/level"
-	"github.com/tychoish/grip/message"
+	"github.com/mongodb/grip/level"
+	"github.com/mongodb/grip/message"
 )
 
 func (g *Grip) CatchLog(l level.Priority, err error) {

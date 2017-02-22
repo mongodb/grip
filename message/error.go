@@ -8,7 +8,7 @@ package message
 import (
 	"fmt"
 
-	"github.com/tychoish/grip/level"
+	"github.com/mongodb/grip/level"
 )
 
 type errorMessage struct {

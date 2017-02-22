@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/tychoish/grip/message"
+	"github.com/mongodb/grip/message"
 )
 
 // this file contains tools to support the slogger interface

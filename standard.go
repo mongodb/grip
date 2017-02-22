@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/tychoish/grip/send"
+	"github.com/mongodb/grip/send"
 )
 
 var std = NewJournaler("grip")

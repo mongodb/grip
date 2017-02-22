@@ -8,8 +8,8 @@ your application generates and collects messages asynchronously.
 package grip
 
 import (
-	"github.com/tychoish/grip/level"
-	"github.com/tychoish/grip/message"
+	"github.com/mongodb/grip/level"
+	"github.com/mongodb/grip/message"
 )
 
 func LogMany(l level.Priority, msgs ...message.Composer) {

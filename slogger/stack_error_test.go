@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/tychoish/grip/message"
+	"github.com/mongodb/grip/message"
 )
 
 func TestSlackError(t *testing.T) {

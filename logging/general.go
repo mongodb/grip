@@ -19,8 +19,8 @@ Loging helpers exist for the following levels:
 package logging
 
 import (
-	"github.com/tychoish/grip/level"
-	"github.com/tychoish/grip/message"
+	"github.com/mongodb/grip/level"
+	"github.com/mongodb/grip/message"
 )
 
 func (g *Grip) Log(l level.Priority, msg interface{}) {

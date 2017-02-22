@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/tychoish/grip/message"
+	"github.com/mongodb/grip/message"
 )
 
 type BaseResetFunc func()

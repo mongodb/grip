@@ -3,8 +3,8 @@ package slogger
 import (
 	"errors"
 
-	"github.com/tychoish/grip/message"
-	"github.com/tychoish/grip/send"
+	"github.com/mongodb/grip/message"
+	"github.com/mongodb/grip/send"
 )
 
 // Logger is a type that represents a single log instance. This is

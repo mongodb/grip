@@ -1,6 +1,6 @@
 package grip
 
-import "github.com/tychoish/grip/level"
+import "github.com/mongodb/grip/level"
 
 // SetDefaultLevel sets the default level for the package level
 // Journaler instance.

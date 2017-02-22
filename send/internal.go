@@ -3,8 +3,8 @@ package send
 import (
 	"errors"
 
-	"github.com/tychoish/grip/level"
-	"github.com/tychoish/grip/message"
+	"github.com/mongodb/grip/level"
+	"github.com/mongodb/grip/message"
 )
 
 // internalSender implements a Sender object that makes it possible to

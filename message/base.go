@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/tychoish/grip/level"
+	"github.com/mongodb/grip/level"
 )
 
 // Base provides a simple embedable implementation of some common

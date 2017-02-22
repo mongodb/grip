@@ -9,7 +9,7 @@ import (
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/mem"
 	"github.com/shirou/gopsutil/net"
-	"github.com/tychoish/grip/level"
+	"github.com/mongodb/grip/level"
 )
 
 // SystemInfo is a type that implements message.Composer but also

@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/suite"
-	"github.com/tychoish/grip/send"
+	"github.com/mongodb/grip/send"
 )
 
 type GripSuite struct {
