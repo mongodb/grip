@@ -79,6 +79,9 @@ coverage-html:$(coverageHtmlOutput)
 phony := lint build build-race race test coverage coverage-html
 phony += deps lint-deps
 .PRECIOUS: $(testOutput) $(raceOutput) $(coverageOutput) $(coverageHtmlOutput)
+.PRECIOUS: $(testOutput) $(raceOutput) $(coverageOutput) $(coverageHtmlOutput)
+.PRECIOUS: $(foreach target,$(packages),$(buildDir)/test.$(target))
+.PRECIOUS: $(foreach target,$(packages),$(buildDir)/race.$(target))
 # end front-ends
 
 
