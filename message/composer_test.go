@@ -8,8 +8,8 @@ import (
 
 	"strings"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/mongodb/grip/level"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMessageComposerConstructors(t *testing.T) {
@@ -57,8 +57,6 @@ func TestDataCollecterComposerConstructors(t *testing.T) {
 		NewProcessInfo(level.Error, int32(os.Getpid()), testMsg): "",
 		NewSystemInfo(level.Error, testMsg):                      testMsg,
 		MakeSystemInfo(testMsg):                                  testMsg,
-		MakeDiskStats(testMsg):                                   testMsg,
-		NewDiskStats(level.Error, testMsg):                       testMsg,
 	}
 
 	for msg, prefix := range cases {

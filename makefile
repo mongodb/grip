@@ -119,14 +119,17 @@ html-coverage-%:$(buildDir)/output.%.coverage $(buildDir)/output.%.coverage.html
 #    that the tests actually need to run. (The "build" target is
 #    intentional and makes these targets rerun as expected.)
 testArgs := -test.v --test.timeout=5m
+#    to avoid vendoring the coverage tool, install it as needed
+coverDeps := golang.org/x/tools/cmd/cover
+coverDeps := $(addprefix $(gopath)/src/,$(coverDeps))
 #    implementation for package coverage and test running,mongodb to produce
 #    and save test output.
-$(buildDir)/test.%:$(testSrcFiles)
+$(buildDir)/test.%:$(testSrcFiles) $(coverDeps)
 	$(vendorGopath) go test $(if $(DISABLE_COVERAGE),,-covermode=count) -c -o $@ ./$(subst -,/,$*)
 $(buildDir)/race.%:$(testSrcFiles)
 	$(vendorGopath) go test -race -c -o $@ ./$(subst -,/,$*)
 #  targets to run any tests in the top-level package
-$(buildDir)/test.$(name):$(testSrcFiles)
+$(buildDir)/test.$(name):$(testSrcFiles) $(coverDeps)
 	$(vendorGopath) go test $(if $(DISABLE_COVERAGE),,-covermode=count) -c -o $@ ./
 $(buildDir)/race.$(name):$(testSrcFiles)
 	$(vendorGopath) go test -race -c -o $@ ./
@@ -136,10 +139,10 @@ $(buildDir)/output.%.test:$(buildDir)/test.% .FORCE
 $(buildDir)/output.%.race:$(buildDir)/race.% .FORCE
 	$(testRunEnv) ./$< $(testArgs) 2>&1 | tee $@
 #  targets to process and generate coverage reports
-$(buildDir)/output.%.coverage:$(buildDir)/test.% .FORCE
+$(buildDir)/output.%.coverage:$(buildDir)/test.% .FORCE $(coverDeps)
 	$(testRunEnv) ./$< $(testTimeout) -test.coverprofile=$@ || true
 	@-[ -f $@ ] && go tool cover -func=$@ | sed 's%$(projectPath)/%%' | column -t
-$(buildDir)/output.%.coverage.html:$(buildDir)/output.%.coverage
+$(buildDir)/output.%.coverage.html:$(buildDir)/output.%.coverage $(coverDeps)
 	$(vendorGopath) go tool cover -html=$< -o $@
 # end test and coverage artifacts
 
