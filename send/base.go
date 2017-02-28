@@ -19,10 +19,11 @@ type Base struct {
 
 	// function literals which allow customizable functionality.
 	// they are set either in the constructor (e.g. MakeBase) of
-	// via the SetErrorHandler injector.
+	// via the SetErrorHandler/SetFormatter injector.
 	errHandler ErrorHandler
 	reset      BaseResetFunc
 	closer     BaseCloseFunc
+	formatter  MessageFormatter
 }
 
 func NewBase(n string) *Base {
@@ -55,6 +56,18 @@ func (b *Base) SetName(name string) {
 	b.mutex.Unlock()
 
 	b.reset()
+}
+
+func (b *Base) SetFormatter(mf MessageFormatter) error {
+	if mf == nil {
+		return errors.New("cannot set message formatter to nil")
+	}
+
+	b.mutex.Lock()
+	defer b.mutex.Unlock()
+	b.formatter = mf
+
+	return nil
 }
 
 func (b *Base) SetErrorHandler(eh ErrorHandler) error {
