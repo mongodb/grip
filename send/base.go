@@ -35,10 +35,12 @@ func NewBase(n string) *Base {
 	}
 }
 
-func MakeBase(n string, r BaseResetFunc, c BaseCloseFunc) {
+func MakeBase(n string, r BaseResetFunc, c BaseCloseFunc) *Base {
 	b := NewBase(n)
 	b.reset = r
 	b.closer = c
+
+	return b
 }
 
 func (b *Base) Close() error { return b.closer() }

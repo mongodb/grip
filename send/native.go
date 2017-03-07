@@ -117,6 +117,5 @@ func (s *nativeLogger) Send(m message.Composer) {
 		}
 
 		s.logger.Printf(out)
-
 	}
 }

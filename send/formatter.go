@@ -12,7 +12,7 @@ import (
 const (
 	defaultFormatTmpl  = "[p=%s]: %s"
 	callSiteTmpl       = "[p=%s] [%s:%d]: %s"
-	completeFormatTmpl = "[%s] (p=%s)  %s"
+	completeFormatTmpl = "[%s] (p=%s) %s"
 )
 
 type MessageFormatter func(message.Composer) (string, error)
