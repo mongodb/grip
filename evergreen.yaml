@@ -149,3 +149,14 @@ buildvariants:
     run_on:
       - osx-1010
     tasks: [ ".test" ]
+
+  - name: windows
+    display_name: Windows
+    run_on:
+      - windows-64-vs2015-small
+      - windows-64-vs2013-test
+      - windows-64-vs2010-test
+    expansions:
+      build_env: "GOROOT=c:/go DISABLE_COVERAGE=yes"
+    tasks: [ ".test" ]
+
