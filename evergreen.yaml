@@ -97,7 +97,7 @@ tasks:
         params:
           directory: gopath/src/github.com/mongodb/grip
       - func: run-make
-        vars: { target: "build" }
+        vars: { target: "lint" }
 
   - name: coverage
     tags: [ "report" ]
