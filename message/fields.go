@@ -14,8 +14,9 @@ type fieldMessage struct {
 	Base
 }
 
-// A convince type that wraps map[string]interface{} and is used for
-// attaching structured metadata to a build request. For example:
+// Fields is a convince type that wraps map[string]interface{} and is
+// used for attaching structured metadata to a build request. For
+// example:
 //
 //     message.Fields{"key0", <value>, "key1", <value>}
 type Fields map[string]interface{}
@@ -40,7 +41,7 @@ func NewFields(p level.Priority, f Fields) Composer {
 	return m
 }
 
-// NewFields constructs a fields Composer from a message string and
+// MakeFieldsMessage constructs a fields Composer from a message string and
 // Fields object, without specifying the priority of the message.
 func MakeFieldsMessage(message string, f Fields) Composer {
 	return &fieldMessage{message: message, fields: f}

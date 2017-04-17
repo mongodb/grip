@@ -45,12 +45,13 @@ func MakeSystemInfo(message string) Composer {
 // NewSystemInfo returns a fully configured and populated SystemInfo
 // object.
 func NewSystemInfo(priority level.Priority, message string) Composer {
+	var err error
 	s := &SystemInfo{
 		Message: message,
 		NumCPU:  runtime.NumCPU(),
 	}
 
-	if err := s.SetPriority(priority); err != nil {
+	if err = s.SetPriority(priority); err != nil {
 		s.Errors = append(s.Errors, err.Error())
 		return s
 	}

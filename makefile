@@ -15,11 +15,11 @@ lintDeps := github.com/alecthomas/gometalinter
 lintArgs := --tests --deadline=1m --vendor
 #   gotype produces false positives because it reads .a files which
 #   are rarely up to date.
-lintArgs += --disable="gotype" --disable="gas"
+lintArgs += --disable="gotype" --disable="gas" --disable="gocyclo" --disable="aligncheck"
 lintArgs += --skip="$(buildDir)" --skip="buildscripts"
 #  add and configure additional linters
 lintArgs += --enable="goimports" --enable="misspell"
-lintArgs += --line-length=100 --dupl-threshold=175 --cyclo-over=17
+lintArgs += --line-length=100 --dupl-threshold=175
 #  two similar functions triggered the duplicate warning, but they're not.
 lintArgs += --exclude="duplicate of registry.go"
 lintArgs += --exclude="don.t use underscores.*_DependencyState.*"
