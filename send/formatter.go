@@ -21,7 +21,7 @@ const (
 // new Sender interfaces.
 type MessageFormatter func(message.Composer) (string, error)
 
-// MakeJSONFormtter returns a MessageFormatter, that returns messages
+// MakeJSONFormatter returns a MessageFormatter, that returns messages
 // as the string form of a JSON document built using the Raw method of
 // the Composer. Returns an error if there was a problem marshalling JSON.
 func MakeJSONFormatter() MessageFormatter {
