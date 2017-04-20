@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"runtime"
 	"testing"
 
 	"strings"
@@ -69,7 +70,14 @@ func TestDataCollecterComposerConstructors(t *testing.T) {
 
 func TestStackMessages(t *testing.T) {
 	const testMsg = "hello"
-	const stackMsg = "message/composer_test"
+
+	var stackMsg string
+	if runtime.GOOS == "windows" {
+		stackMsg = "message\\composer_test"
+	} else {
+		stackMsg = "message/composer_test"
+	}
+
 	assert := assert.New(t)
 	// map objects to output (prefix)
 	cases := map[Composer]string{
