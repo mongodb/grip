@@ -1,6 +1,7 @@
 package send
 
 import (
+	"bytes"
 	"fmt"
 	"math/rand"
 	"testing"
@@ -31,9 +32,8 @@ func (s *SenderSuite) SetupSuite() {
 func (s *SenderSuite) SetupTest() {
 	l := LevelInfo{level.Info, level.Notice}
 	s.senders = map[string]Sender{
-		"slack":  &slackJournal{Base: NewBase("slack")},
-		"xmpp":   &xmppLogger{Base: NewBase("xmpp")},
-		"stream": &streamLogger{Base: NewBase("stream")},
+		"slack": &slackJournal{Base: NewBase("slack")},
+		"xmpp":  &xmppLogger{Base: NewBase("xmpp")},
 	}
 
 	internal := new(internalSender)
@@ -44,6 +44,18 @@ func (s *SenderSuite) SetupTest() {
 	native, err := NewNativeLogger("native", l)
 	s.require.NoError(err)
 	s.senders["native"] = native
+
+	callsite, err := NewCallSiteConsoleLogger("callsite", 1, l)
+	s.require.NoError(err)
+	s.senders["callsite"] = callsite
+
+	stream, err := NewStreamLogger("stream", &bytes.Buffer{}, l)
+	s.require.NoError(err)
+	s.senders["stream"] = stream
+
+	jsons, err := NewJSONConsoleLogger("json", LevelInfo{level.Info, level.Notice})
+	s.require.NoError(err)
+	s.senders["json"] = jsons
 
 	var sender Sender
 	multiSenders := []Sender{}
@@ -61,12 +73,8 @@ func (s *SenderSuite) SetupTest() {
 func (s *SenderSuite) functionalMockSenders() map[string]Sender {
 	out := map[string]Sender{}
 	for t, sender := range s.senders {
-		if t == "slack" || t == "stream" || t == "internal" || t == "xmpp" {
+		if t == "slack" || t == "internal" || t == "xmpp" {
 			continue
-		} else if t == "json" {
-			var err error
-			out[t], err = NewJSONConsoleLogger("json", LevelInfo{level.Info, level.Notice})
-			s.require.NoError(err)
 		} else {
 			out[t] = sender
 		}
