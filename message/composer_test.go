@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"runtime"
 	"testing"
 
 	"strings"
@@ -123,14 +122,7 @@ func TestDataCollecterComposerConstructors(t *testing.T) {
 
 func TestStackMessages(t *testing.T) {
 	const testMsg = "hello"
-
-	var stackMsg string
-	if runtime.GOOS == "windows" {
-		stackMsg = "message\\composer_test"
-	} else {
-		stackMsg = "message/composer_test"
-	}
-
+	const stackMsg = "message/composer_test"
 	assert := assert.New(t)
 	// map objects to output (prefix)
 	cases := map[Composer]string{
@@ -160,4 +152,54 @@ func TestStackMessages(t *testing.T) {
 		assert.True(strings.Contains(msg.String(), text), diagMsg)
 		assert.True(strings.Contains(msg.String(), stackMsg), diagMsg)
 	}
+}
+
+func TestComposerConverter(t *testing.T) {
+	const testMsg = "hello world"
+	assert := assert.New(t)
+
+	cases := []interface{}{
+		NewLine(testMsg),
+		testMsg,
+		errors.New(testMsg),
+		[]string{testMsg},
+		[]interface{}{testMsg},
+		[]byte(testMsg),
+	}
+
+	for _, msg := range cases {
+		comp := ConvertToComposer(level.Error, msg)
+		assert.True(comp.Loggable())
+		assert.Equal(testMsg, comp.String(), fmt.Sprintf("%T", msg))
+	}
+
+	cases = []interface{}{
+		nil,
+		"",
+		[]interface{}{},
+		[]string{},
+		[]byte{},
+		Fields{},
+		map[string]interface{}{},
+	}
+
+	for _, msg := range cases {
+		comp := ConvertToComposer(level.Error, msg)
+		assert.False(comp.Loggable())
+		assert.Equal("", comp.String(), fmt.Sprintf("%T", msg))
+	}
+
+	outputCases := map[string]interface{}{
+		"1":         1,
+		"2":         int32(2),
+		"[msg='3']": Fields{"msg": 3},
+		"[msg='4']": map[string]interface{}{"msg": "4"},
+	}
+
+	for out, in := range outputCases {
+		comp := ConvertToComposer(level.Error, in)
+		assert.True(comp.Loggable())
+		assert.Equal(out, comp.String(), fmt.Sprintf("%T", in))
+	}
+
 }
