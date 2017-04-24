@@ -1,14 +1,16 @@
 package logging
 
 import (
+	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"testing"
 
-	"github.com/stretchr/testify/suite"
 	"github.com/mongodb/grip/level"
 	"github.com/mongodb/grip/message"
 	"github.com/mongodb/grip/send"
+	"github.com/stretchr/testify/suite"
 )
 
 type GripInternalSuite struct {
@@ -92,6 +94,159 @@ func (s *GripInternalSuite) TestConditionalSend() {
 	s.grip.conditionalSend(true, msg)
 	s.grip.conditionalSend(false, msgTwo)
 	s.Equal(sink.GetMessage().Message, msg)
+}
+
+func (s *GripInternalSuite) TestCatchMethods() {
+
+	sink, err := send.NewInternalLogger("sink", send.LevelInfo{level.Trace, level.Trace})
+	s.NoError(err)
+	s.NoError(s.grip.SetSender(sink))
+
+	cases := []interface{}{
+		s.grip.CatchAlert,
+		s.grip.CatchCritical,
+		s.grip.CatchDebug,
+		s.grip.CatchEmergency,
+		s.grip.CatchError,
+		s.grip.CatchInfo,
+		s.grip.CatchNotice,
+		s.grip.CatchWarning,
+
+		s.grip.Alert,
+		s.grip.Critical,
+		s.grip.Debug,
+		s.grip.Emergency,
+		s.grip.Error,
+		s.grip.Info,
+		s.grip.Notice,
+		s.grip.Warning,
+
+		s.grip.Alertln,
+		s.grip.Criticalln,
+		s.grip.Debugln,
+		s.grip.Emergencyln,
+		s.grip.Errorln,
+		s.grip.Infoln,
+		s.grip.Noticeln,
+		s.grip.Warningln,
+
+		s.grip.Alertf,
+		s.grip.Criticalf,
+		s.grip.Debugf,
+		s.grip.Emergencyf,
+		s.grip.Errorf,
+		s.grip.Infof,
+		s.grip.Noticef,
+		s.grip.Warningf,
+
+		s.grip.AlertWhen,
+		s.grip.CriticalWhen,
+		s.grip.DebugWhen,
+		s.grip.EmergencyWhen,
+		s.grip.ErrorWhen,
+		s.grip.InfoWhen,
+		s.grip.NoticeWhen,
+		s.grip.WarningWhen,
+
+		s.grip.AlertWhenln,
+		s.grip.CriticalWhenln,
+		s.grip.DebugWhenln,
+		s.grip.EmergencyWhenln,
+		s.grip.ErrorWhenln,
+		s.grip.InfoWhenln,
+		s.grip.NoticeWhenln,
+		s.grip.WarningWhenln,
+
+		s.grip.AlertWhenf,
+		s.grip.CriticalWhenf,
+		s.grip.DebugWhenf,
+		s.grip.EmergencyWhenf,
+		s.grip.ErrorWhenf,
+		s.grip.InfoWhenf,
+		s.grip.NoticeWhenf,
+		s.grip.WarningWhenf,
+
+		s.grip.AlertMany,
+		s.grip.CriticalMany,
+		s.grip.DebugMany,
+		s.grip.EmergencyMany,
+		s.grip.ErrorMany,
+		s.grip.InfoMany,
+		s.grip.NoticeMany,
+		s.grip.WarningMany,
+
+		s.grip.AlertManyWhen,
+		s.grip.CriticalManyWhen,
+		s.grip.DebugManyWhen,
+		s.grip.EmergencyManyWhen,
+		s.grip.ErrorManyWhen,
+		s.grip.InfoManyWhen,
+		s.grip.NoticeManyWhen,
+		s.grip.WarningManyWhen,
+	}
+
+	const msg = "hello world!"
+	multiMessage := []message.Composer{
+		message.ConvertToComposer(0, nil),
+		message.ConvertToComposer(0, msg),
+	}
+
+	for _, logger := range cases {
+		s.Equal(0, sink.Len())
+		s.False(sink.HasMessage())
+
+		switch log := logger.(type) {
+		case func(error):
+			log(errors.New(msg))
+		case func(interface{}):
+			log(msg)
+		case func(...interface{}):
+			log(msg, "", nil)
+		case func(string, ...interface{}):
+			log("%s", msg)
+		case func(bool, interface{}):
+			log(false, msg)
+			log(true, msg)
+		case func(bool, ...interface{}):
+			log(false, msg, "", nil)
+			log(true, msg, "", nil)
+		case func(bool, string, ...interface{}):
+			log(false, "%s", msg)
+			log(true, "%s", msg)
+		case func(...message.Composer):
+			log(multiMessage...)
+		case func(bool, ...message.Composer):
+			log(false, multiMessage...)
+			log(true, multiMessage...)
+		default:
+			panic(fmt.Sprintf("%T is not supported\n", log))
+		}
+
+		if sink.Len() == 1 {
+			s.True(sink.Len() == 1)
+			s.True(sink.HasMessage())
+			out := sink.GetMessage()
+			s.Equal(out.Rendered, msg)
+			if out.Priority != level.Debug {
+				s.True(out.Logged, fmt.Sprintf("%T %s", logger, out.Priority))
+			}
+		} else {
+
+			var numLogged int
+			out := sink.GetMessage()
+			for i := 0; i < sink.Len(); i++ {
+				out = sink.GetMessage()
+				if out.Logged {
+					numLogged++
+					s.Equal(out.Rendered, msg)
+				}
+			}
+			if out.Priority != level.Debug {
+				s.True(numLogged == 1, fmt.Sprintf("%T: %d %s", logger, numLogged, out.Priority))
+			}
+		}
+	}
+
 }
 
 // This testing method uses the technique outlined in:

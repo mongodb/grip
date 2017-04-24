@@ -68,10 +68,6 @@ func (g *Grip) LogManyWhen(conditional bool, l level.Priority, msgs ...message.C
 	g.conditionalMultiSend(conditional, l, msgs)
 }
 
-func (g *Grip) DefaultManyWhen(conditional bool, msgs ...message.Composer) {
-	g.conditionalMultiSend(conditional, g.Level().Default, msgs)
-}
-
 func (g *Grip) EmergencyManyWhen(conditional bool, msgs ...message.Composer) {
 	g.conditionalMultiSend(conditional, level.Emergency, msgs)
 }
