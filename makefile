@@ -2,7 +2,7 @@
 name := grip
 buildDir := build
 packages := logging message send slogger $(name)
-orgPath := github.com/tychoish
+orgPath := github.com/mongodb
 projectPath := $(orgPath)/$(name)
 # end project configuration
 
@@ -31,7 +31,7 @@ lintArgs += --exclude="error return value not checked \(defer.*"
 lintArgs += --exclude="exported method Grip\..*should have comment or be unexported.*"
 lintArgs += --exclude="exported function (Catch|Log|Default|Emergency|Alert|Critical|Error|Warning|Notice|Info|Debug).* should have comment.*"
 lintArgs += --exclude="exported func.*InternalLogger returns unexported type.*"
-lintArgs += --exclude="exported method (Log|SystemInfo)\..+ should have comment"
+lintArgs += --exclude="exported method (Log|SystemInfo|InternalSender)\..+ should have comment"
 # end lint suppressions
 
 
