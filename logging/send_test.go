@@ -27,6 +27,7 @@ func (s *GripInternalSuite) SetupSuite() {
 	s.name = "test"
 	s.grip = NewGrip(s.name)
 	s.Equal(s.grip.Name(), s.name)
+	s.grip.SetThreshold(level.Trace)
 }
 
 func (s *GripInternalSuite) SetupTest() {
@@ -60,6 +61,7 @@ func (s *GripInternalSuite) TestPanicSenderActuallyPanics() {
 }
 
 func (s *GripInternalSuite) TestPanicSenderRespectsTThreshold() {
+	s.grip.SetThreshold(level.Notice)
 	s.True(level.Debug < s.grip.DefaultLevel())
 
 	// test that there is a no panic if the message isn't "logabble"
@@ -183,6 +185,16 @@ func (s *GripInternalSuite) TestCatchMethods() {
 		s.grip.InfoManyWhen,
 		s.grip.NoticeManyWhen,
 		s.grip.WarningManyWhen,
+
+		func(err error) { s.grip.CatchLog(level.Info, err) },
+		func(w bool, m interface{}) { s.grip.LogWhen(w, level.Info, m) },
+		func(w bool, m ...interface{}) { s.grip.LogWhenln(w, level.Info, m...) },
+		func(w bool, m string, a ...interface{}) { s.grip.LogWhenf(w, level.Info, m, a...) },
+		func(m interface{}) { s.grip.Log(level.Info, m) },
+		func(m string, a ...interface{}) { s.grip.Logf(level.Info, m, a...) },
+		func(m ...interface{}) { s.grip.Logln(level.Info, m...) },
+		func(m ...message.Composer) { s.grip.LogMany(level.Info, m...) },
+		func(w bool, m ...message.Composer) { s.grip.LogManyWhen(w, level.Info, m...) },
 	}
 
 	const msg = "hello world!"
@@ -222,16 +234,8 @@ func (s *GripInternalSuite) TestCatchMethods() {
 			panic(fmt.Sprintf("%T is not supported\n", log))
 		}
 
-		if sink.Len() == 1 {
-			s.True(sink.Len() == 1)
-			s.True(sink.HasMessage())
-			out := sink.GetMessage()
-			s.Equal(out.Rendered, msg)
-			if out.Priority != level.Debug {
-				s.True(out.Logged, fmt.Sprintf("%T %s", logger, out.Priority))
-			}
-		} else {
-
+		if sink.Len() > 1 {
+			// this is the many case
 			var numLogged int
 			out := sink.GetMessage()
 			for i := 0; i < sink.Len(); i++ {
@@ -241,12 +245,18 @@ func (s *GripInternalSuite) TestCatchMethods() {
 					s.Equal(out.Rendered, msg)
 				}
 			}
-			if out.Priority != level.Debug {
-				s.True(numLogged == 1, fmt.Sprintf("%T: %d %s", logger, numLogged, out.Priority))
-			}
-		}
-	}
 
+			s.True(numLogged == 1, fmt.Sprintf("%T: %d %s", logger, numLogged, out.Priority))
+
+			continue
+		}
+
+		s.True(sink.Len() == 1)
+		s.True(sink.HasMessage())
+		out := sink.GetMessage()
+		s.Equal(out.Rendered, msg)
+		s.True(out.Logged, fmt.Sprintf("%T %s", logger, out.Priority))
+	}
 }
 
 // This testing method uses the technique outlined in:
