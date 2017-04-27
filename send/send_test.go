@@ -14,13 +14,11 @@ import (
 	"github.com/mongodb/grip/level"
 	"github.com/mongodb/grip/message"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
 
 type SenderSuite struct {
 	senders map[string]Sender
-	require *require.Assertions
 	rand    *rand.Rand
 	tempDir string
 	suite.Suite
@@ -31,8 +29,10 @@ func TestSenderSuite(t *testing.T) {
 }
 
 func (s *SenderSuite) SetupSuite() {
+	var err error
 	s.rand = rand.New(rand.NewSource(time.Now().Unix()))
-	s.require = s.Require()
+	s.tempDir, err = ioutil.TempDir("", fmt.Sprintf("%v", s.rand))
+	s.Require().NoError(err)
 }
 
 func (s *SenderSuite) SetupTest() {
@@ -52,55 +52,55 @@ func (s *SenderSuite) SetupTest() {
 	s.senders["internal"] = internal
 
 	native, err := NewNativeLogger("native", l)
-	s.require.NoError(err)
+	s.Require().NoError(err)
 	s.senders["native"] = native
 
 	nativeErr, err := NewErrorLogger("error", l)
-	s.require.NoError(err)
+	s.Require().NoError(err)
 	s.senders["error"] = nativeErr
 
 	nativeFile, err := NewFileLogger("native-file", filepath.Join(s.tempDir, "file"), l)
-	s.require.NoError(err)
+	s.Require().NoError(err)
 	s.senders["native-file"] = nativeFile
 
 	callsite, err := NewCallSiteConsoleLogger("callsite", 1, l)
-	s.require.NoError(err)
+	s.Require().NoError(err)
 	s.senders["callsite"] = callsite
 
 	callsiteFile, err := NewCallSiteFileLogger("callsite", filepath.Join(s.tempDir, "cs"), 1, l)
-	s.require.NoError(err)
+	s.Require().NoError(err)
 	s.senders["callsite-file"] = callsiteFile
 
 	stream, err := NewStreamLogger("stream", &bytes.Buffer{}, l)
-	s.require.NoError(err)
+	s.Require().NoError(err)
 	s.senders["stream"] = stream
 
 	jsons, err := NewJSONConsoleLogger("json", LevelInfo{level.Info, level.Notice})
-	s.require.NoError(err)
+	s.Require().NoError(err)
 	s.senders["json"] = jsons
 
 	jsonf, err := NewJSONFileLogger("json", filepath.Join(s.tempDir, "js"), l)
-	s.require.NoError(err)
+	s.Require().NoError(err)
 	s.senders["json"] = jsonf
 
 	var sender Sender
 	multiSenders := []Sender{}
 	for i := 0; i < 4; i++ {
 		sender, err = NewNativeLogger(fmt.Sprintf("native-%d", i), l)
-		s.require.NoError(err)
+		s.Require().NoError(err)
 		multiSenders = append(multiSenders, sender)
 	}
 
 	multi, err := NewMultiSender("multi", l, multiSenders)
-	s.require.NoError(err)
+	s.Require().NoError(err)
 	s.senders["multi"] = multi
 
 	s.tempDir, err = ioutil.TempDir("", "sender-test")
-	s.require.NoError(err)
+	s.Require().NoError(err)
 }
 
 func (s *SenderSuite) TeardownTest() {
-	s.require.NoError(os.RemoveAll(s.tempDir))
+	s.Require().NoError(os.RemoveAll(s.tempDir))
 }
 
 func (s *SenderSuite) functionalMockSenders() map[string]Sender {
