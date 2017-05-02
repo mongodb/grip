@@ -97,6 +97,21 @@ func (s *SenderSuite) SetupTest() {
 
 	s.tempDir, err = ioutil.TempDir("", "sender-test")
 	s.Require().NoError(err)
+
+	slackMocked, err := NewSlackLogger(&SlackOptions{
+		client:   &slackClientMock{},
+		Hostname: "testhost",
+		Channel:  "#test",
+		Name:     "smoke",
+	}, "slack", LevelInfo{level.Info, level.Notice})
+	s.Require().NoError(err)
+	s.senders["slack-mocked"] = slackMocked
+
+	xmppMocked, err := NewXMPPLogger("xmpp", "target",
+		XMPPConnectionInfo{client: &xmppClientMock{}},
+		LevelInfo{level.Info, level.Notice})
+	s.Require().NoError(err)
+	s.senders["xmpp-mocked"] = xmppMocked
 }
 
 func (s *SenderSuite) TeardownTest() {
