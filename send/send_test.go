@@ -182,7 +182,6 @@ func (s *SenderSuite) TestBasicNoopSendTest() {
 			m := message.NewDefaultMessage(level.Priority(i), "hello world! "+randomString(10, s.rand))
 			sender.Send(m)
 		}
-
 	}
 }
 

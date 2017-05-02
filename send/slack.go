@@ -19,7 +19,7 @@ const (
 
 type slackJournal struct {
 	opts   *SlackOptions
-	client *slack.Slack
+	client slackClient
 	*Base
 }
 
@@ -32,9 +32,11 @@ func NewSlackLogger(opts *SlackOptions, token string, l LevelInfo) (Sender, erro
 
 	s := &slackJournal{
 		opts:   opts,
-		client: slack.New(token),
+		client: opts.client,
 		Base:   NewBase(opts.Name),
 	}
+
+	s.client.Create(token)
 
 	if err := s.SetLevel(l); err != nil {
 		return nil, err
@@ -109,11 +111,13 @@ type SlackOptions struct {
 	BasicMetadata bool
 	Fields        bool
 	FieldsSet     map[string]struct{}
-	mutex         sync.RWMutex
+
+	client slackClient
+	mutex  sync.RWMutex
 }
 
 func (o *SlackOptions) fieldSetShouldInclude(name string) bool {
-	if name == "time" {
+	if name == "time" || name == "msg" {
 		return false
 	}
 
@@ -136,6 +140,10 @@ func (o *SlackOptions) fieldSetShouldInclude(name string) bool {
 // no Hostname is specified). Validate also prepends a missing "#" to
 // the channel setting if the "#" character is not set.
 func (o *SlackOptions) Validate() error {
+	if o == nil {
+		return errors.New("slack options cannot be nil")
+	}
+
 	errs := []string{}
 	if o.Channel == "" {
 		errs = append(errs, "no channel specified")
@@ -147,6 +155,9 @@ func (o *SlackOptions) Validate() error {
 
 	if o.FieldsSet == nil {
 		o.FieldsSet = map[string]struct{}{}
+	}
+	if o.client == nil {
+		o.client = &slackClientImpl{}
 	}
 
 	if o.Hostname == "" {
@@ -212,11 +223,10 @@ func (o *SlackOptions) getParams(m message.Composer) *slack.ChatPostMessageOpt {
 
 		if ok {
 			for k, v := range fields {
-				if k == "msg" && v == m.String() {
+				if k == "msg" {
 					continue
 				}
-
-				if o.fieldSetShouldInclude(k) {
+				if !o.fieldSetShouldInclude(k) {
 					continue
 				}
 
@@ -249,4 +259,24 @@ func (o *SlackOptions) getParams(m message.Composer) *slack.ChatPostMessageOpt {
 	return &slack.ChatPostMessageOpt{
 		Attachments: []*slack.Attachment{&attachment},
 	}
+}
+
+////////////////////////////////////////////////////////////////////////
+//
+// interface wrapper for the slack client so that we can mock things out
+//
+////////////////////////////////////////////////////////////////////////
+
+type slackClient interface {
+	Create(string)
+	AuthTest() (*slack.AuthTestApiResponse, error)
+	ChatPostMessage(string, string, *slack.ChatPostMessageOpt) error
+}
+
+type slackClientImpl struct {
+	*slack.Slack
+}
+
+func (c *slackClientImpl) Create(token string) {
+	c.Slack = slack.New(token)
 }
