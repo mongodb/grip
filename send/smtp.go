@@ -54,6 +54,7 @@ func MakeSMTPLogger(opts *SMTPOptions) (Sender, error) {
 	}
 
 	s := &smtpLogger{
+		Base: NewBase(opts.Name),
 		opts: opts,
 	}
 
@@ -292,7 +293,6 @@ func (o *SMTPOptions) sendMail(m message.Composer) error {
 
 	if len(o.toAddrs) == 0 {
 		return fmt.Errorf("no recipients specified, cannot send mail")
-
 	}
 
 	if err := o.client.Mail(o.From); err != nil {

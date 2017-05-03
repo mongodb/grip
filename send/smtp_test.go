@@ -2,8 +2,10 @@ package send
 
 import (
 	"net/mail"
+	"strings"
 	"testing"
 
+	"github.com/mongodb/grip/level"
 	"github.com/mongodb/grip/message"
 	"github.com/stretchr/testify/suite"
 )
@@ -161,4 +163,120 @@ func (s *SmtpSuite) TestMakeConstructorFailureCases() {
 	sender, err = MakeSMTPLogger(s.opts)
 	s.Nil(sender)
 	s.Error(err)
+}
+
+func (s *SmtpSuite) TestDefaultSmtpImplShouldValidate() {
+	s.opts.client = nil
+	s.NoError(s.opts.Validate())
+	s.NotNil(s.opts.client)
+
+	s.Error(s.opts.client.Create(s.opts))
+	s.opts.UseSSL = true
+	s.Error(s.opts.client.Create(s.opts))
+}
+
+func (s *SmtpSuite) TestSendMailErrorsIfNoAddresses() {
+	s.opts.ResetRecipients()
+	s.Len(s.opts.toAddrs, 0)
+
+	m := message.NewString("hello world!")
+	s.Error(s.opts.sendMail(m))
+}
+
+func (s *SmtpSuite) TestSendMailErrorsIfMailCallFails() {
+	s.opts.client = &smtpClientMock{
+		failMail: true,
+	}
+
+	m := message.NewString("hello world!")
+	s.Error(s.opts.sendMail(m))
+}
+
+func (s *SmtpSuite) TestSendMailErrorsIfRecptFails() {
+	s.opts.client = &smtpClientMock{
+		failRcpt: true,
+	}
+
+	m := message.NewString("hello world!")
+	s.Error(s.opts.sendMail(m))
+}
+
+func (s *SmtpSuite) TestSendMailErrorsIfDataFails() {
+	s.opts.client = &smtpClientMock{
+		failData: true,
+	}
+
+	m := message.NewString("hello world!")
+	s.Error(s.opts.sendMail(m))
+}
+
+func (s *SmtpSuite) TestSendMailRecordsMessage() {
+	m := message.NewString("hello world!")
+	s.NoError(s.opts.sendMail(m))
+	mock, ok := s.opts.client.(*smtpClientMock)
+	s.Require().True(ok)
+	s.True(strings.Contains(mock.message.String(), s.opts.Name))
+	s.True(strings.Contains(mock.message.String(), "plain"))
+	s.False(strings.Contains(mock.message.String(), "html"))
+
+	s.opts.PlainTextContents = false
+	s.NoError(s.opts.sendMail(m))
+	s.True(strings.Contains(mock.message.String(), s.opts.Name))
+	s.True(strings.Contains(mock.message.String(), "html"))
+	s.False(strings.Contains(mock.message.String(), "plain"))
+}
+
+func (s *SmtpSuite) TestNewConstructor() {
+	sender, err := NewSMTPLogger(nil, LevelInfo{level.Trace, level.Info})
+	s.Error(err)
+	s.Nil(sender)
+
+	sender, err = NewSMTPLogger(s.opts, LevelInfo{level.Invalid, level.Info})
+	s.Error(err)
+	s.Nil(sender)
+
+	sender, err = NewSMTPLogger(s.opts, LevelInfo{level.Trace, level.Info})
+	s.NoError(err)
+	s.NotNil(sender)
+}
+
+func (s *SmtpSuite) TestSendMethod() {
+	sender, err := NewSMTPLogger(s.opts, LevelInfo{level.Trace, level.Info})
+	s.NoError(err)
+	s.NotNil(sender)
+
+	mock, ok := s.opts.client.(*smtpClientMock)
+	s.True(ok)
+	s.Equal(mock.numMsgs, 0)
+
+	m := message.NewDefaultMessage(level.Debug, "hello")
+	sender.Send(m)
+	s.Equal(mock.numMsgs, 0)
+
+	m = message.NewDefaultMessage(level.Alert, "")
+	sender.Send(m)
+	s.Equal(mock.numMsgs, 0)
+
+	m = message.NewDefaultMessage(level.Alert, "world")
+	sender.Send(m)
+	s.Equal(mock.numMsgs, 1)
+}
+
+func (s *SmtpSuite) TestSendMethodWithError() {
+	sender, err := NewSMTPLogger(s.opts, LevelInfo{level.Trace, level.Info})
+	s.NoError(err)
+	s.NotNil(sender)
+
+	mock, ok := s.opts.client.(*smtpClientMock)
+	s.True(ok)
+	s.Equal(mock.numMsgs, 0)
+	s.False(mock.failData)
+
+	m := message.NewDefaultMessage(level.Alert, "world")
+	sender.Send(m)
+	s.Equal(mock.numMsgs, 1)
+
+	mock.failData = true
+	sender.Send(m)
+	s.Equal(mock.numMsgs, 1)
 }
