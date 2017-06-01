@@ -9,24 +9,24 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type XmppSuite struct {
+type XMPPSuite struct {
 	info XMPPConnectionInfo
 	suite.Suite
 }
 
-func TestXmppSuite(t *testing.T) {
-	suite.Run(t, new(XmppSuite))
+func TestXMPPSuite(t *testing.T) {
+	suite.Run(t, new(XMPPSuite))
 }
 
-func (s *XmppSuite) SetupSuite() {}
+func (s *XMPPSuite) SetupSuite() {}
 
-func (s *XmppSuite) SetupTest() {
+func (s *XMPPSuite) SetupTest() {
 	s.info = XMPPConnectionInfo{
 		client: &xmppClientMock{},
 	}
 }
 
-func (s *XmppSuite) TestEnvironmentVariableReader() {
+func (s *XMPPSuite) TestEnvironmentVariableReader() {
 	hostVal := "hostName"
 	userVal := "userName"
 	passVal := "passName"
@@ -35,9 +35,9 @@ func (s *XmppSuite) TestEnvironmentVariableReader() {
 	defer os.Setenv(xmppUsernameEnvVar, os.Getenv(xmppUsernameEnvVar))
 	defer os.Setenv(xmppPasswordEnvVar, os.Getenv(xmppPasswordEnvVar))
 
-	os.Setenv(xmppHostEnvVar, hostVal)
-	os.Setenv(xmppUsernameEnvVar, userVal)
-	os.Setenv(xmppPasswordEnvVar, passVal)
+	s.NoError(os.Setenv(xmppHostEnvVar, hostVal))
+	s.NoError(os.Setenv(xmppUsernameEnvVar, userVal))
+	s.NoError(os.Setenv(xmppPasswordEnvVar, passVal))
 
 	info := GetXMPPConnectionInfo()
 
@@ -46,13 +46,13 @@ func (s *XmppSuite) TestEnvironmentVariableReader() {
 	s.Equal(passVal, info.Password)
 }
 
-func (s *XmppSuite) TestNewConstructor() {
+func (s *XMPPSuite) TestNewConstructor() {
 	sender, err := NewXMPPLogger("name", "target", s.info, LevelInfo{level.Debug, level.Info})
 	s.NoError(err)
 	s.NotNil(sender)
 }
 
-func (s *XmppSuite) TestNewConstructorFailsWhenClientCreateFails() {
+func (s *XMPPSuite) TestNewConstructorFailsWhenClientCreateFails() {
 	s.info.client = &xmppClientMock{failCreate: true}
 
 	sender, err := NewXMPPLogger("name", "target", s.info, LevelInfo{level.Debug, level.Info})
@@ -60,7 +60,7 @@ func (s *XmppSuite) TestNewConstructorFailsWhenClientCreateFails() {
 	s.Nil(sender)
 }
 
-func (s *XmppSuite) TestCloseMethod() {
+func (s *XMPPSuite) TestCloseMethod() {
 	sender, err := NewXMPPLogger("name", "target", s.info, LevelInfo{level.Debug, level.Info})
 	s.NoError(err)
 	s.NotNil(sender)
@@ -68,11 +68,11 @@ func (s *XmppSuite) TestCloseMethod() {
 	mock, ok := s.info.client.(*xmppClientMock)
 	s.True(ok)
 	s.Equal(0, mock.numCloses)
-	sender.Close()
+	s.NoError(sender.Close())
 	s.Equal(1, mock.numCloses)
 }
 
-func (s *XmppSuite) TestAutoConstructorErrorsWithoutValidEnvVar() {
+func (s *XMPPSuite) TestAutoConstructorErrorsWithoutValidEnvVar() {
 	sender, err := MakeXMPP("target")
 	s.Error(err)
 	s.Nil(sender)
@@ -82,7 +82,7 @@ func (s *XmppSuite) TestAutoConstructorErrorsWithoutValidEnvVar() {
 	s.Nil(sender)
 }
 
-func (s *XmppSuite) TestSendMethod() {
+func (s *XMPPSuite) TestSendMethod() {
 	sender, err := NewXMPPLogger("name", "target", s.info, LevelInfo{level.Debug, level.Info})
 	s.NoError(err)
 	s.NotNil(sender)
@@ -104,7 +104,7 @@ func (s *XmppSuite) TestSendMethod() {
 	s.Equal(mock.numSent, 1)
 }
 
-func (s *XmppSuite) TestSendMethodWithError() {
+func (s *XMPPSuite) TestSendMethodWithError() {
 	sender, err := NewXMPPLogger("name", "target", s.info, LevelInfo{level.Debug, level.Info})
 	s.NoError(err)
 	s.NotNil(sender)

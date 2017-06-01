@@ -10,18 +10,18 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type SmtpSuite struct {
+type SMTPSuite struct {
 	opts *SMTPOptions
 	suite.Suite
 }
 
-func TestSmtpSuite(t *testing.T) {
-	suite.Run(t, new(SmtpSuite))
+func TestSMTPSuite(t *testing.T) {
+	suite.Run(t, new(SMTPSuite))
 }
 
-func (s *SmtpSuite) SetupSuite() {}
+func (s *SMTPSuite) SetupSuite() {}
 
-func (s *SmtpSuite) SetupTest() {
+func (s *SMTPSuite) SetupTest() {
 	s.opts = &SMTPOptions{
 		client:        &smtpClientMock{},
 		Subject:       "test email from logger",
@@ -39,7 +39,7 @@ func (s *SmtpSuite) SetupTest() {
 	s.NotNil(s.opts.GetContents)
 }
 
-func (s *SmtpSuite) TestOptionsMustBeIValid() {
+func (s *SMTPSuite) TestOptionsMustBeIValid() {
 	invalidOpts := []*SMTPOptions{
 		{},
 		{
@@ -68,7 +68,7 @@ func (s *SmtpSuite) TestOptionsMustBeIValid() {
 	}
 }
 
-func (s *SmtpSuite) TestDefaultGetContents() {
+func (s *SMTPSuite) TestDefaultGetContents() {
 	s.NotNil(s.opts)
 
 	m := message.NewString("helllooooo!")
@@ -106,25 +106,25 @@ func (s *SmtpSuite) TestDefaultGetContents() {
 	s.True(len(msg) > len(sbj))
 }
 
-func (s *SmtpSuite) TestResetRecips() {
+func (s *SMTPSuite) TestResetRecips() {
 	s.True(len(s.opts.toAddrs) > 0)
 	s.opts.ResetRecipients()
 	s.Len(s.opts.toAddrs, 0)
 }
 
-func (s *SmtpSuite) TestAddRecipientsFailsWithNoArgs() {
+func (s *SMTPSuite) TestAddRecipientsFailsWithNoArgs() {
 	s.opts.ResetRecipients()
 	s.Error(s.opts.AddRecipients())
 	s.Len(s.opts.toAddrs, 0)
 }
 
-func (s *SmtpSuite) TestAddRecipientsErrorsWithInvalidAddresses() {
+func (s *SMTPSuite) TestAddRecipientsErrorsWithInvalidAddresses() {
 	s.opts.ResetRecipients()
 	s.Error(s.opts.AddRecipients("foo", "bar", "baz"))
 	s.Len(s.opts.toAddrs, 0)
 }
 
-func (s *SmtpSuite) TestAddingMultipleRecipients() {
+func (s *SMTPSuite) TestAddingMultipleRecipients() {
 	s.opts.ResetRecipients()
 
 	s.NoError(s.opts.AddRecipients("test <one@example.net>"))
@@ -133,7 +133,7 @@ func (s *SmtpSuite) TestAddingMultipleRecipients() {
 	s.Len(s.opts.toAddrs, 3)
 }
 
-func (s *SmtpSuite) TestAddingSingleRecipientWithInvalidAddressErrors() {
+func (s *SMTPSuite) TestAddingSingleRecipientWithInvalidAddressErrors() {
 	s.opts.ResetRecipients()
 	s.Error(s.opts.AddRecipient("test", "address"))
 	s.Len(s.opts.toAddrs, 0)
@@ -141,13 +141,13 @@ func (s *SmtpSuite) TestAddingSingleRecipientWithInvalidAddressErrors() {
 	s.Len(s.opts.toAddrs, 0)
 }
 
-func (s *SmtpSuite) TestAddingSingleRecipient() {
+func (s *SMTPSuite) TestAddingSingleRecipient() {
 	s.opts.ResetRecipients()
 	s.NoError(s.opts.AddRecipient("test", "one@example.net"))
 	s.Len(s.opts.toAddrs, 1)
 }
 
-func (s *SmtpSuite) TestMakeConstructorFailureCases() {
+func (s *SMTPSuite) TestMakeConstructorFailureCases() {
 	sender, err := MakeSMTPLogger(nil)
 	s.Nil(sender)
 	s.Error(err)
@@ -165,7 +165,7 @@ func (s *SmtpSuite) TestMakeConstructorFailureCases() {
 	s.Error(err)
 }
 
-func (s *SmtpSuite) TestDefaultSmtpImplShouldValidate() {
+func (s *SMTPSuite) TestDefaultSmtpImplShouldValidate() {
 	s.opts.client = nil
 	s.NoError(s.opts.Validate())
 	s.NotNil(s.opts.client)
@@ -175,7 +175,7 @@ func (s *SmtpSuite) TestDefaultSmtpImplShouldValidate() {
 	s.Error(s.opts.client.Create(s.opts))
 }
 
-func (s *SmtpSuite) TestSendMailErrorsIfNoAddresses() {
+func (s *SMTPSuite) TestSendMailErrorsIfNoAddresses() {
 	s.opts.ResetRecipients()
 	s.Len(s.opts.toAddrs, 0)
 
@@ -183,7 +183,7 @@ func (s *SmtpSuite) TestSendMailErrorsIfNoAddresses() {
 	s.Error(s.opts.sendMail(m))
 }
 
-func (s *SmtpSuite) TestSendMailErrorsIfMailCallFails() {
+func (s *SMTPSuite) TestSendMailErrorsIfMailCallFails() {
 	s.opts.client = &smtpClientMock{
 		failMail: true,
 	}
@@ -192,7 +192,7 @@ func (s *SmtpSuite) TestSendMailErrorsIfMailCallFails() {
 	s.Error(s.opts.sendMail(m))
 }
 
-func (s *SmtpSuite) TestSendMailErrorsIfRecptFails() {
+func (s *SMTPSuite) TestSendMailErrorsIfRecptFails() {
 	s.opts.client = &smtpClientMock{
 		failRcpt: true,
 	}
@@ -201,7 +201,7 @@ func (s *SmtpSuite) TestSendMailErrorsIfRecptFails() {
 	s.Error(s.opts.sendMail(m))
 }
 
-func (s *SmtpSuite) TestSendMailErrorsIfDataFails() {
+func (s *SMTPSuite) TestSendMailErrorsIfDataFails() {
 	s.opts.client = &smtpClientMock{
 		failData: true,
 	}
@@ -210,7 +210,7 @@ func (s *SmtpSuite) TestSendMailErrorsIfDataFails() {
 	s.Error(s.opts.sendMail(m))
 }
 
-func (s *SmtpSuite) TestSendMailRecordsMessage() {
+func (s *SMTPSuite) TestSendMailRecordsMessage() {
 	m := message.NewString("hello world!")
 	s.NoError(s.opts.sendMail(m))
 	mock, ok := s.opts.client.(*smtpClientMock)
@@ -226,7 +226,7 @@ func (s *SmtpSuite) TestSendMailRecordsMessage() {
 	s.False(strings.Contains(mock.message.String(), "plain"))
 }
 
-func (s *SmtpSuite) TestNewConstructor() {
+func (s *SMTPSuite) TestNewConstructor() {
 	sender, err := NewSMTPLogger(nil, LevelInfo{level.Trace, level.Info})
 	s.Error(err)
 	s.Nil(sender)
@@ -240,7 +240,7 @@ func (s *SmtpSuite) TestNewConstructor() {
 	s.NotNil(sender)
 }
 
-func (s *SmtpSuite) TestSendMethod() {
+func (s *SMTPSuite) TestSendMethod() {
 	sender, err := NewSMTPLogger(s.opts, LevelInfo{level.Trace, level.Info})
 	s.NoError(err)
 	s.NotNil(sender)
@@ -262,7 +262,7 @@ func (s *SmtpSuite) TestSendMethod() {
 	s.Equal(mock.numMsgs, 1)
 }
 
-func (s *SmtpSuite) TestSendMethodWithError() {
+func (s *SMTPSuite) TestSendMethodWithError() {
 	sender, err := NewSMTPLogger(s.opts, LevelInfo{level.Trace, level.Info})
 	s.NoError(err)
 	s.NotNil(sender)
