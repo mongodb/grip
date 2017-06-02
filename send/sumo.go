@@ -4,25 +4,40 @@ import (
 	"os"
 	"log"
 	"fmt"
-	"bytes"
-	"net/http"
 
+	sumo "github.com/nutmegdevelopment/sumologic/upload"
 	"github.com/mongodb/grip/message"
 )
 
 type sumoLogger struct {
-	Endpoint string
+	info  SumoConnectionInfo
 	*Base
+}
+
+// SumoConnectionInfo stores all information needed to connect to a
+// Sumo server to send log messages.
+type SumoConnectionInfo struct {
+	Endpoint string
+
+	client sumoClient
 }
 
 const (
 	sumoEndpointEnvVar = "GRIP_SUMO_ENDPOINT"
 )
 
+// GetSumoConnectionInfo builds an SumoConnectionInfo structure reading
+// default values from the GRIP_SUMO_ENDPOINT environment variable
+func GetSumoConnectionInfo() SumoConnectionInfo {
+	return SumoConnectionInfo{
+		Endpoint: os.Getenv(sumoEndpointEnvVar),
+	}
+}
+
 // NewSumoLogger constructs a new Sender implementation that sends
 // messages to a URL endpoint.
-func NewSumoLogger(name, endpoint string, l LevelInfo) (Sender, error) {
-	s, err := constructSumoLogger(name, endpoint)
+func NewSumoLogger(name string, info SumoConnectionInfo, l LevelInfo) (Sender, error) {
+	s, err := constructSumoLogger(name, info)
 	if err != nil {
 		return nil, err
 	}
@@ -30,17 +45,15 @@ func NewSumoLogger(name, endpoint string, l LevelInfo) (Sender, error) {
 	return setup(s, name, l)
 }
 
-// MakeSumo constructs an Sumo logging backend that reads the
-// hostname and URL endpoint from environment variables:
-//
-//    - GRIP_SUMO_ENDPOINT
+// MakeSumo constructs a Sumo logging backend that reads the hostname
+// and URL endpoint from the GRIP_SUMO_ENDPOINT environment variable
 //
 // The instance is otherwise unconquered. Call SetName or inject it
 // into a Journaler instance using SetSender before using.
 func MakeSumo() (Sender, error) {
-	endpoint := os.Getenv(sumoEndpointEnvVar)
+	info := GetSumoConnectionInfo()
 
-	s, err := constructSumoLogger("", endpoint)
+	s, err := constructSumoLogger("", info)
 	if err != nil {
 		return nil, err
 	}
@@ -49,21 +62,26 @@ func MakeSumo() (Sender, error) {
 }
 
 // NewSumo constructs a Sumo logging backend that reads the URL endpoint
-// from environment variables:
-//
-//    - GRIP_SUMO_ENDPOINT
+// from the GRIP_SUMO_ENDPOINT environment variable
 //
 // Otherwise, the semantics of NewSumoDefault are the same as NewSumoLogger.
 func NewSumo(name string, l LevelInfo) (Sender, error) {
-	endpoint := os.Getenv(sumoEndpointEnvVar)
+	info := GetSumoConnectionInfo()
 
-	return NewSumoLogger(name, endpoint, l)
+	return NewSumoLogger(name, info, l)
 }
 
-func constructSumoLogger(name, endpoint string) (Sender, error) {
+func constructSumoLogger(name string, info SumoConnectionInfo) (Sender, error) {
 	s := &sumoLogger{
 		Base: NewBase(name),
-		Endpoint: endpoint,
+	}
+
+	if s.info.client == nil {
+		s.info.client = &sumoClientImpl{}
+	}
+
+	if err := s.info.client.Create(info); err != nil {
+		return nil, err
 	}
 
 	fallback := log.New(os.Stdout, "", log.LstdFlags)
@@ -91,9 +109,33 @@ func (s *sumoLogger) Send(m message.Composer) {
 			return
 		}
 
-		_, err = http.Post(s.Endpoint, "text/plain", bytes.NewBufferString(text))
-		if err != nil {
+		buf := []byte(text)
+		if err := s.info.client.Send(buf, s.name); err != nil {
 			s.errHandler(err, m)
 		}
 	}
+}
+
+////////////////////////////////////////////////////////////////////////
+//
+// interface to wrap sumologic client interaction
+//
+////////////////////////////////////////////////////////////////////////
+
+type sumoClient interface {
+	Create(SumoConnectionInfo) error
+	Send([]byte, string) error
+}
+
+type sumoClientImpl struct {
+	uploader sumo.Uploader
+}
+
+func (c *sumoClientImpl) Create(info SumoConnectionInfo) error {
+	c.uploader = sumo.NewUploader(info.Endpoint)
+	return nil
+}
+
+func (c *sumoClientImpl) Send(input []byte, name string) error {
+	return c.uploader.Send(input, name)
 }
