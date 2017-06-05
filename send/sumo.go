@@ -131,13 +131,9 @@ type sumoClient interface {
 }
 
 type sumoClientImpl struct {
-	uploader sumo.Uploader
+	sumo.Uploader
 }
 
 func (c *sumoClientImpl) Create(info SumoConnectionInfo) {
-	c.uploader = sumo.NewUploader(info.Endpoint)
-}
-
-func (c *sumoClientImpl) Send(input []byte, name string) error {
-	return c.uploader.Send(input, name)
+	c.Uploader = sumo.NewUploader(info.Endpoint)
 }
