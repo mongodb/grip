@@ -4,6 +4,7 @@ import (
 	"os"
 	"log"
 	"fmt"
+	"net/url"
 
 	sumo "github.com/nutmegdevelopment/sumologic/upload"
 	"github.com/mongodb/grip/message"
@@ -74,14 +75,16 @@ func NewSumo(name string, l LevelInfo) (Sender, error) {
 func constructSumoLogger(name string, info SumoConnectionInfo) (Sender, error) {
 	s := &sumoLogger{
 		Base: NewBase(name),
+		info: info,
 	}
 
 	if s.info.client == nil {
 		s.info.client = &sumoClientImpl{}
 	}
 
-	if err := s.info.client.Create(info); err != nil {
-		return nil, err
+	s.info.client.Create(info)
+	if _, err := url.ParseRequestURI(s.info.Endpoint); err != nil {
+		return nil, fmt.Errorf("cannot connect to url '%s': %s", s.info.Endpoint, err)
 	}
 
 	fallback := log.New(os.Stdout, "", log.LstdFlags)
@@ -123,7 +126,7 @@ func (s *sumoLogger) Send(m message.Composer) {
 ////////////////////////////////////////////////////////////////////////
 
 type sumoClient interface {
-	Create(SumoConnectionInfo) error
+	Create(SumoConnectionInfo)
 	Send([]byte, string) error
 }
 
@@ -131,9 +134,8 @@ type sumoClientImpl struct {
 	uploader sumo.Uploader
 }
 
-func (c *sumoClientImpl) Create(info SumoConnectionInfo) error {
+func (c *sumoClientImpl) Create(info SumoConnectionInfo) {
 	c.uploader = sumo.NewUploader(info.Endpoint)
-	return nil
 }
 
 func (c *sumoClientImpl) Send(input []byte, name string) error {
