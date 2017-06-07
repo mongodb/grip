@@ -35,6 +35,8 @@ func TestPopulatedMessageComposerConstructors(t *testing.T) {
 		NewLineMessage(level.Error, testMsg, ""):                               testMsg,
 		NewLine(testMsg):                                                       testMsg,
 		NewLineMessage(level.Error, testMsg):                                   testMsg,
+		MakeGroupComposer(NewString(testMsg)):                                  testMsg,
+		NewGroupComposer([]Composer{NewString(testMsg)}):                       testMsg,
 	}
 
 	for msg, output := range cases {
@@ -76,6 +78,8 @@ func TestUnpopulatedMessageComposers(t *testing.T) {
 		NewStack(1, ""),
 		NewStackLines(1),
 		NewStackFormatted(1, ""),
+		MakeGroupComposer(),
+		&GroupComposer{},
 	}
 
 	for _, msg := range cases {
@@ -165,6 +169,7 @@ func TestComposerConverter(t *testing.T) {
 		[]string{testMsg},
 		[]interface{}{testMsg},
 		[]byte(testMsg),
+		[]Composer{NewString(testMsg)},
 	}
 
 	for _, msg := range cases {

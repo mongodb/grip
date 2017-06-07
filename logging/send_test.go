@@ -103,7 +103,6 @@ func (s *GripInternalSuite) TestConditionalSend() {
 }
 
 func (s *GripInternalSuite) TestCatchMethods() {
-
 	sink, err := send.NewInternalLogger("sink", send.LevelInfo{level.Trace, level.Trace})
 	s.NoError(err)
 	s.NoError(s.grip.SetSender(sink))
@@ -172,24 +171,6 @@ func (s *GripInternalSuite) TestCatchMethods() {
 		s.grip.NoticeWhenf,
 		s.grip.WarningWhenf,
 
-		s.grip.AlertMany,
-		s.grip.CriticalMany,
-		s.grip.DebugMany,
-		s.grip.EmergencyMany,
-		s.grip.ErrorMany,
-		s.grip.InfoMany,
-		s.grip.NoticeMany,
-		s.grip.WarningMany,
-
-		s.grip.AlertManyWhen,
-		s.grip.CriticalManyWhen,
-		s.grip.DebugManyWhen,
-		s.grip.EmergencyManyWhen,
-		s.grip.ErrorManyWhen,
-		s.grip.InfoManyWhen,
-		s.grip.NoticeManyWhen,
-		s.grip.WarningManyWhen,
-
 		func(err error) { s.grip.CatchLog(level.Info, err) },
 		func(w bool, m interface{}) { s.grip.LogWhen(w, level.Info, m) },
 		func(w bool, m ...interface{}) { s.grip.LogWhenln(w, level.Info, m...) },
@@ -197,8 +178,10 @@ func (s *GripInternalSuite) TestCatchMethods() {
 		func(m interface{}) { s.grip.Log(level.Info, m) },
 		func(m string, a ...interface{}) { s.grip.Logf(level.Info, m, a...) },
 		func(m ...interface{}) { s.grip.Logln(level.Info, m...) },
-		func(m ...message.Composer) { s.grip.LogMany(level.Info, m...) },
-		func(w bool, m ...message.Composer) { s.grip.LogManyWhen(w, level.Info, m...) },
+		func(m ...message.Composer) { s.grip.Log(level.Info, m) },
+		func(m []message.Composer) { s.grip.Log(level.Info, m) },
+		func(w bool, m ...message.Composer) { s.grip.LogWhen(w, level.Info, m) },
+		func(w bool, m []message.Composer) { s.grip.LogWhen(w, level.Info, m) },
 	}
 
 	const msg = "hello world!"
@@ -234,6 +217,11 @@ func (s *GripInternalSuite) TestCatchMethods() {
 		case func(bool, ...message.Composer):
 			log(false, multiMessage...)
 			log(true, multiMessage...)
+		case func([]message.Composer):
+			log(multiMessage)
+		case func(bool, []message.Composer):
+			log(false, multiMessage)
+			log(true, multiMessage)
 		default:
 			panic(fmt.Sprintf("%T is not supported\n", log))
 		}

@@ -112,10 +112,17 @@ func (s *SenderSuite) SetupTest() {
 		LevelInfo{level.Info, level.Notice})
 	s.Require().NoError(err)
 	s.senders["xmpp-mocked"] = xmppMocked
+
+	bufferedInternal, err := NewNativeLogger("buffered", l)
+	s.Require().NoError(err)
+	s.senders["buffered"] = NewBufferedSender(bufferedInternal, minBufferLength, 1)
 }
 
 func (s *SenderSuite) TeardownTest() {
 	s.Require().NoError(os.RemoveAll(s.tempDir))
+	for _, sender := range s.senders {
+		s.NoError(sender.Close())
+	}
 }
 
 func (s *SenderSuite) functionalMockSenders() map[string]Sender {
