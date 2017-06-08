@@ -4,6 +4,7 @@ import:
   version: ^9.0.0
   subpackages:
   - journal
+- package: github.com/nutmegdevelopment/sumologic
 - package: github.com/bluele/slack
 - package: github.com/mattn/go-xmpp
 - package: github.com/shirou/gopsutil
