@@ -15,3 +15,5 @@ import:
 - package: github.com/stretchr/objx
 - package: github.com/pmezard/go-difflib
 - package: github.com/davecgh/go-spew
+- package: github.com/fuyufjh/splunk-hec-go
+- package: github.com/satori/go.uuid
