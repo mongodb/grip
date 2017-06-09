@@ -30,5 +30,9 @@ imports:
   version: 1a9d0bb9f541897e62256577b352fdbc1fb4fd94
 - name: github.com/stretchr/testify
   version: d77da356e56a7428ad25149ca77381849a6a5232
+- name: github.com/fuyufjh/splunk-hec-go
+  version: 69956d6a6cbd511dade209563c3256c204c9ae51
+- name: github.com/satori/go.uuid
+  version: 879c5887cd475cd7864858769793b2ceb0d44feb
 
 devImports: []
