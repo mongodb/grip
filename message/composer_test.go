@@ -38,6 +38,8 @@ func TestPopulatedMessageComposerConstructors(t *testing.T) {
 		NewLineMessage(level.Error, testMsg):                                   testMsg,
 		MakeGroupComposer(NewString(testMsg)):                                  testMsg,
 		NewGroupComposer([]Composer{NewString(testMsg)}):                       testMsg,
+		MakeJiraMessage(JiraIssue{Summary: testMsg}):                           testMsg,
+		NewJiraMessage("", testMsg):                                            testMsg,
 	}
 
 	for msg, output := range cases {
@@ -213,4 +215,24 @@ func TestComposerConverter(t *testing.T) {
 		assert.Equal(out, comp.String(), fmt.Sprintf("%T", in))
 	}
 
+}
+
+func TestJiraMessageComposerConstructor(t *testing.T) {
+	const testMsg = "hello"
+	assert := assert.New(t)
+	reporterField := JiraField{Key: "Reporter", Value: "Annie"}
+	assigneeField := JiraField{Key: "Assignee", Value: "Sejin"}
+	typeField := JiraField{Key: "Type", Value: "Bug"}
+	labelsField := JiraField{Key: "Labels", Value: []string{"Soul", "Pop"}}
+	unknownField := JiraField{Key: "Artist", Value: "Adele"}
+	msg := NewJiraMessage("project", testMsg, reporterField, assigneeField, typeField, labelsField, unknownField)
+	issue := msg.Raw().(JiraIssue)
+
+	assert.Equal(issue.Project, "project")
+	assert.Equal(issue.Summary, testMsg)
+	assert.Equal(issue.Reporter, reporterField.Value)
+	assert.Equal(issue.Assignee, assigneeField.Value)
+	assert.Equal(issue.Type, typeField.Value)
+	assert.Equal(issue.Labels, labelsField.Value)
+	assert.Equal(issue.Fields[unknownField.Key], unknownField.Value)
 }
