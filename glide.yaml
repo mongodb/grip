@@ -17,3 +17,7 @@ import:
 - package: github.com/davecgh/go-spew
 - package: github.com/fuyufjh/splunk-hec-go
 - package: github.com/satori/go.uuid
+- package: github.com/andygrunwald/go-jira
+- package: github.com/trivago/tgo
+- package: github.com/fatih/structs
+- package: github.com/google/go-querystring
