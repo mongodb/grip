@@ -172,16 +172,6 @@ func (s *SMTPSuite) TestMakeConstructorFailureCases() {
 	s.Error(err)
 }
 
-func (s *SMTPSuite) TestDefaultSmtpImplShouldValidate() {
-	s.opts.client = nil
-	s.NoError(s.opts.Validate())
-	s.NotNil(s.opts.client)
-
-	s.Error(s.opts.client.Create(s.opts))
-	s.opts.UseSSL = true
-	s.Error(s.opts.client.Create(s.opts))
-}
-
 func (s *SMTPSuite) TestSendMailErrorsIfNoAddresses() {
 	s.opts.ResetRecipients()
 	s.Len(s.opts.toAddrs, 0)
