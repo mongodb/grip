@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/andygrunwald/go-jira"
+	jira "github.com/andygrunwald/go-jira"
 	"github.com/mongodb/grip/message"
 	"github.com/trivago/tgo/tcontainer"
 )
@@ -143,10 +143,10 @@ func getFields(m message.Composer) *jira.IssueFields {
 
 	case message.Fields:
 		issueFields = &jira.IssueFields{
-			Summary: fmt.Sprintf("%s", msg["msg"]),
+			Summary: fmt.Sprintf("%s", msg[message.FieldsMsgName]),
 		}
 		for k, v := range msg {
-			if k == "msg" {
+			if k == message.FieldsMsgName {
 				continue
 			}
 

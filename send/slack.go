@@ -64,7 +64,8 @@ func NewSlackLogger(opts *SlackOptions, token string, l LevelInfo) (Sender, erro
 func MakeSlackLogger(opts *SlackOptions) (Sender, error) {
 	token := os.Getenv(slackClientToken)
 	if token == "" {
-		return nil, fmt.Errorf("environment variable %s not defined, cannot create slack client")
+		return nil, fmt.Errorf("environment variable %s not defined, cannot create slack client",
+			slackClientToken)
 	}
 
 	return NewSlackLogger(opts, token, LevelInfo{level.Trace, level.Trace})
@@ -114,7 +115,7 @@ type SlackOptions struct {
 }
 
 func (o *SlackOptions) fieldSetShouldInclude(name string) bool {
-	if name == "time" || name == "msg" {
+	if name == "time" || name == message.FieldsMsgName {
 		return false
 	}
 
@@ -220,7 +221,7 @@ func (o *SlackOptions) getParams(m message.Composer) *slack.ChatPostMessageOpt {
 
 		if ok {
 			for k, v := range fields {
-				if k == "msg" {
+				if k == message.FieldsMsgName {
 					continue
 				}
 				if !o.fieldSetShouldInclude(k) {

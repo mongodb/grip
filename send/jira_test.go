@@ -9,8 +9,7 @@ import (
 )
 
 type JiraSuite struct {
-	opts   *JiraOptions
-	sender jiraJournal
+	opts *JiraOptions
 	suite.Suite
 }
 
@@ -109,7 +108,7 @@ func (j *JiraSuite) TestCreateMethodChangesClientState() {
 	new := &jiraClientImpl{}
 
 	j.Equal(base, new)
-	new.CreateClient("foo")
+	_ = new.CreateClient("foo")
 	j.NotEqual(base, new)
 }
 
