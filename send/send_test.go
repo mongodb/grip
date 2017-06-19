@@ -128,13 +128,13 @@ func (s *SenderSuite) SetupTest() {
 		Base: NewBase("gh-mocked"),
 		gh:   &githubClientMock{},
 	}
-	s.senders["gh-mocked"].SetFormatter(MakeDefaultFormatter())
+	s.NoError(s.senders["gh-mocked"].SetFormatter(MakeDefaultFormatter()))
 	s.senders["gh-comment-mocked"] = &githubCommentLogger{
 		Base:  NewBase("gh-mocked"),
 		gh:    &githubClientMock{},
 		issue: 200,
 	}
-	s.senders["gh-comment-mocked"].SetFormatter(MakeDefaultFormatter())
+	s.NoError(s.senders["gh-comment-mocked"].SetFormatter(MakeDefaultFormatter()))
 }
 
 func (s *SenderSuite) TeardownTest() {
