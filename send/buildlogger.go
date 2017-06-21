@@ -251,7 +251,9 @@ func MakeBuildlogger(name string, conf *BuildloggerConfig) (Sender, error) {
 
 func (b *buildlogger) Send(m message.Composer) {
 	if b.level.ShouldLog(m) {
-		req := []interface{}{float64(time.Now().Unix()), m.String()}
+		req := [][]interface{}{
+			[]interface{}{float64(time.Now().Unix()), m.String()},
+		}
 
 		out, err := json.Marshal(req)
 		if err != nil {
