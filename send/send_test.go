@@ -56,6 +56,8 @@ func (s *SenderSuite) SetupTest() {
 	s.Require().NoError(err)
 	s.senders["native"] = native
 
+	s.senders["writer"] = NewWriterSender(native)
+
 	nativeErr, err := NewErrorLogger("error", l)
 	s.Require().NoError(err)
 	s.senders["error"] = nativeErr
