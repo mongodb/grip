@@ -87,7 +87,7 @@ func (m *fieldMessage) String() string {
 func (m *fieldMessage) Raw() interface{} {
 	_ = m.Collect()
 
-	if _, ok := m.fields[FieldsMsgName]; !ok {
+	if _, ok := m.fields[FieldsMsgName]; !ok && m.message != "" {
 		m.fields[FieldsMsgName] = m.message
 	}
 
