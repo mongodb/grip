@@ -68,7 +68,7 @@ func (m *fieldMessage) String() string {
 		}
 
 		for k, v := range m.fields {
-			if k == "msg" && v == m.message {
+			if k == FieldsMsgName && v == m.message {
 				continue
 			}
 			if k == "time" {
