@@ -36,7 +36,7 @@ type WriterSender struct {
 // If there are any bytes in the buffer when the Close method is
 // called, this sender flushes the buffer before closing the underlying sender.
 func NewWriterSender(s Sender) *WriterSender {
-	return &WriterSender{Sender: s, level: s.Level().Default}
+	return &WriterSender{Sender: s, priority: s.Level().Default}
 }
 
 // MakeWriterSender returns an sender interface that also implements
