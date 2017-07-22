@@ -41,7 +41,7 @@ func GetSplunkConnectionInfo() SplunkConnectionInfo {
 	return SplunkConnectionInfo{
 		ServerURL: os.Getenv(splunkServerURL),
 		Token:     os.Getenv(splunkClientToken),
-		Channel:   os.Getenv(splunkChanel),
+		Channel:   os.Getenv(splunkChannel),
 	}
 }
 
