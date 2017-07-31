@@ -143,9 +143,6 @@ type splunkClientImpl struct {
 
 func (c *splunkClientImpl) Create(serverURL string, token string, channel string) error {
 	c.HEC = hec.NewClient(serverURL, token)
-	c.HEC.SetHTTPClient(&http.Client{Transport: &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}})
 	if channel != "" {
 		c.HEC.SetChannel(channel)
 	}
@@ -161,6 +158,9 @@ func (c *splunkClientImpl) Create(serverURL string, token string, channel string
 				KeepAlive: 20 * time.Second,
 			}).Dial,
 			TLSHandshakeTimeout: 10 * time.Second,
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
 		},
 		Timeout: 5 * time.Second,
 	})
