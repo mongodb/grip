@@ -3,7 +3,6 @@ package send
 import (
 	"crypto/tls"
 	"fmt"
-	"net"
 	"net/http"
 	"os"
 	"time"
@@ -151,13 +150,9 @@ func (c *splunkClientImpl) Create(serverURL string, token string, channel string
 	c.HEC.SetMaxRetry(0)
 	c.HEC.SetHTTPClient(&http.Client{
 		Transport: &http.Transport{
-			Proxy:             http.ProxyFromEnvironment,
-			DisableKeepAlives: true,
-			Dial: (&net.Dialer{
-				Timeout:   10 * time.Second,
-				KeepAlive: 20 * time.Second,
-			}).Dial,
-			TLSHandshakeTimeout: 10 * time.Second,
+			Proxy:               http.ProxyFromEnvironment,
+			DisableKeepAlives:   true,
+			TLSHandshakeTimeout: 5 * time.Second,
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: true,
 			},
