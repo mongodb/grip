@@ -3,8 +3,10 @@ package send
 import (
 	"crypto/tls"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
+	"time"
 
 	hec "github.com/fuyufjh/splunk-hec-go"
 	"github.com/mongodb/grip/level"
@@ -147,5 +149,21 @@ func (c *splunkClientImpl) Create(serverURL string, token string, channel string
 	if channel != "" {
 		c.HEC.SetChannel(channel)
 	}
+
+	c.HEC.SetKeepAlive(false)
+	c.HEC.SetMaxRetry(0)
+	c.HEC.SetHTTPClient(&http.Client{
+		Transport: &http.Transport{
+			Proxy:             http.ProxyFromEnvironment,
+			DisableKeepAlives: true,
+			Dial: (&net.Dialer{
+				Timeout:   10 * time.Second,
+				KeepAlive: 20 * time.Second,
+			}).Dial,
+			TLSHandshakeTimeout: 10 * time.Second,
+		},
+		Timeout: 5 * time.Second,
+	})
+
 	return nil
 }
