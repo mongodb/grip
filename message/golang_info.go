@@ -24,8 +24,8 @@ func CollectGoStats() Composer {
 		"memory.summary.System":      m.HeapSys,
 		"memory.heap.Idle":           m.HeapIdle,
 		"memory.heap.InUse":          m.HeapInuse,
-		"gc.sinceLastNS":             time.Since(lastGC),
-		"gc.sinceLast":               time.Since(lastGC).String(),
+		"gc.sinceLast.span":          int64(time.Since(lastGC)),
+		"gc.sinceLast.string":        time.Since(lastGC).String(),
 		"goroutines.total":           runtime.NumGoroutine(),
 	})
 }
