@@ -47,6 +47,8 @@ func GetSplunkConnectionInfo() SplunkConnectionInfo {
 	}
 }
 
+// Populated validates a SplunkConnectionInfo, and returns false if
+// there is missing data.
 func (info SplunkConnectionInfo) Populated() bool {
 	return info.ServerURL != "" && info.Token != ""
 }

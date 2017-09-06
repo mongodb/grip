@@ -59,7 +59,7 @@ func (s *WriterSender) Write(p []byte) (int, error) {
 	if err != nil {
 		return n, err
 	}
-	s.writer.Flush()
+	_ = s.writer.Flush()
 
 	if s.buffer.Len() > 80 {
 		err = s.doSend()
@@ -91,7 +91,11 @@ func (s *WriterSender) doSend() error {
 func (s *WriterSender) Close() error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.writer.Flush()
+
+	if err := s.writer.Flush(); err != nil {
+		return err
+	}
+
 	s.Send(message.NewBytesMessage(s.priority, bytes.Trim(s.buffer.Bytes(), "\n\t ")))
 	s.buffer.Reset()
 	s.writer.Reset(s.buffer)
