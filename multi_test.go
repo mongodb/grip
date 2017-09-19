@@ -22,15 +22,15 @@ func TestExtendedCatcherSuite(t *testing.T) {
 	suite.Run(t, s)
 }
 
-func TestSimpleCatcherSuite(t *testing.T) {
+func TestBasicCatcherSuite(t *testing.T) {
 	s := new(CatcherSuite)
-	s.reset = func() Catcher { return NewSimpleCatcher() }
+	s.reset = func() Catcher { return NewBasicCatcher() }
 	suite.Run(t, s)
 }
 
-func TestMinimalCatcherSuite(t *testing.T) {
+func TestSimpleCatcherSuite(t *testing.T) {
 	s := new(CatcherSuite)
-	s.reset = func() Catcher { return NewMinimalCatcher() }
+	s.reset = func() Catcher { return NewSimpleCatcher() }
 	suite.Run(t, s)
 }
 

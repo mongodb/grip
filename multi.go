@@ -28,9 +28,9 @@ import (
 // If you do not use github.com/pkg/errors to attach
 // errors, the implementations are usually functionally
 // equivalent. The Extended variant formats the errors using the "%+v"
-// (which returns a full stack trace with pkg/errors,) the Minimal
+// (which returns a full stack trace with pkg/errors,) the Simple
 // variant uses %s (which includes all the wrapped context,) and the
-// simple catcher calls error.Error() (which should be equvalent to %s
+// basic catcher calls error.Error() (which should be equvalent to %s
 // for most error implementations.)
 type Catcher interface {
 	Add(error)
@@ -58,15 +58,15 @@ type baseCatcher struct {
 // documentation for the Catcher interface for most implementations.
 func NewCatcher() Catcher { return NewExtendedCatcher() }
 
-func NewSimpleCatcher() Catcher {
+func NewBasicCatcher() Catcher {
 	c := &baseCatcher{}
-	c.Stringer = &simpleCatcher{c}
+	c.Stringer = &basicCatcher{c}
 	return c
 }
 
-func NewMinimalCatcher() Catcher {
+func NewSimpleCatcher() Catcher {
 	c := &baseCatcher{}
-	c.Stringer = &minimalCatcher{c}
+	c.Stringer = &simpleCatcher{c}
 	return c
 }
 
@@ -127,23 +127,8 @@ func (c *extendedCatcher) String() string {
 
 	output := make([]string, len(c.errs))
 
-	for _, err := range c.errs {
-		output = append(output, fmt.Sprintf("%+v", err))
-	}
-
-	return strings.Join(output, "\n")
-}
-
-type minimalCatcher struct{ *baseCatcher }
-
-func (c *minimalCatcher) String() string {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
-	output := make([]string, len(c.errs))
-
-	for _, err := range c.errs {
-		output = append(output, fmt.Sprintf("%s", err))
+	for idx, err := range c.errs {
+		output[idx] = fmt.Sprintf("%+v", err)
 	}
 
 	return strings.Join(output, "\n")
@@ -157,8 +142,23 @@ func (c *simpleCatcher) String() string {
 
 	output := make([]string, len(c.errs))
 
-	for _, err := range c.errs {
-		output = append(output, err.Error())
+	for idx, err := range c.errs {
+		output[idx] = fmt.Sprintf("%s", err)
+	}
+
+	return strings.Join(output, "\n")
+}
+
+type basicCatcher struct{ *baseCatcher }
+
+func (c *basicCatcher) String() string {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+
+	output := make([]string, len(c.errs))
+
+	for idx, err := range c.errs {
+		output[idx] = err.Error()
 	}
 
 	return strings.Join(output, "\n")
