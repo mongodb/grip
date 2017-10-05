@@ -1,7 +1,7 @@
 # project configuration
 name := grip
 buildDir := build
-packages := logging message send slogger $(name)
+packages := recovery logging message send slogger $(name)
 orgPath := github.com/mongodb
 projectPath := $(orgPath)/$(name)
 # end project configuration
