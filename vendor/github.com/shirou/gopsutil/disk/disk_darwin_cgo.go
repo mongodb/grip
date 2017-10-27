@@ -26,14 +26,12 @@ type kernelReturn C.kern_return_t
 // diskMetrics contains I/O data about a specific disk partition
 // It is the interpreted output of statfs (https://www.kernel.org/doc/Documentation/block/stat.txt)
 type diskMetrics struct {
-	sampleTime    int64
-	name          string
-	readCount     int64
-	readTime      int64
-	writeCount    int64
-	writeTime     int64
-	diskSpaceUsed int64
-	diskSpaceFree int64
+	sampleTime int64
+	name       string
+	readCount  int64
+	readTime   int64
+	writeCount int64
+	writeTime  int64
 }
 
 func getDiskMetrics() (map[string]IOCountersStat, error) {
@@ -44,7 +42,7 @@ func getDiskMetrics() (map[string]IOCountersStat, error) {
 
 	counters := make(map[string]IOCountersStat)
 	for _, partition := range partitions {
-		metrics, err := fetchOneDiskMetrics(partition.Mountpoint)
+		metrics, err := getSingleDiskMetrics(partition.Mountpoint)
 		if err != nil && !strings.Contains(err.Error(), "Failed to find IOBlockStorageDriver for device") {
 			return nil, fmt.Errorf("Error getting disk metrics for partition %v: %v", partition.Device, err)
 		}
@@ -64,7 +62,7 @@ func getDiskMetrics() (map[string]IOCountersStat, error) {
 	return counters, nil
 }
 
-func fetchOneDiskMetrics(filePath string) (*diskMetrics, error) {
+func getSingleDiskMetrics(filePath string) (*diskMetrics, error) {
 	diskMetrics := &diskMetrics{
 		sampleTime: time.Now().UnixNano() / 1e6,
 	}
@@ -73,9 +71,6 @@ func fetchOneDiskMetrics(filePath string) (*diskMetrics, error) {
 	if err := syscall.Statfs(filePath, &statfs); err != nil {
 		return nil, fmt.Errorf("Error getting disk metrics for filePath = %v : Failed to statfs : %v", filePath, err)
 	}
-
-	diskMetrics.diskSpaceUsed = int64((statfs.Blocks - statfs.Bfree) * uint64(statfs.Bsize))
-	diskMetrics.diskSpaceFree = int64(uint64(statfs.Bfree) * uint64(statfs.Bsize))
 
 	var session C.DASessionRef = C.DASessionRef(C.DASessionCreate(C.kCFAllocatorDefault))
 	defer C.CFRelease(C.CFTypeRef(session))
