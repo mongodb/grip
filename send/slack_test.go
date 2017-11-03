@@ -275,3 +275,22 @@ func (s *SlackSuite) TestCreateMethodChangesClientState() {
 	new.Create("foo")
 	s.NotEqual(base, new)
 }
+
+func (s *SlackSuite) TestSendMethodDoesIncorrectlyAllowTooLowMessages() {
+	sender, err := NewSlackLogger(s.opts, "foo", LevelInfo{level.Trace, level.Info})
+	s.NotNil(sender)
+	s.NoError(err)
+
+	mock, ok := s.opts.client.(*slackClientMock)
+	s.True(ok)
+	s.Equal(mock.numSent, 0)
+
+	sender.SetLevel(LevelInfo{Default: level.Critical, Threshold: level.Alert})
+	s.Equal(mock.numSent, 0)
+	sender.Send(message.NewDefaultMessage(level.Info, "hello"))
+	s.Equal(mock.numSent, 0)
+	sender.Send(message.NewDefaultMessage(level.Alert, "hello"))
+	s.Equal(mock.numSent, 1)
+	sender.Send(message.NewDefaultMessage(level.Alert, "hello"))
+	s.Equal(mock.numSent, 2)
+}
