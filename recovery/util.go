@@ -14,7 +14,7 @@ func panicString(p interface{}) string {
 	case fmt.Stringer:
 		return panicMesg.String()
 	default:
-		return fmt.Sprintf("%+v", panicMsg)
+		return fmt.Sprintf("%+v", panicMesg)
 	}
 }
 
