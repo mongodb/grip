@@ -13,6 +13,8 @@ func panicString(p interface{}) string {
 		return panicMesg.Error()
 	case fmt.Stringer:
 		return panicMesg.String()
+	case nil:
+		return ""
 	default:
 		return fmt.Sprintf("%+v", panicMesg)
 	}
