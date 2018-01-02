@@ -3,6 +3,7 @@ package message
 import (
 	"fmt"
 	"os"
+	"sync"
 
 	"github.com/mongodb/grip/level"
 	"github.com/shirou/gopsutil/cpu"
@@ -84,19 +85,42 @@ func CollectProcessInfoWithChildren(pid int32) []Composer {
 // message.Composer interfaces for all processes currently running on
 // a system.
 func CollectAllProcesses() []Composer {
+	numThreads := 32
 	procs, err := process.Processes()
 	if err != nil {
 		return []Composer{}
 	}
 
 	results := make([]Composer, len(procs))
-	for idx, p := range procs {
-		cm := &ProcessInfo{}
-		cm.loggable = true
-		cm.populate(p)
-		results[idx] = cm
+	procChan := make(chan *process.Process, len(procs))
+	for _, p := range procs {
+		procChan <- p
 	}
-
+	close(procChan)
+	wg := sync.WaitGroup{}
+	wg.Add(numThreads)
+	infoChan := make(chan *ProcessInfo)
+	for i := 0; i < numThreads; i++ {
+		go func() {
+			defer wg.Done()
+			for p := range procChan {
+				cm := &ProcessInfo{}
+				cm.loggable = true
+				cm.populate(p)
+				infoChan <- cm
+			}
+		}()
+	}
+	doneChan := make(chan bool)
+	go func() {
+		defer close(doneChan)
+		for p := range infoChan {
+			results = append(results, p)
+		}
+	}()
+	wg.Wait()
+	close(infoChan)
+	<-doneChan
 	return results
 }
 
