@@ -99,7 +99,7 @@ func CollectAllProcesses() []Composer {
 	close(procChan)
 	wg := sync.WaitGroup{}
 	wg.Add(numThreads)
-	infoChan := make(chan *ProcessInfo)
+	infoChan := make(chan *ProcessInfo, len(procs))
 	for i := 0; i < numThreads; i++ {
 		go func() {
 			defer wg.Done()
@@ -111,16 +111,12 @@ func CollectAllProcesses() []Composer {
 			}
 		}()
 	}
-	doneChan := make(chan bool)
-	go func() {
-		defer close(doneChan)
-		for p := range infoChan {
-			results = append(results, p)
-		}
-	}()
 	wg.Wait()
 	close(infoChan)
-	<-doneChan
+	for p := range infoChan {
+		results = append(results, p)
+	}
+
 	return results
 }
 
