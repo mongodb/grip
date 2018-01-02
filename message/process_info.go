@@ -90,6 +90,9 @@ func CollectAllProcesses() []Composer {
 	if err != nil {
 		return []Composer{}
 	}
+	if len(procs) < numThreads {
+		numThreads = len(procs)
+	}
 
 	results := make([]Composer, len(procs))
 	procChan := make(chan *process.Process, len(procs))
