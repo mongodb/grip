@@ -76,12 +76,12 @@ func (m *errorComposerWrap) Raw() interface{} {
 
 	if m.Composer.Loggable() {
 		// special handling for fields - merge keys in with output keys
-		fields, ok := m.Composer.(*fieldMessage)
-		if ok {
-			for k, v := range fields.fields {
+		switch t := m.Composer.(type) {
+		case *fieldMessage:
+			for k, v := range t.fields {
 				out[k] = v
 			}
-		} else {
+		default:
 			out["context"] = m.Composer.Raw()
 		}
 	}
