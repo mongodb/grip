@@ -129,6 +129,7 @@ func getFields(m message.Composer) *jira.IssueFields {
 			Project:     jira.Project{Key: msg.Project},
 			Summary:     msg.Summary,
 			Description: msg.Description,
+			Components:  []*jira.Component{},
 		}
 		if len(msg.Fields) != 0 {
 			unknownsMap := tcontainer.NewMarshalMap()
@@ -149,7 +150,12 @@ func getFields(m message.Composer) *jira.IssueFields {
 		if len(msg.Labels) > 0 {
 			issueFields.Labels = msg.Labels
 		}
-
+		for _, component := range msg.Components {
+			issueFields.Components = append(issueFields.Components,
+				&jira.Component{
+					Name: component,
+				})
+		}
 	case message.Fields:
 		issueFields = &jira.IssueFields{
 			Summary: fmt.Sprintf("%s", msg[message.FieldsMsgName]),
@@ -216,7 +222,6 @@ func (c *jiraClientImpl) PostIssue(issueFields *jira.IssueFields) error {
 			data, _ := ioutil.ReadAll(resp.Body)
 			return fmt.Errorf("encountered error logging to jira: %s [%s]",
 				err.Error(), string(data))
-
 		}
 
 		return err
