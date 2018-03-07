@@ -1,5 +1,7 @@
 package message
 
+import "fmt"
+
 type jiraMessage struct {
 	issue JiraIssue
 	Base
@@ -78,3 +80,16 @@ func NewJiraMessage(project, summary string, fields ...JiraField) Composer {
 func (m *jiraMessage) String() string   { return m.issue.Summary }
 func (m *jiraMessage) Raw() interface{} { return m.issue }
 func (m *jiraMessage) Loggable() bool   { return m.issue.Summary != "" }
+func (m *jiraMessage) Annotate(k string, v interface{}) error {
+	value, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("value %+v for key %s is not a string, which is required for jira fields",
+			k, v)
+	}
+
+	m.issue.Fields[k] = value
+
+	return nil
+
+	return nil
+}
