@@ -81,15 +81,21 @@ func (m *jiraMessage) String() string   { return m.issue.Summary }
 func (m *jiraMessage) Raw() interface{} { return m.issue }
 func (m *jiraMessage) Loggable() bool   { return m.issue.Summary != "" }
 func (m *jiraMessage) Annotate(k string, v interface{}) error {
+	if m.issue.Fields == nil {
+		m.issue.Fields = map[string]string{}
+	}
+
 	value, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("value %+v for key %s is not a string, which is required for jira fields",
 			k, v)
 	}
 
-	m.issue.Fields[k] = value
+	if _, ok := m.issue.Fields[k]; ok {
+		return fmt.Errorf("value %s already exists", k)
+	}
 
-	return nil
+	m.issue.Fields[k] = value
 
 	return nil
 }
