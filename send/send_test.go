@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -162,6 +163,12 @@ func (s *SenderSuite) SetupTest() {
 }
 
 func (s *SenderSuite) TearDownTest() {
+	if runtime.GOOS == "windows" {
+		_ = s.senders["native-file"].Close()
+		_ = s.senders["callsite-file"].Close()
+		_ = s.senders["json"].Close()
+		_ = s.senders["plain.file"].Close()
+	}
 	s.Require().NoError(os.RemoveAll(s.tempDir))
 }
 
@@ -242,7 +249,7 @@ func (s *SenderSuite) TestLevelSetterRejectsInvalidSettings() {
 	}
 }
 
-func (s *SenderSuite) TestCloserShouldUsusallyNoop() {
+func (s *SenderSuite) TestCloserShouldUsuallyNoop() {
 	for t, sender := range s.senders {
 		s.NoError(sender.Close(), string(t))
 	}
