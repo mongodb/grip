@@ -117,7 +117,6 @@ buildvariants:
     display_name: Race Detector (Arch Linux)
     run_on:
       - archlinux-test
-      - archlinux-build
     tasks: [ ".race", ".report" ]
 
   - name: ubuntu1604
@@ -140,8 +139,6 @@ buildvariants:
     display_name: Windows
     run_on:
       - windows-64-vs2015-small
-      - windows-64-vs2013-test
-      - windows-64-vs2010-test
     expansions:
       build_env: "GOROOT=c:/go DISABLE_COVERAGE=yes"
     tasks: [ ".test" ]
