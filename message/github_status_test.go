@@ -11,9 +11,9 @@ import (
 func TestGithubStatus(t *testing.T) {
 	assert := assert.New(t)
 
-	c, err := NewGithubStatus(level.Info, "example", GithubStatePending, "https://example.com/hi", "description")
-	assert.NoError(err)
+	c := NewGithubStatus(level.Info, "example", GithubStatePending, "https://example.com/hi", "description")
 	assert.NotNil(c)
+	assert.True(c.Loggable())
 
 	raw, ok := c.Raw().(*github.RepoStatus)
 	assert.True(ok)
@@ -26,4 +26,22 @@ func TestGithubStatus(t *testing.T) {
 	})
 
 	assert.Equal("example pending: description (https://example.com/hi)", c.String())
+
+	c = NewGithubStatus(level.Info, "example", GithubStatePending, "https://example.com/hi", "")
+	assert.True(c.Loggable())
+	raw, ok = c.Raw().(*github.RepoStatus)
+	assert.True(ok)
+	assert.Nil(raw.Description)
+	assert.Equal("example pending (https://example.com/hi)", c.String())
+}
+
+func TestGithubStatusInvalidStatusesAreNotLoggable(t *testing.T) {
+	assert := assert.New(t)
+
+	c := NewGithubStatus(level.Info, "", GithubStatePending, "https://example.com/hi", "description")
+	assert.False(c.Loggable())
+	c = NewGithubStatus(level.Info, "example", "nope", "https://example.com/hi", "description")
+	assert.False(c.Loggable())
+	c = NewGithubStatus(level.Info, "example", GithubStatePending, ":foo", "description")
+	assert.False(c.Loggable())
 }
