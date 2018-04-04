@@ -308,6 +308,7 @@ func (s *SenderSuite) TestGithubStatusLogger() {
 	sender := s.senders["gh-status-mocked"].(*githubStatusLogger)
 	client := sender.gh.(*githubClientMock)
 
+	// failed send test
 	client.failSend = true
 	c := message.NewGithubStatus(level.Info, "example", message.GithubStatePending,
 		"https://example.com/hi", "description")
@@ -318,10 +319,18 @@ func (s *SenderSuite) TestGithubStatusLogger() {
 	sender.Send(c)
 	s.Equal(0, client.numSent)
 
+	// successful send test
 	client.failSend = false
 	sender.SetErrorHandler(func(err error, c message.Composer) {
 		s.T().Errorf("Got error, but shouldn't have: %s for composer: %s", err.Error(), c.String())
 	})
+	sender.Send(c)
+	s.Equal(1, client.numSent)
+
+	// don't send invalid messages
+	c = message.NewGithubStatus(level.Info, "", message.GithubStatePending,
+		"https://example.com/hi", "description")
+	s.False(c.Loggable())
 	sender.Send(c)
 	s.Equal(1, client.numSent)
 }
@@ -330,6 +339,7 @@ func (s *SenderSuite) TestGithubCommentLogger() {
 	sender := s.senders["gh-comment-mocked"].(*githubCommentLogger)
 	client := sender.gh.(*githubClientMock)
 
+	// failed send test
 	client.failSend = true
 	c := message.NewString("hi")
 
@@ -339,6 +349,7 @@ func (s *SenderSuite) TestGithubCommentLogger() {
 	sender.Send(c)
 	s.Equal(0, client.numSent)
 
+	// successful send test
 	client.failSend = false
 	sender.SetErrorHandler(func(err error, c message.Composer) {
 		s.T().Errorf("Got error, but shouldn't have: %s for composer: %s", err.Error(), c.String())
