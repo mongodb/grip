@@ -26,6 +26,10 @@ func (s *githubStatusLogger) Send(m message.Composer) {
 		switch v := m.Raw().(type) {
 		case *github.RepoStatus:
 			status = v
+		case *message.Fields:
+			status = githubMessageFieldsToStatus(v)
+		case message.Fields:
+			status = githubMessageFieldsToStatus(&v)
 		}
 		if status == nil {
 			s.ErrorHandler(errors.New("composer cannot be converted to github status"), m)
@@ -37,6 +41,53 @@ func (s *githubStatusLogger) Send(m message.Composer) {
 			s.ErrorHandler(err, m)
 		}
 	}
+}
+
+func githubMessageFieldsToStatus(m *message.Fields) *github.RepoStatus {
+	if m == nil {
+		return nil
+	}
+
+	state, ok := getStringPtrFromField((*m)["state"])
+	if !ok {
+		return nil
+	}
+	context, ok := getStringPtrFromField((*m)["context"])
+	if !ok {
+		return nil
+	}
+	URL, ok := getStringPtrFromField((*m)["URL"])
+	if !ok {
+		return nil
+	}
+	var description *string
+	if description != nil {
+		description, ok = getStringPtrFromField((*m)["description"])
+		if description != nil && len(*description) == 0 {
+			description = nil
+		}
+		if !ok {
+			return nil
+		}
+	}
+
+	return &github.RepoStatus{
+		State:       state,
+		Context:     context,
+		URL:         URL,
+		Description: description,
+	}
+}
+
+func getStringPtrFromField(i interface{}) (*string, bool) {
+	if ret, ok := i.(string); ok {
+		return &ret, true
+	}
+	if ret, ok := i.(*string); ok {
+		return ret, ok
+	}
+
+	return nil, false
 }
 
 func NewGithubStatusLogger(name string, opts *GithubOptions, ref string) (Sender, error) {
@@ -54,7 +105,7 @@ func NewGithubStatusLogger(name string, opts *GithubOptions, ref string) (Sender
 		return nil, err
 	}
 
-	if err := s.SetFormatter(MakeDefaultFormatter()); err != nil {
+	if err := s.SetFormatter(MakePlainFormatter()); err != nil {
 		return nil, err
 	}
 
@@ -63,8 +114,4 @@ func NewGithubStatusLogger(name string, opts *GithubOptions, ref string) (Sender
 	}
 
 	return s, nil
-}
-
-func (c *githubClientImpl) CreateStatus(ctx context.Context, owner, repo, ref string, status *github.RepoStatus) (*github.RepoStatus, *github.Response, error) {
-	return c.repos.CreateStatus(ctx, owner, repo, ref, status)
 }

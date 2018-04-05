@@ -107,3 +107,7 @@ func (c *githubClientImpl) Init(ctx context.Context, token string) {
 	c.IssuesService = client.Issues
 	c.repos = client.Repositories
 }
+
+func (c *githubClientImpl) CreateStatus(ctx context.Context, owner, repo, ref string, status *github.RepoStatus) (*github.RepoStatus, *github.Response, error) {
+	return c.repos.CreateStatus(ctx, owner, repo, ref, status)
+}

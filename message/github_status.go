@@ -16,34 +16,33 @@ const (
 )
 
 type githubStatus struct {
+	Context     string `bson:"context" json:"context" yaml:"context"`
+	State       string `bson:"state" json:"state" yaml:"state"`
+	URL         string `bson:"url" json:"url" yaml:"url"`
+	Description string `bson:"description" json:"description" yaml:"description"`
+
 	Base `bson:"metadata" json:"metadata" yaml:"metadata"`
-	raw  github.RepoStatus
 }
 
 func NewGithubStatus(p level.Priority, context, state, URL, description string) Composer {
-	m := &githubStatus{
-		raw: github.RepoStatus{
-			Context: github.String(context),
-			State:   github.String(state),
-			URL:     github.String(URL),
-		},
+	s := &githubStatus{
+		Context:     context,
+		State:       state,
+		URL:         URL,
+		Description: description,
 	}
-	if len(description) > 0 {
-		m.raw.Description = github.String(description)
-	}
+	_ = s.SetPriority(p)
 
-	_ = m.SetPriority(p)
-
-	return m
+	return s
 }
 
-func (s *githubStatus) Loggable() bool {
-	_, err := url.Parse(*s.raw.URL)
-	if err != nil || len(*s.raw.Context) == 0 {
+func (c *githubStatus) Loggable() bool {
+	_, err := url.Parse(c.URL)
+	if err != nil || len(c.Context) == 0 {
 		return false
 	}
 
-	switch *s.raw.State {
+	switch c.State {
 	case GithubStatePending, GithubStateSuccess, GithubStateError, GithubStateFailure:
 	default:
 		return false
@@ -52,15 +51,24 @@ func (s *githubStatus) Loggable() bool {
 	return true
 }
 
-func (s *githubStatus) String() string {
-	if s.raw.Description == nil {
+func (c *githubStatus) String() string {
+	if len(c.Description) == 0 {
 		// looks like: evergreen failed (https://evergreen.mongodb.com)
-		return fmt.Sprintf("%s %s (%s)", *s.raw.Context, *s.raw.State, *s.raw.URL)
+		return fmt.Sprintf("%s %s (%s)", c.Context, c.State, c.URL)
 	}
 	// looks like: evergreen failed: 1 task failed (https://evergreen.mongodb.com)
-	return fmt.Sprintf("%s %s: %s (%s)", *s.raw.Context, *s.raw.State, *s.raw.Description, *s.raw.URL)
+	return fmt.Sprintf("%s %s: %s (%s)", c.Context, c.State, c.Description, c.URL)
 }
 
-func (s *githubStatus) Raw() interface{} {
-	return &s.raw
+func (c *githubStatus) Raw() interface{} {
+	s := &github.RepoStatus{
+		Context: github.String(c.Context),
+		State:   github.String(c.State),
+		URL:     github.String(c.URL),
+	}
+	if len(c.Description) > 0 {
+		s.Description = github.String(c.Description)
+	}
+
+	return s
 }
