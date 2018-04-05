@@ -8,6 +8,7 @@ import (
 	"github.com/mongodb/grip/level"
 )
 
+// The list of valid "state"s for Github Status API requests
 const (
 	GithubStatePending = "pending"
 	GithubStateSuccess = "success"
@@ -24,6 +25,8 @@ type githubStatus struct {
 	Base `bson:"metadata" json:"metadata" yaml:"metadata"`
 }
 
+// NewGithubStatus creates a composer for sending payloads to the Github Status
+// API
 func NewGithubStatus(p level.Priority, context, state, URL, description string) Composer {
 	s := &githubStatus{
 		Context:     context,

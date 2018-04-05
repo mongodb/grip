@@ -43,6 +43,34 @@ func (s *githubStatusLogger) Send(m message.Composer) {
 	}
 }
 
+// NewGithubStatusLogger returns a Sender to send payloads to the Github Status
+// API. Statuses will be attached to the given ref.
+func NewGithubStatusLogger(name string, opts *GithubOptions, ref string) (Sender, error) {
+	s := &githubStatusLogger{
+		Base: NewBase(name),
+		gh:   &githubClientImpl{},
+		ref:  ref,
+	}
+
+	ctx := context.TODO()
+	s.gh.Init(ctx, opts.Token)
+
+	fallback := log.New(os.Stdout, "", log.LstdFlags)
+	if err := s.SetErrorHandler(ErrorHandlerFromLogger(fallback)); err != nil {
+		return nil, err
+	}
+
+	if err := s.SetFormatter(MakePlainFormatter()); err != nil {
+		return nil, err
+	}
+
+	s.reset = func() {
+		fallback.SetPrefix(fmt.Sprintf("[%s] [%s/%s] ", s.Name(), opts.Account, opts.Repo))
+	}
+
+	return s, nil
+}
+
 func githubMessageFieldsToStatus(m *message.Fields) *github.RepoStatus {
 	if m == nil {
 		return nil
@@ -88,30 +116,4 @@ func getStringPtrFromField(i interface{}) (*string, bool) {
 	}
 
 	return nil, false
-}
-
-func NewGithubStatusLogger(name string, opts *GithubOptions, ref string) (Sender, error) {
-	s := &githubStatusLogger{
-		Base: NewBase(name),
-		gh:   &githubClientImpl{},
-		ref:  ref,
-	}
-
-	ctx := context.TODO()
-	s.gh.Init(ctx, opts.Token)
-
-	fallback := log.New(os.Stdout, "", log.LstdFlags)
-	if err := s.SetErrorHandler(ErrorHandlerFromLogger(fallback)); err != nil {
-		return nil, err
-	}
-
-	if err := s.SetFormatter(MakePlainFormatter()); err != nil {
-		return nil, err
-	}
-
-	s.reset = func() {
-		fallback.SetPrefix(fmt.Sprintf("[%s] [%s/%s] ", s.Name(), opts.Account, opts.Repo))
-	}
-
-	return s, nil
 }

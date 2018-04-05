@@ -313,17 +313,17 @@ func (s *SenderSuite) TestGithubStatusLogger() {
 	c := message.NewGithubStatus(level.Info, "example", message.GithubStatePending,
 		"https://example.com/hi", "description")
 
-	sender.SetErrorHandler(func(err error, c message.Composer) {
+	s.NoError(sender.SetErrorHandler(func(err error, c message.Composer) {
 		s.Equal("failed to create status", err.Error())
-	})
+	}))
 	sender.Send(c)
 	s.Equal(0, client.numSent)
 
 	// successful send test
 	client.failSend = false
-	sender.SetErrorHandler(func(err error, c message.Composer) {
+	s.NoError(sender.SetErrorHandler(func(err error, c message.Composer) {
 		s.T().Errorf("Got error, but shouldn't have: %s for composer: %s", err.Error(), c.String())
-	})
+	}))
 	sender.Send(c)
 	s.Equal(1, client.numSent)
 
@@ -343,17 +343,17 @@ func (s *SenderSuite) TestGithubCommentLogger() {
 	client.failSend = true
 	c := message.NewString("hi")
 
-	sender.SetErrorHandler(func(err error, c message.Composer) {
+	s.NoError(sender.SetErrorHandler(func(err error, c message.Composer) {
 		s.Equal("failed to create comment", err.Error())
-	})
+	}))
 	sender.Send(c)
 	s.Equal(0, client.numSent)
 
 	// successful send test
 	client.failSend = false
-	sender.SetErrorHandler(func(err error, c message.Composer) {
+	s.NoError(sender.SetErrorHandler(func(err error, c message.Composer) {
 		s.T().Errorf("Got error, but shouldn't have: %s for composer: %s", err.Error(), c.String())
-	})
+	}))
 	sender.Send(c)
 	s.Equal(1, client.numSent)
 }

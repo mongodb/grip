@@ -9,7 +9,7 @@ import (
 )
 
 func TestGithubStatus(t *testing.T) {
-	assert := assert.New(t)
+	assert := assert.New(t) //nolint: vetshadow
 
 	c := NewGithubStatus(level.Info, "example", GithubStatePending, "https://example.com/hi", "description")
 	assert.NotNil(c)
@@ -36,7 +36,7 @@ func TestGithubStatus(t *testing.T) {
 }
 
 func TestGithubStatusInvalidStatusesAreNotLoggable(t *testing.T) {
-	assert := assert.New(t)
+	assert := assert.New(t) //nolint: vetshadow
 
 	c := NewGithubStatus(level.Info, "", GithubStatePending, "https://example.com/hi", "description")
 	assert.False(c.Loggable())
