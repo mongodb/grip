@@ -20,7 +20,7 @@ func TestGithubStatus(t *testing.T) {
 
 	assert.NotPanics(func() {
 		assert.Equal("example", *raw.Context)
-		assert.Equal(GithubStatePending, *raw.State)
+		assert.Equal(string(GithubStatePending), *raw.State)
 		assert.Equal("https://example.com/hi", *raw.URL)
 		assert.Equal("description", *raw.Description)
 	})

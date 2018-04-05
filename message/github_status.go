@@ -8,26 +8,30 @@ import (
 	"github.com/mongodb/grip/level"
 )
 
-// The list of valid "state"s for Github Status API requests
+// GithubState represents the 4 valid states for the Github State API in
+// a safer way
+type GithubState string
+
+// The list of valid states for Github Status API requests
 const (
-	GithubStatePending = "pending"
-	GithubStateSuccess = "success"
-	GithubStateError   = "error"
-	GithubStateFailure = "failure"
+	GithubStatePending = GithubState("pending")
+	GithubStateSuccess = GithubState("success")
+	GithubStateError   = GithubState("error")
+	GithubStateFailure = GithubState("failure")
 )
 
 type githubStatus struct {
-	Context     string `bson:"context" json:"context" yaml:"context"`
-	State       string `bson:"state" json:"state" yaml:"state"`
-	URL         string `bson:"url" json:"url" yaml:"url"`
-	Description string `bson:"description" json:"description" yaml:"description"`
+	Context     string      `bson:"context" json:"context" yaml:"context"`
+	State       GithubState `bson:"state" json:"state" yaml:"state"`
+	URL         string      `bson:"url" json:"url" yaml:"url"`
+	Description string      `bson:"description" json:"description" yaml:"description"`
 
 	Base `bson:"metadata" json:"metadata" yaml:"metadata"`
 }
 
 // NewGithubStatus creates a composer for sending payloads to the Github Status
 // API
-func NewGithubStatus(p level.Priority, context, state, URL, description string) Composer {
+func NewGithubStatus(p level.Priority, context string, state GithubState, URL, description string) Composer {
 	s := &githubStatus{
 		Context:     context,
 		State:       state,
@@ -57,16 +61,16 @@ func (c *githubStatus) Loggable() bool {
 func (c *githubStatus) String() string {
 	if len(c.Description) == 0 {
 		// looks like: evergreen failed (https://evergreen.mongodb.com)
-		return fmt.Sprintf("%s %s (%s)", c.Context, c.State, c.URL)
+		return fmt.Sprintf("%s %s (%s)", c.Context, string(c.State), c.URL)
 	}
 	// looks like: evergreen failed: 1 task failed (https://evergreen.mongodb.com)
-	return fmt.Sprintf("%s %s: %s (%s)", c.Context, c.State, c.Description, c.URL)
+	return fmt.Sprintf("%s %s: %s (%s)", c.Context, string(c.State), c.Description, c.URL)
 }
 
 func (c *githubStatus) Raw() interface{} {
 	s := &github.RepoStatus{
 		Context: github.String(c.Context),
-		State:   github.String(c.State),
+		State:   github.String(string(c.State)),
 		URL:     github.String(c.URL),
 	}
 	if len(c.Description) > 0 {
