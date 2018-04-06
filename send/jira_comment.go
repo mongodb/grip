@@ -63,7 +63,7 @@ func NewJiraCommentLogger(id string, opts *JiraOptions, l LevelInfo) (Sender, er
 func (j *jiraCommentJournal) Send(m message.Composer) {
 	if j.Level().ShouldLog(m) {
 		issue := j.issueID
-		if c, ok := m.Raw().(*message.JIRAPayload); ok {
+		if c, ok := m.Raw().(*message.JIRAComment); ok {
 			issue = c.IssueID
 		}
 		if err := j.opts.client.PostComment(issue, m.String()); err != nil {

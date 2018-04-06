@@ -327,12 +327,28 @@ func (s *SenderSuite) TestGithubStatusLogger() {
 	sender.Send(c)
 	s.Equal(1, client.numSent)
 
+	// WithRepo constructor should override sender's defaults
+	p := message.GithubStatus{
+		Owner:       "somewhere",
+		Repo:        "over",
+		Ref:         "therainbow",
+		Context:     "example",
+		State:       message.GithubStatePending,
+		URL:         "https://example.com/hi",
+		Description: "description",
+	}
+	c = message.NewGithubStatusWithRepo(level.Info, p)
+	s.True(c.Loggable())
+	sender.Send(c)
+	s.Equal(2, client.numSent)
+	s.Equal("somewhere/over@therainbow", client.lastRepo)
+
 	// don't send invalid messages
 	c = message.NewGithubStatus(level.Info, "", message.GithubStatePending,
 		"https://example.com/hi", "description")
 	s.False(c.Loggable())
 	sender.Send(c)
-	s.Equal(1, client.numSent)
+	s.Equal(2, client.numSent)
 }
 
 func (s *SenderSuite) TestGithubCommentLogger() {
