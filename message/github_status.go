@@ -55,16 +55,16 @@ func (p *GithubStatus) Valid() bool {
 	return true
 }
 
-type githubStatus struct {
+type githubStatusMessage struct {
 	raw GithubStatus
 
 	Base `bson:"metadata" json:"metadata" yaml:"metadata"`
 }
 
-// NewGithubStatusWithRepo creates a composer for sending payloads to the Github Status
+// NewGithubStatusMessageWithRepo creates a composer for sending payloads to the Github Status
 // API, with the repository and ref stored in the composer
-func NewGithubStatusWithRepo(p level.Priority, status GithubStatus) Composer {
-	s := &githubStatus{
+func NewGithubStatusMessageWithRepo(p level.Priority, status GithubStatus) Composer {
+	s := &githubStatusMessage{
 		raw: status,
 	}
 	_ = s.SetPriority(p)
@@ -72,10 +72,10 @@ func NewGithubStatusWithRepo(p level.Priority, status GithubStatus) Composer {
 	return s
 }
 
-// NewGithubStatus creates a composer for sending payloads to the Github Status
+// NewGithubStatusMessage creates a composer for sending payloads to the Github Status
 // API.
-func NewGithubStatus(p level.Priority, context string, state GithubState, URL, description string) Composer {
-	s := &githubStatus{
+func NewGithubStatusMessage(p level.Priority, context string, state GithubState, URL, description string) Composer {
+	s := &githubStatusMessage{
 		raw: GithubStatus{
 			Context:     context,
 			State:       state,
@@ -88,11 +88,11 @@ func NewGithubStatus(p level.Priority, context string, state GithubState, URL, d
 	return s
 }
 
-func (c *githubStatus) Loggable() bool {
+func (c *githubStatusMessage) Loggable() bool {
 	return c.raw.Valid()
 }
 
-func (c *githubStatus) String() string {
+func (c *githubStatusMessage) String() string {
 	base := c.raw.Ref
 	if len(c.raw.Owner) > 0 {
 		base = fmt.Sprintf("%s/%s@%s", c.raw.Owner, c.raw.Repo, c.raw.Ref)
@@ -105,6 +105,6 @@ func (c *githubStatus) String() string {
 	return base + fmt.Sprintf("%s %s: %s (%s)", c.raw.Context, string(c.raw.State), c.raw.Description, c.raw.URL)
 }
 
-func (c *githubStatus) Raw() interface{} {
+func (c *githubStatusMessage) Raw() interface{} {
 	return &c.raw
 }

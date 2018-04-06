@@ -16,10 +16,10 @@ type JIRAComment struct {
 	Body    string `bson:"body" json:"body" yaml:"body"`
 }
 
-// NewJIRAComment returns a self-contained composer for posting a comment
+// NewJIRACommentMessage returns a self-contained composer for posting a comment
 // to a single JIRA issue. This composer will override the issue set in the
 // JIRA sender
-func NewJIRAComment(p level.Priority, issueID, body string) Composer {
+func NewJIRACommentMessage(p level.Priority, issueID, body string) Composer {
 	s := &jiraComment{
 		Payload: JIRAComment{
 			IssueID: issueID,

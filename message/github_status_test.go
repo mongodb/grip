@@ -10,7 +10,7 @@ import (
 func TestGithubStatus(t *testing.T) {
 	assert := assert.New(t) //nolint: vetshadow
 
-	c := NewGithubStatus(level.Info, "example", GithubStatePending, "https://example.com/hi", "description")
+	c := NewGithubStatusMessage(level.Info, "example", GithubStatePending, "https://example.com/hi", "description")
 	assert.NotNil(c)
 	assert.True(c.Loggable())
 
@@ -30,11 +30,11 @@ func TestGithubStatus(t *testing.T) {
 func TestGithubStatusInvalidStatusesAreNotLoggable(t *testing.T) {
 	assert := assert.New(t) //nolint: vetshadow
 
-	c := NewGithubStatus(level.Info, "", GithubStatePending, "https://example.com/hi", "description")
+	c := NewGithubStatusMessage(level.Info, "", GithubStatePending, "https://example.com/hi", "description")
 	assert.False(c.Loggable())
-	c = NewGithubStatus(level.Info, "example", "nope", "https://example.com/hi", "description")
+	c = NewGithubStatusMessage(level.Info, "example", "nope", "https://example.com/hi", "description")
 	assert.False(c.Loggable())
-	c = NewGithubStatus(level.Info, "example", GithubStatePending, ":foo", "description")
+	c = NewGithubStatusMessage(level.Info, "example", GithubStatePending, ":foo", "description")
 	assert.False(c.Loggable())
 
 	p := GithubStatus{
@@ -46,16 +46,16 @@ func TestGithubStatusInvalidStatusesAreNotLoggable(t *testing.T) {
 		URL:         "https://example.com/hi",
 		Description: "description",
 	}
-	c = NewGithubStatusWithRepo(level.Info, p)
+	c = NewGithubStatusMessageWithRepo(level.Info, p)
 	assert.False(c.Loggable())
 
 	p.Owner = "mongodb"
 	p.Repo = ""
-	c = NewGithubStatusWithRepo(level.Info, p)
+	c = NewGithubStatusMessageWithRepo(level.Info, p)
 	assert.False(c.Loggable())
 
 	p.Repo = "grip"
 	p.Ref = ""
-	c = NewGithubStatusWithRepo(level.Info, p)
+	c = NewGithubStatusMessageWithRepo(level.Info, p)
 	assert.False(c.Loggable())
 }

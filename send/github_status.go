@@ -11,7 +11,7 @@ import (
 	"github.com/mongodb/grip/message"
 )
 
-type githubStatusLogger struct {
+type githubStatusMessageLogger struct {
 	opts *GithubOptions
 	ref  string
 
@@ -19,7 +19,7 @@ type githubStatusLogger struct {
 	*Base
 }
 
-func (s *githubStatusLogger) Send(m message.Composer) {
+func (s *githubStatusMessageLogger) Send(m message.Composer) {
 	if s.Level().ShouldLog(m) {
 		var status *github.RepoStatus
 		owner := ""
@@ -28,14 +28,14 @@ func (s *githubStatusLogger) Send(m message.Composer) {
 
 		switch v := m.Raw().(type) {
 		case *message.GithubStatus:
-			status = githubStatusPayloadToRepoStatus(v)
+			status = githubStatusMessagePayloadToRepoStatus(v)
 			if v != nil {
 				owner = v.Owner
 				repo = v.Repo
 				ref = v.Ref
 			}
 		case message.GithubStatus:
-			status = githubStatusPayloadToRepoStatus(&v)
+			status = githubStatusMessagePayloadToRepoStatus(&v)
 			owner = v.Owner
 			repo = v.Repo
 			ref = v.Ref
@@ -71,7 +71,7 @@ func (s *githubStatusLogger) Send(m message.Composer) {
 // NewGithubStatusLogger returns a Sender to send payloads to the Github Status
 // API. Statuses will be attached to the given ref.
 func NewGithubStatusLogger(name string, opts *GithubOptions, ref string) (Sender, error) {
-	s := &githubStatusLogger{
+	s := &githubStatusMessageLogger{
 		Base: NewBase(name),
 		gh:   &githubClientImpl{},
 		ref:  ref,
@@ -98,7 +98,7 @@ func NewGithubStatusLogger(name string, opts *GithubOptions, ref string) (Sender
 	return s, nil
 }
 
-func (s *githubStatusLogger) githubMessageFieldsToStatus(m *message.Fields) *github.RepoStatus {
+func (s *githubStatusMessageLogger) githubMessageFieldsToStatus(m *message.Fields) *github.RepoStatus {
 	if m == nil {
 		return nil
 	}
@@ -146,7 +146,7 @@ func getStringPtrFromField(i interface{}) (*string, bool) {
 
 	return nil, false
 }
-func githubStatusPayloadToRepoStatus(c *message.GithubStatus) *github.RepoStatus {
+func githubStatusMessagePayloadToRepoStatus(c *message.GithubStatus) *github.RepoStatus {
 	if c == nil {
 		return nil
 	}

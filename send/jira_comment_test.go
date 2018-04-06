@@ -111,7 +111,7 @@ func (j *JiraCommentSuite) TestCreateMethodChangesClientState() {
 }
 
 func (j *JiraCommentSuite) TestSendWithJiraIssueComposer() {
-	c := message.NewJIRAComment(level.Notice, "ABC-123", "Hi")
+	c := message.NewJIRACommentMessage(level.Notice, "ABC-123", "Hi")
 
 	sender, err := NewJiraCommentLogger("XYZ-123", j.opts, LevelInfo{level.Trace, level.Info})
 	j.NoError(err)
