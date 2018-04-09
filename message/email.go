@@ -3,15 +3,25 @@ package message
 import (
 	"fmt"
 	"net/mail"
+
+	"github.com/mongodb/grip/level"
 )
 
 // Email represents the parameters of an email message
 type Email struct {
-	From       string              `bson:"from" json:"from" yaml:"from"`
-	Recipients []string            `bson:"recipients" json:"recipients" yaml:"recipients"`
-	Subject    string              `bson:"subject" json:"subject" yaml:"subject"`
-	Body       string              `bson:"body" json:"body" yaml:"body"`
-	Headers    map[string][]string `bson:"headers" json:"headers" yaml:"headers"`
+	From       string   `bson:"from" json:"from" yaml:"from"`
+	Recipients []string `bson:"recipients" json:"recipients" yaml:"recipients"`
+	Subject    string   `bson:"subject" json:"subject" yaml:"subject"`
+	Body       string   `bson:"body" json:"body" yaml:"body"`
+	// PlainTextContents dictates the Content-Type of the email. If true,
+	// it will text/html, if false text/plain. This value is overridden by
+	// the presence of a "Content-Type" header in Headers
+	PlainTextContents bool `bson:"is_plain_text" json:"is_plain_text" yaml:"is_plain_text"`
+
+	// Headers adds additional headers to the email body, ignoring any
+	// named "To", "From", "Subject", or "Content-Transfer-Encoding"
+	// (which should be set with the above fields)
+	Headers map[string][]string `bson:"headers" json:"headers" yaml:"headers"`
 }
 
 type emailMessage struct {
@@ -20,10 +30,13 @@ type emailMessage struct {
 }
 
 // NewEmailMessage returns a composer for emails
-func NewEmailMessage(e Email) Composer {
-	return &emailMessage{
+func NewEmailMessage(l level.Priority, e Email) Composer {
+	m := &emailMessage{
 		data: e,
 	}
+	_ = m.SetPriority(l)
+
+	return m
 }
 
 func (e *emailMessage) Loggable() bool {
@@ -49,6 +62,7 @@ func (e *emailMessage) Loggable() bool {
 		return false
 	}
 
+	// reject empty headers
 	for _, v := range e.data.Headers {
 		if len(v) == 0 {
 			return false
