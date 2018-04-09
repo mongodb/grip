@@ -44,6 +44,17 @@ func TestPopulatedMessageComposerConstructors(t *testing.T) {
 		When(true, testMsg):                                                    testMsg,
 		Whenf(true, testMsg):                                                   testMsg,
 		Whenln(true, testMsg):                                                  testMsg,
+		NewGithubStatusMessage(level.Error, "tests", GithubStateError, "https://example.com", testMsg): fmt.Sprintf("tests error: %s (https://example.com)", testMsg),
+		NewGithubStatusMessageWithRepo(level.Error, GithubStatus{
+			Owner: "mongodb",
+			Repo:  "grip",
+			Ref:   "master",
+
+			Context:     "tests",
+			State:       GithubStateError,
+			URL:         "https://example.com",
+			Description: testMsg,
+		}): fmt.Sprintf("mongodb/grip@master tests error: %s (https://example.com)", testMsg),
 	}
 
 	for msg, output := range cases {
@@ -105,6 +116,8 @@ func TestUnpopulatedMessageComposers(t *testing.T) {
 		When(false, ""),
 		Whenf(false, "", ""),
 		Whenln(false, "", ""),
+		NewGithubStatusMessage(level.Error, "", GithubState(""), "", ""),
+		NewGithubStatusMessageWithRepo(level.Error, GithubStatus{}),
 	}
 
 	for idx, msg := range cases {

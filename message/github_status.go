@@ -95,7 +95,7 @@ func (c *githubStatusMessage) Loggable() bool {
 func (c *githubStatusMessage) String() string {
 	base := c.raw.Ref
 	if len(c.raw.Owner) > 0 {
-		base = fmt.Sprintf("%s/%s@%s", c.raw.Owner, c.raw.Repo, c.raw.Ref)
+		base = fmt.Sprintf("%s/%s@%s ", c.raw.Owner, c.raw.Repo, c.raw.Ref)
 	}
 	if len(c.raw.Description) == 0 {
 		// looks like: evergreen failed (https://evergreen.mongodb.com)
