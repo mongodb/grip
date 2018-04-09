@@ -44,6 +44,11 @@ func TestPopulatedMessageComposerConstructors(t *testing.T) {
 		When(true, testMsg):                                                    testMsg,
 		Whenf(true, testMsg):                                                   testMsg,
 		Whenln(true, testMsg):                                                  testMsg,
+		NewEmailMessage(Email{
+			Recipients: []string{"someone@example.com"},
+			Subject:    "Test msg",
+			Body:       testMsg,
+		}): fmt.Sprintf("To: someone@example.com; Body: %s", testMsg),
 	}
 
 	for msg, output := range cases {
@@ -105,6 +110,7 @@ func TestUnpopulatedMessageComposers(t *testing.T) {
 		When(false, ""),
 		Whenf(false, "", ""),
 		Whenln(false, "", ""),
+		NewEmailMessage(Email{}),
 	}
 
 	for idx, msg := range cases {
