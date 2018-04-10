@@ -9,6 +9,10 @@ import (
 	"github.com/mongodb/grip/level"
 )
 
+const (
+	slackMaxAttachments = 100
+)
+
 // Slack is a message to a Slack channel or user
 type Slack struct {
 	Target      string              `bson:"target,omitempty" json:"target,omitempty" yaml:"target,omitempty"`
@@ -127,7 +131,7 @@ func MakeSlackMessage(target string, msg string, attachments []SlackAttachment) 
 }
 
 func (c *slackMessage) Loggable() bool {
-	return len(c.raw.Target) != 0 && len(c.raw.Msg) != 0
+	return len(c.raw.Target) != 0 && len(c.raw.Msg) != 0 && len(c.raw.Attachments) <= slackMaxAttachments
 }
 
 func (c *slackMessage) String() string {
@@ -153,6 +157,9 @@ func (c *slackMessage) Annotate(key string, data interface{}) error {
 	}
 	if annotate == nil {
 		return errors.New("Annotate data must not be nil")
+	}
+	if len(c.raw.Attachments) == slackMaxAttachments {
+		return errors.Errorf("Adding another slack attachment would exceed maximum number of attachments, %d", slackMaxAttachments)
 	}
 
 	c.raw.Attachments = append(c.raw.Attachments, annotate.convert())
