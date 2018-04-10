@@ -64,18 +64,33 @@ type githubStatusMessage struct {
 // NewGithubStatusMessageWithRepo creates a composer for sending payloads to the Github Status
 // API, with the repository and ref stored in the composer
 func NewGithubStatusMessageWithRepo(p level.Priority, status GithubStatus) Composer {
-	s := &githubStatusMessage{
-		raw: status,
-	}
+	s := MakeGithubStatusMessageWithRepo(status)
 	_ = s.SetPriority(p)
 
 	return s
 }
 
+// MakeGithubStatusMessageWithRepo creates a composer for sending payloads to the Github Status
+// API, with the repository and ref stored in the composer
+func MakeGithubStatusMessageWithRepo(status GithubStatus) Composer {
+	return &githubStatusMessage{
+		raw: status,
+	}
+}
+
 // NewGithubStatusMessage creates a composer for sending payloads to the Github Status
 // API.
 func NewGithubStatusMessage(p level.Priority, context string, state GithubState, URL, description string) Composer {
-	s := &githubStatusMessage{
+	s := MakeGithubStatusMessage(context, state, URL, description)
+	_ = s.SetPriority(p)
+
+	return s
+}
+
+// MakeGithubStatusMessage creates a composer for sending payloads to the Github Status
+// API without setting a priority
+func MakeGithubStatusMessage(context string, state GithubState, URL, description string) Composer {
+	return &githubStatusMessage{
 		raw: GithubStatus{
 			Context:     context,
 			State:       state,
@@ -83,9 +98,6 @@ func NewGithubStatusMessage(p level.Priority, context string, state GithubState,
 			Description: description,
 		},
 	}
-	_ = s.SetPriority(p)
-
-	return s
 }
 
 func (c *githubStatusMessage) Loggable() bool {

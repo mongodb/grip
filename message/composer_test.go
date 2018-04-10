@@ -55,6 +55,8 @@ func TestPopulatedMessageComposerConstructors(t *testing.T) {
 			URL:         "https://example.com",
 			Description: testMsg,
 		}): fmt.Sprintf("mongodb/grip@master tests error: %s (https://example.com)", testMsg),
+		NewJIRACommentMessage(level.Error, "ABC-123", testMsg): testMsg,
+		NewSlackMessage(level.Error, "@someone", testMsg, nil): fmt.Sprintf("@someone: %s", testMsg),
 	}
 
 	for msg, output := range cases {
@@ -81,6 +83,8 @@ func TestPopulatedMessageComposerConstructors(t *testing.T) {
 		// check message annotation functionality
 		switch msg.(type) {
 		case *GroupComposer:
+			continue
+		case *slackMessage:
 			continue
 		default:
 			assert.NoError(msg.Annotate("k1", "foo"), "%T", msg)
@@ -118,6 +122,8 @@ func TestUnpopulatedMessageComposers(t *testing.T) {
 		Whenln(false, "", ""),
 		NewGithubStatusMessage(level.Error, "", GithubState(""), "", ""),
 		NewGithubStatusMessageWithRepo(level.Error, GithubStatus{}),
+		NewJIRACommentMessage(level.Error, "", ""),
+		NewSlackMessage(level.Error, "", "", nil),
 	}
 
 	for idx, msg := range cases {

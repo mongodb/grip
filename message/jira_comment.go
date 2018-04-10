@@ -20,16 +20,22 @@ type JIRAComment struct {
 // to a single JIRA issue. This composer will override the issue set in the
 // JIRA sender
 func NewJIRACommentMessage(p level.Priority, issueID, body string) Composer {
-	s := &jiraComment{
+	s := MakeJIRACommentMessage(issueID, body)
+	_ = s.SetPriority(p)
+
+	return s
+}
+
+// MakeJIRACommentMessage returns a self-contained composer for posting a comment
+// to a single JIRA issue. This composer will override the issue set in the
+// JIRA sender. The composer will not have a priority set
+func MakeJIRACommentMessage(issueID, body string) Composer {
+	return &jiraComment{
 		Payload: JIRAComment{
 			IssueID: issueID,
 			Body:    body,
 		},
 	}
-
-	_ = s.SetPriority(p)
-
-	return s
 }
 
 func (c *jiraComment) Loggable() bool {
