@@ -31,12 +31,17 @@ type emailMessage struct {
 
 // NewEmailMessage returns a composer for emails
 func NewEmailMessage(l level.Priority, e Email) Composer {
-	m := &emailMessage{
-		data: e,
-	}
+	m := MakeEmailMessage(e)
 	_ = m.SetPriority(l)
 
 	return m
+}
+
+// MakeEmailMessage creates a composer for emails without a priority set
+func MakeEmailMessage(e Email) Composer {
+	return &emailMessage{
+		data: e,
+	}
 }
 
 func (e *emailMessage) Loggable() bool {
