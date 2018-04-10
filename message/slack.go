@@ -139,7 +139,8 @@ func (c *slackMessage) Raw() interface{} {
 }
 
 // Annotate adds additional attachments to the message. The key value is ignored
-func (c *slackMessage) Annotate(_ string, data interface{}) error {
+// if a SlackAttachment or *SlackAttachment is supplied
+func (c *slackMessage) Annotate(key string, data interface{}) error {
 	var annotate *SlackAttachment
 
 	switch v := data.(type) {
@@ -148,7 +149,7 @@ func (c *slackMessage) Annotate(_ string, data interface{}) error {
 	case SlackAttachment:
 		annotate = &v
 	default:
-		return errors.New("Annotate only accepts SlackAttachment, or *SlackAttachment")
+		return c.Base.Annotate(key, data)
 	}
 	if annotate == nil {
 		return errors.New("Annotate data must not be nil")

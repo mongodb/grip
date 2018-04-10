@@ -57,6 +57,7 @@ func (p *GithubStatus) Valid() bool {
 
 type githubStatusMessage struct {
 	raw GithubStatus
+	str string
 
 	Base `bson:"metadata" json:"metadata" yaml:"metadata"`
 }
@@ -105,16 +106,23 @@ func (c *githubStatusMessage) Loggable() bool {
 }
 
 func (c *githubStatusMessage) String() string {
+	if len(c.str) != 0 {
+		return c.str
+	}
+
 	base := c.raw.Ref
 	if len(c.raw.Owner) > 0 {
 		base = fmt.Sprintf("%s/%s@%s ", c.raw.Owner, c.raw.Repo, c.raw.Ref)
 	}
 	if len(c.raw.Description) == 0 {
 		// looks like: evergreen failed (https://evergreen.mongodb.com)
-		return base + fmt.Sprintf("%s %s (%s)", c.raw.Context, string(c.raw.State), c.raw.URL)
+		c.str = base + fmt.Sprintf("%s %s (%s)", c.raw.Context, string(c.raw.State), c.raw.URL)
+	} else {
+		// looks like: evergreen failed: 1 task failed (https://evergreen.mongodb.com)
+		c.str = base + fmt.Sprintf("%s %s: %s (%s)", c.raw.Context, string(c.raw.State), c.raw.Description, c.raw.URL)
 	}
-	// looks like: evergreen failed: 1 task failed (https://evergreen.mongodb.com)
-	return base + fmt.Sprintf("%s %s: %s (%s)", c.raw.Context, string(c.raw.State), c.raw.Description, c.raw.URL)
+
+	return c.str
 }
 
 func (c *githubStatusMessage) Raw() interface{} {
