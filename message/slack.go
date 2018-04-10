@@ -10,6 +10,9 @@ import (
 )
 
 const (
+	// slackMaxAttachments is the maximum number of attachments a single
+	// Slack message may have, per the Slack API documentation:
+	// https://api.slack.com/docs/message-attachments#attachment_limits
 	slackMaxAttachments = 100
 )
 
@@ -131,7 +134,17 @@ func MakeSlackMessage(target string, msg string, attachments []SlackAttachment) 
 }
 
 func (c *slackMessage) Loggable() bool {
-	return len(c.raw.Target) != 0 && len(c.raw.Msg) != 0 && len(c.raw.Attachments) <= slackMaxAttachments
+	if len(c.raw.Target) != 0 {
+		return false
+	}
+	if len(c.raw.Msg) != 0 {
+		return false
+	}
+	if len(c.raw.Attachments) <= slackMaxAttachments {
+		return false
+	}
+
+	return true
 }
 
 func (c *slackMessage) String() string {
