@@ -49,6 +49,19 @@ func TestPopulatedMessageComposerConstructors(t *testing.T) {
 			Subject:    "Test msg",
 			Body:       testMsg,
 		}): fmt.Sprintf("To: someone@example.com; Body: %s", testMsg),
+		NewGithubStatusMessage(level.Error, "tests", GithubStateError, "https://example.com", testMsg): fmt.Sprintf("tests error: %s (https://example.com)", testMsg),
+		NewGithubStatusMessageWithRepo(level.Error, GithubStatus{
+			Owner: "mongodb",
+			Repo:  "grip",
+			Ref:   "master",
+
+			Context:     "tests",
+			State:       GithubStateError,
+			URL:         "https://example.com",
+			Description: testMsg,
+		}): fmt.Sprintf("mongodb/grip@master tests error: %s (https://example.com)", testMsg),
+		NewJIRACommentMessage(level.Error, "ABC-123", testMsg): testMsg,
+		NewSlackMessage(level.Error, "@someone", testMsg, nil): fmt.Sprintf("@someone: %s", testMsg),
 	}
 
 	for msg, output := range cases {
@@ -75,6 +88,8 @@ func TestPopulatedMessageComposerConstructors(t *testing.T) {
 		// check message annotation functionality
 		switch msg.(type) {
 		case *GroupComposer:
+			continue
+		case *slackMessage:
 			continue
 		default:
 			assert.NoError(msg.Annotate("k1", "foo"), "%T", msg)
@@ -111,6 +126,10 @@ func TestUnpopulatedMessageComposers(t *testing.T) {
 		Whenf(false, "", ""),
 		Whenln(false, "", ""),
 		NewEmailMessage(level.Error, Email{}),
+		NewGithubStatusMessage(level.Error, "", GithubState(""), "", ""),
+		NewGithubStatusMessageWithRepo(level.Error, GithubStatus{}),
+		NewJIRACommentMessage(level.Error, "", ""),
+		NewSlackMessage(level.Error, "", "", nil),
 	}
 
 	for idx, msg := range cases {
