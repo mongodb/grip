@@ -18,7 +18,7 @@ const (
 
 // Slack is a message to a Slack channel or user
 type Slack struct {
-	Target      string              `bson:"target,omitempty" json:"target,omitempty" yaml:"target,omitempty"`
+	Target      string              `bson:"target" json:"target" yaml:"target"`
 	Msg         string              `bson:"msg" json:"msg" yaml:"msg"`
 	Attachments []*slack.Attachment `bson:"attachments" json:"attachments" yaml:"attachments"`
 }
@@ -29,21 +29,12 @@ type SlackAttachment struct {
 	Color    string `bson:"color,omitempty" json:"color,omitempty" yaml:"color,omitempty"`
 	Fallback string `bson:"fallback" json:"fallback" yaml:"fallback"`
 
-	AuthorName    string `bson:"author_name,omitempty" json:"author_name,omitempty" yaml:"author_name,omitempty"`
-	AuthorSubname string `bson:"author_subname,omitempty" json:"author_subname,omitempty" yaml:"author_subname,omitempty"`
-	AuthorLink    string `bson:"author_link,omitempty" json:"author_link,omitempty" yaml:"author_link,omitempty"`
-	AuthorIcon    string `bson:"author_icon,omitempty" json:"author_icon,omitempty" yaml:"author_icon,omitempty"`
+	AuthorName string `bson:"author_name,omitempty" json:"author_name,omitempty" yaml:"author_name,omitempty"`
+	AuthorIcon string `bson:"author_icon,omitempty" json:"author_icon,omitempty" yaml:"author_icon,omitempty"`
 
 	Title     string `bson:"title,omitempty" json:"title,omitempty" yaml:"title,omitempty"`
 	TitleLink string `bson:"title_link,omitempty" json:"title_link,omitempty" yaml:"title_link,omitempty"`
-	Pretext   string `bson:"pretext,omitempty" json:"pretext,omitempty" yaml:"pretext,omitempty"`
 	Text      string `bson:"text" json:"text" yaml:"text"`
-
-	ImageURL string `bson:"image_url,omitempty" json:"image_url,omitempty" yaml:"image_url,omitempty"`
-	ThumbURL string `bson:"thumb_url,omitempty" json:"thumb_url,omitempty" yaml:"thumb_url,omitempty"`
-
-	Footer     string `bson:"footer,omitempty" json:"footer,omitempty" yaml:"footer,omitempty"`
-	FooterIcon string `bson:"footer_icon,omitempty" json:"footer_icon,omitempty" yaml:"footer_icon,omitempty"`
 
 	Fields     []*SlackAttachmentField `bson:"fields,omitempty" json:"fields,omitempty" yaml:"fields,omitempty"`
 	MarkdownIn []string                `bson:"mrkdwn_in,omitempty" json:"mrkdwn_in,omitempty" yaml:"mrkdwn_in,omitempty"`
@@ -134,13 +125,13 @@ func MakeSlackMessage(target string, msg string, attachments []SlackAttachment) 
 }
 
 func (c *slackMessage) Loggable() bool {
-	if len(c.raw.Target) != 0 {
+	if len(c.raw.Target) == 0 {
 		return false
 	}
-	if len(c.raw.Msg) != 0 {
+	if len(c.raw.Msg) == 0 {
 		return false
 	}
-	if len(c.raw.Attachments) <= slackMaxAttachments {
+	if len(c.raw.Attachments) > slackMaxAttachments {
 		return false
 	}
 
@@ -172,7 +163,7 @@ func (c *slackMessage) Annotate(key string, data interface{}) error {
 		return errors.New("Annotate data must not be nil")
 	}
 	if len(c.raw.Attachments) == slackMaxAttachments {
-		return fmt.Errorf("Adding another slack attachment would exceed maximum number of attachments, %d", slackMaxAttachments)
+		return fmt.Errorf("Adding another Slack attachment would exceed maximum number of attachments, %d", slackMaxAttachments)
 	}
 
 	c.raw.Attachments = append(c.raw.Attachments, annotate.convert())

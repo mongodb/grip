@@ -33,39 +33,25 @@ func TestSlackAttachmentConvert(t *testing.T) {
 	}
 
 	at := SlackAttachment{
-		Color:         "1",
-		Fallback:      "2",
-		AuthorName:    "3",
-		AuthorSubname: "4",
-		AuthorLink:    "5",
-		AuthorIcon:    "6",
-		Title:         "7",
-		TitleLink:     "8",
-		Pretext:       "9",
-		Text:          "10",
-		ImageURL:      "11",
-		ThumbURL:      "12",
-		Footer:        "13",
-		FooterIcon:    "14",
-		Fields:        []*SlackAttachmentField{&af},
-		MarkdownIn:    []string{"15", "16"},
+		Color:      "1",
+		Fallback:   "2",
+		AuthorName: "3",
+		AuthorIcon: "6",
+		Title:      "7",
+		TitleLink:  "8",
+		Text:       "10",
+		Fields:     []*SlackAttachmentField{&af},
+		MarkdownIn: []string{"15", "16"},
 	}
 	slackAttachment := at.convert()
 
 	assert.Equal("1", slackAttachment.Color)
 	assert.Equal("2", slackAttachment.Fallback)
 	assert.Equal("3", slackAttachment.AuthorName)
-	assert.Equal("4", slackAttachment.AuthorSubname)
-	assert.Equal("5", slackAttachment.AuthorLink)
 	assert.Equal("6", slackAttachment.AuthorIcon)
 	assert.Equal("7", slackAttachment.Title)
 	assert.Equal("8", slackAttachment.TitleLink)
-	assert.Equal("9", slackAttachment.Pretext)
 	assert.Equal("10", slackAttachment.Text)
-	assert.Equal("11", slackAttachment.ImageURL)
-	assert.Equal("12", slackAttachment.ThumbURL)
-	assert.Equal("13", slackAttachment.Footer)
-	assert.Equal("14", slackAttachment.FooterIcon)
 	assert.Equal([]string{"15", "16"}, slackAttachment.MarkdownIn)
 	assert.Len(slackAttachment.Fields, 1)
 	assert.Equal("1", slackAttachment.Fields[0].Title)
@@ -82,11 +68,9 @@ func TestSlackAttachmentIsSame(t *testing.T) {
 	vGrip := reflect.TypeOf(grip)
 	vSlack := reflect.TypeOf(slack)
 
-	assert.Equal(vSlack.NumField(), vGrip.NumField())
 	for i := 0; i < vSlack.NumField(); i++ {
 		slackField := vSlack.Field(i)
 		gripField, found := vGrip.FieldByName(slackField.Name)
-		assert.True(found, "field %s found in slack.Attachment, but not in message.SlackAttachment", slackField.Name)
 		if !found {
 			continue
 		}
