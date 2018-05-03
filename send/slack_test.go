@@ -76,7 +76,7 @@ func (s *SlackSuite) TestValidateAndConstructoRequiresValidate() {
 	s.NoError(os.Setenv(slackClientToken, "foo"))
 }
 
-func (s *SlackSuite) TestValidateRequiresOctothorpOrAmpersand() {
+func (s *SlackSuite) TestValidateRequiresOctothorpOrArobase() {
 	opts := &SlackOptions{Name: "test", Channel: "#chat", Hostname: "foo"}
 	s.Equal("#chat", opts.Channel)
 	s.NoError(opts.Validate())
