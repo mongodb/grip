@@ -49,10 +49,6 @@ func MakeSMTPLogger(opts *SMTPOptions) (Sender, error) {
 		return nil, err
 	}
 
-	if err := opts.client.Create(opts); err != nil {
-		return nil, err
-	}
-
 	s := &smtpLogger{
 		Base: NewBase(opts.Name),
 		opts: opts,
@@ -291,6 +287,11 @@ func (o *SMTPOptions) sendMail(m message.Composer) error {
 	o.mutex.Lock()
 	defer o.mutex.Unlock()
 
+	if err := o.client.Create(o); err != nil {
+		return err
+	}
+	defer o.client.Close()
+
 	var subject, body string
 	toAddrs := o.toAddrs
 	fromAddr := o.fromAddr
@@ -407,6 +408,7 @@ type smtpClient interface {
 	Mail(string) error
 	Rcpt(string) error
 	Data() (io.WriteCloser, error)
+	Close() error
 }
 
 type smtpClientImpl struct {
@@ -444,4 +446,8 @@ func (c *smtpClientImpl) Create(opts *SMTPOptions) error {
 	}
 
 	return nil
+}
+
+func (c *smtpClientImpl) Close() error {
+	return c.Client.Close()
 }
