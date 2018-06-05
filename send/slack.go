@@ -92,7 +92,7 @@ func (s *slackJournal) Send(m message.Composer) {
 
 		params.IconUrl = s.opts.IconURL
 		params.Username = s.opts.Username
-		if len(params.Username) == 0 {
+		if len(params.Username) != 0 {
 			params.AsUser = false
 		}
 
