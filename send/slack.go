@@ -114,7 +114,7 @@ type SlackOptions struct {
 	Hostname string `bson:"hostname" json:"hostname" yaml:"hostname"`
 	Name     string `bson:"name" json:"name" yaml:"name"`
 	// Username and IconURL allow the slack sender to set a display
-	// name and icon. Setting either paramter will force as_user to false.
+	// name and icon. Setting either parameter will force as_user to false.
 	Username string `bson:"username" json:"username" yaml:"username"`
 	IconURL  string `bson:"icon_url" json:"icon_url" yaml:"icon_url"`
 
