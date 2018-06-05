@@ -90,8 +90,11 @@ func (s *slackJournal) Send(m message.Composer) {
 			msg, params = s.opts.produceMessage(m)
 		}
 
-		params.Username = s.opts.Username
 		params.IconUrl = s.opts.IconURL
+		params.Username = s.opts.Username
+		if len(params.Username) == 0 {
+			params.AsUser = false
+		}
 
 		if err := s.opts.client.ChatPostMessage(channel, msg, params); err != nil {
 			s.ErrorHandler(err, message.NewFormattedMessage(m.Priority(),
@@ -111,7 +114,7 @@ type SlackOptions struct {
 	Hostname string `bson:"hostname" json:"hostname" yaml:"hostname"`
 	Name     string `bson:"name" json:"name" yaml:"name"`
 	// Username and IconURL allow the slack sender to set a display
-	// name and icon. Setting either parameter will force AsUser to true.
+	// name and icon. Setting Username will force as_user to false.
 	Username string `bson:"username" json:"username" yaml:"username"`
 	IconURL  string `bson:"icon_url" json:"icon_url" yaml:"icon_url"`
 
