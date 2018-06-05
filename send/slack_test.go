@@ -352,4 +352,5 @@ func (s *SlackSuite) TestSettingBotIdentity() {
 	s.Equal(2, mock.numSent)
 	s.Equal("Grip", mock.lastMsg.Username)
 	s.Equal("https://example.com/icon.ico", mock.lastMsg.IconUrl)
+	s.False(mock.lastMsg.AsUser)
 }
