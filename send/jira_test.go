@@ -208,7 +208,6 @@ func (j *JiraSuite) TestCustomFields() {
 	j.True(m.Loggable())
 	sender.Send(m)
 
-	//pp.Println(mock.lastFields)
 	j.Equal([]string{"hi", "bye"}, mock.lastFields.Unknowns["customfield_12345"])
 	j.Equal("test", mock.lastFields.Summary)
 }
