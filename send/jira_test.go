@@ -203,7 +203,7 @@ func (j *JiraSuite) TestCustomFields() {
 		},
 	}
 
-	m = message.MakeJiraMessage(jiraIssue)
+	m := message.MakeJiraMessage(jiraIssue)
 	m.SetPriority(level.Warning)
 	j.True(m.Loggable())
 	sender.Send(m)
