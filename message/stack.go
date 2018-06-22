@@ -110,7 +110,7 @@ func NewStackFormatted(skip int, message string, args ...interface{}) Composer {
 ////////////////////////////////////////////////////////////////////////
 
 func (m *stackMessage) String() string {
-	return strings.Trim(strings.Join([]string{m.getTag(), m.Composer.String()}, " "), " \n\t")
+	return strings.Trim(m.trace.String(), " \n\t")
 }
 
 func (m *stackMessage) Raw() interface{} {
