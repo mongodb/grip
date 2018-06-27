@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/mongodb/grip"
+	"github.com/mongodb/grip/logging"
 	"github.com/mongodb/grip/message"
 	"github.com/mongodb/grip/send"
 	"github.com/stretchr/testify/suite"
@@ -35,6 +36,8 @@ func (s *RecoverySuite) SetupTest() {
 	s.globalSender = grip.GetSender()
 	s.Require().NoError(grip.SetSender(s.sender))
 }
+
+func (s *RecoverySuite) logger() grip.Journaler { return logging.MakeGrip(s.sender) }
 
 func (s *RecoverySuite) TearDownTest() {
 	s.Require().NoError(grip.SetSender(s.globalSender))
@@ -190,4 +193,50 @@ func (s *RecoverySuite) TestPanicAnnotatesLogsWithErrorHandler() {
 	s.True(strings.Contains(msg.Rendered, "hit panic; adding error"))
 	s.True(strings.Contains(msg.Rendered, "get a grip"))
 	s.True(strings.Contains(msg.Rendered, "foo='bar'"))
+}
+
+func (s *RecoverySuite) TestPanicHandlerSendJournalerPropogagaesMessage() {
+	s.False(s.sender.HasMessage())
+	s.NotPanics(func() {
+		defer SendStackTraceAndContinue(s.logger(), message.Fields{"foo": "test handler op2 for real"})
+		panic("sorry")
+	})
+	s.True(s.sender.HasMessage())
+	msg, ok := s.sender.GetMessageSafe()
+	s.True(ok)
+	s.True(strings.Contains(msg.Rendered, "test handler op2 for real"))
+
+}
+
+func (s *RecoverySuite) TestPanicsCausesSendJournalerLogsWithExitHandler() {
+	s.False(s.sender.HasMessage())
+	s.NotPanics(func() {
+		defer SendStackTraceMessageAndExit(s.logger(), message.Fields{"foo": "exit op2"})
+		panic("sorry buddy")
+	})
+	s.True(s.sender.HasMessage())
+	msg, ok := s.sender.GetMessageSafe()
+	s.True(ok)
+	s.True(strings.Contains(msg.Rendered, "hit panic; exiting"))
+	s.True(strings.Contains(msg.Rendered, "sorry buddy"))
+	s.True(strings.Contains(msg.Rendered, "exit op2"))
+}
+
+func (s *RecoverySuite) TestPanicSendJournalerLogsWithErrorHandler() {
+	s.False(s.sender.HasMessage())
+	s.NotPanics(func() {
+		err := func() (err error) {
+			defer func() { err = SendMessageWithPanicError(recover(), nil, s.logger(), message.Fields{"foo": "bar1"}) }()
+			panic("get a grip")
+		}()
+
+		s.Error(err)
+		s.True(strings.Contains(err.Error(), "get a grip"))
+	})
+	s.True(s.sender.HasMessage())
+	msg, ok := s.sender.GetMessageSafe()
+	s.True(ok)
+	s.True(strings.Contains(msg.Rendered, "hit panic; adding error"))
+	s.True(strings.Contains(msg.Rendered, "get a grip"))
+	s.True(strings.Contains(msg.Rendered, "foo='bar1'"))
 }
