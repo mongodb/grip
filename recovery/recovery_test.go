@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/mongodb/grip"
+	"github.com/mongodb/grip/message"
 	"github.com/mongodb/grip/send"
 	"github.com/stretchr/testify/suite"
 )
@@ -58,8 +59,8 @@ func (s *RecoverySuite) TestPanicCausesLogsWithContinueRecoverer() {
 	s.True(s.sender.HasMessage())
 	msg, ok := s.sender.GetMessageSafe()
 	s.True(ok)
-	s.True(strings.Contains(msg.Rendered, "hit panic; recovering"))
-	s.True(strings.Contains(msg.Rendered, "sorry"))
+	s.Contains(msg.Rendered, "hit panic; recovering")
+	s.Contains(msg.Rendered, "sorry")
 }
 
 func (s *RecoverySuite) TestPanicsCausesLogsWithExitHandler() {
@@ -110,10 +111,9 @@ func (s *RecoverySuite) TestErrorHandlerPropogatesErrorAndPanicMessage() {
 	s.True(s.sender.HasMessage())
 	msg, ok := s.sender.GetMessageSafe()
 	s.True(ok)
-	s.True(strings.Contains(msg.Rendered, "this op name"))
-	s.True(strings.Contains(msg.Rendered, "got grip"))
-	s.True(strings.Contains(msg.Rendered, "bar"))
-
+	s.Contains(msg.Rendered, "this op name")
+	s.Contains(msg.Rendered, "got grip")
+	s.Contains(msg.Rendered, "bar")
 }
 
 func (s *RecoverySuite) TestPanicHandlerWithErrorPropogatesErrorWithoutPanic() {
@@ -144,4 +144,50 @@ func (s *RecoverySuite) TestPanicHandlerPropogatesOperationNameWithArgs() {
 	msg, ok := s.sender.GetMessageSafe()
 	s.True(ok)
 	s.True(strings.Contains(msg.Rendered, "test handler op for real"))
+}
+
+func (s *RecoverySuite) TestPanicHandlerAnnotationPropogagaesMessage() {
+	s.False(s.sender.HasMessage())
+	s.NotPanics(func() {
+		defer AnnotateMessageWithStackTraceAndContinue(message.Fields{"foo": "test handler op1 for real"})
+		panic("sorry")
+	})
+	s.True(s.sender.HasMessage())
+	msg, ok := s.sender.GetMessageSafe()
+	s.True(ok)
+	s.True(strings.Contains(msg.Rendered, "test handler op1 for real"))
+
+}
+
+func (s *RecoverySuite) TestPanicsCausesAnnotateLogsWithExitHandler() {
+	s.False(s.sender.HasMessage())
+	s.NotPanics(func() {
+		defer AnnotateMessageWithStackTraceAndExit(message.Fields{"foo": "exit op1"})
+		panic("sorry buddy")
+	})
+	s.True(s.sender.HasMessage())
+	msg, ok := s.sender.GetMessageSafe()
+	s.True(ok)
+	s.True(strings.Contains(msg.Rendered, "hit panic; exiting"))
+	s.True(strings.Contains(msg.Rendered, "sorry buddy"))
+	s.True(strings.Contains(msg.Rendered, "exit op1"))
+}
+
+func (s *RecoverySuite) TestPanicAnnotatesLogsWithErrorHandler() {
+	s.False(s.sender.HasMessage())
+	s.NotPanics(func() {
+		err := func() (err error) {
+			defer func() { err = AnnotateMessageWithPanicError(recover(), nil, message.Fields{"foo": "bar"}) }()
+			panic("get a grip")
+		}()
+
+		s.Error(err)
+		s.True(strings.Contains(err.Error(), "get a grip"))
+	})
+	s.True(s.sender.HasMessage())
+	msg, ok := s.sender.GetMessageSafe()
+	s.True(ok)
+	s.True(strings.Contains(msg.Rendered, "hit panic; adding error"))
+	s.True(strings.Contains(msg.Rendered, "get a grip"))
+	s.True(strings.Contains(msg.Rendered, "foo='bar'"))
 }

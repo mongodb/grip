@@ -19,6 +19,7 @@ import (
 	"strings"
 
 	"github.com/mongodb/grip"
+	"github.com/mongodb/grip/level"
 	"github.com/mongodb/grip/message"
 )
 
@@ -30,23 +31,7 @@ const killOverrideVarName = "__GRIP_EXIT_OVERRIDE"
 // This operation also attempts to close the underlying log sender.
 func LogStackTraceAndExit(opDetails ...string) {
 	if p := recover(); p != nil {
-		m := message.Fields{
-			message.FieldsMsgName: "hit panic; exiting",
-			"panic":               panicString(p),
-			"stack":               message.NewStack(2, "").Raw().(message.StackTrace).Frames,
-		}
-
-		if len(opDetails) > 0 {
-			m["operation"] = strings.Join(opDetails, " ")
-		}
-
-		// check this env var so that we can avoid exiting in the test.
-		if os.Getenv(killOverrideVarName) == "" {
-			_ = grip.GetSender().Close()
-			grip.EmergencyFatal(m)
-		} else {
-			grip.Emergency(m)
-		}
+		logAndExit(p, message.MakeFields(getMessage(opDetails)))
 	}
 }
 
@@ -64,17 +49,7 @@ func LogStackTraceAndExit(opDetails ...string) {
 //
 func LogStackTraceAndContinue(opDetails ...string) {
 	if p := recover(); p != nil {
-		m := message.Fields{
-			message.FieldsMsgName: "hit panic; recovering",
-			"panic":               panicString(p),
-			"stack":               message.NewStack(2, "").Raw().(message.StackTrace).Frames,
-		}
-
-		if len(opDetails) > 0 {
-			m["operation"] = strings.Join(opDetails, " ")
-		}
-
-		grip.Alert(m)
+		logAndContinue(p, message.MakeFields(getMessage(opDetails)))
 	}
 }
 
@@ -101,22 +76,102 @@ func HandlePanicWithError(p interface{}, err error, opDetails ...string) error {
 		perr := panicError(p)
 		catcher.Add(perr)
 
-		m := message.Fields{
-			message.FieldsMsgName: "hit panic; adding error",
-			"stack":               message.NewStack(2, "").Raw().(message.StackTrace).Frames,
-			"panic":               perr.Error(),
-		}
-
-		if err != nil {
-			m["error"] = err.Error()
-		}
-
-		if len(opDetails) > 0 {
-			m["operation"] = strings.Join(opDetails, " ")
-		}
-
-		grip.Alert(m)
+		handleWithError(perr, err, message.MakeFields(getMessage(opDetails)))
 	}
 
 	return catcher.Resolve()
+}
+
+// AnnotateMessageWithStackTraceAndContinue logs panics and continues
+// and is meant to be used in defer statements like
+// LogStackTraceAndContinue.
+//
+// It takes an interface which it converts to a message.Composer using
+// the same rules as logging methods, and annotates those messages
+// with the stack trace and panic information.
+func AnnotateMessageWithStackTraceAndContinue(m interface{}) {
+	if p := recover(); p != nil {
+		logAndContinue(p, message.ConvertToComposer(level.Critical, m))
+	}
+}
+
+// AnnotateMessageWithStackTraceAndExit logs panics and calls exit
+// like LogStackTraceAndExit.
+//
+// It takes an interface which it converts to a message.Composer using
+// the same rules as logging methods, and annotates those messages
+// with the stack trace and panic information.
+func AnnotateMessageWithStackTraceAndExit(m interface{}) {
+	if p := recover(); p != nil {
+		logAndExit(p, message.ConvertToComposer(level.Critical, m))
+	}
+}
+
+// AnnotateMessageWithPanicError processes a panic and converts it
+// into an error, combining it with the value of another error. Like,
+// HandlePanicWithError, this method is meant to be used in your own
+// defer functions.
+//
+// It takes an interface which it converts to a message.Composer using
+// the same rules as logging methods, and annotates those messages
+// with the stack trace and panic information.
+func AnnotateMessageWithPanicError(p interface{}, err error, m interface{}) error {
+	catcher := grip.NewSimpleCatcher()
+	catcher.Add(err)
+
+	if p != nil {
+		perr := panicError(p)
+		catcher.Add(perr)
+
+		handleWithError(perr, err, message.ConvertToComposer(level.Critical, m))
+	}
+
+	return catcher.Resolve()
+}
+
+////////////////////////////////////////////////////////////////////////
+//
+// helpers
+
+func getMessage(details []string) message.Fields {
+	m := message.Fields{}
+
+	if len(details) > 0 {
+		m["operation"] = strings.Join(details, " ")
+	}
+
+	return m
+}
+
+func logAndContinue(p interface{}, msg message.Composer) {
+	_ = msg.Annotate("panic", panicString(p))
+	_ = msg.Annotate("stack", message.NewStack(3, "").Raw().(message.StackTrace).Frames)
+	_ = msg.Annotate(message.FieldsMsgName, "hit panic; recovering")
+
+	grip.Alert(msg)
+}
+
+func logAndExit(p interface{}, msg message.Composer) {
+	_ = msg.Annotate("panic", panicString(p))
+	_ = msg.Annotate("stack", message.NewStack(3, "").Raw().(message.StackTrace).Frames)
+	_ = msg.Annotate(message.FieldsMsgName, "hit panic; exiting")
+
+	// check this env var so that we can avoid exiting in the test.
+	if os.Getenv(killOverrideVarName) == "" {
+		grip.EmergencyFatal(msg)
+	} else {
+		grip.Emergency(msg)
+	}
+}
+
+func handleWithError(p error, err error, msg message.Composer) {
+	_ = msg.Annotate("panic", p.Error())
+	_ = msg.Annotate("stack", message.NewStack(3, "").Raw().(message.StackTrace).Frames)
+	_ = msg.Annotate(message.FieldsMsgName, "hit panic; adding error")
+
+	if err != nil {
+		_ = msg.Annotate("error", err.Error())
+	}
+
+	grip.Alert(msg)
 }
