@@ -160,7 +160,7 @@ func getFields(m message.Composer) *jira.IssueFields {
 			issueFields.Labels = msg.Labels
 		}
 		if len(msg.Components) > 0 {
-			issueFields.Components = make([]*jira.Component{}, 0, len(msg.Components))
+			issueFields.Components = make([]*jira.Component, 0, len(msg.Components))
 			for _, component := range msg.Components {
 				issueFields.Components = append(issueFields.Components,
 					&jira.Component{

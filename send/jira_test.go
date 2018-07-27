@@ -2,6 +2,7 @@ package send
 
 import (
 	"bytes"
+	"encoding/json"
 	"testing"
 
 	"github.com/mongodb/grip/level"
@@ -211,4 +212,9 @@ func (j *JiraSuite) TestCustomFields() {
 
 	j.Equal([]string{"hi", "bye"}, mock.lastFields.Unknowns["customfield_12345"])
 	j.Equal("test", mock.lastFields.Summary)
+
+	bytes, err := json.Marshal(&mock.lastFields)
+	j.NoError(err)
+	j.Len(bytes, 79)
+	j.Equal(`{"customfield_12345":["hi","bye"],"issuetype":{"name":"type"},"summary":"test"}`, string(bytes))
 }
