@@ -186,6 +186,16 @@ func (j *JiraSuite) TestTruncate() {
 	m = message.NewDefaultMessage(level.Info, longString.String())
 	sender.Send(m)
 	j.Len(mock.lastSummary, 254)
+
+	buffer := bytes.NewBufferString("")
+	buffer.Grow(40000)
+	for i := 0; i < 40000; i++ {
+		buffer.WriteString("a")
+	}
+
+	m = message.NewDefaultMessage(level.Info, buffer.String())
+	sender.Send(m)
+	j.Len(mock.lastDescription, 32767)
 }
 
 func (j *JiraSuite) TestCustomFields() {
