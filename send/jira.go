@@ -54,7 +54,7 @@ func NewJiraLogger(opts *JiraOptions, l LevelInfo) (Sender, error) {
 		return nil, err
 	}
 
-	if err := j.opts.client.Authenticate(opts.Username, opts.Password); err != nil {
+	if err := j.opts.client.Authenticate(opts.Username, opts.Password, opts.UseBasicAuth); err != nil {
 		return nil, fmt.Errorf("jira authentication error: %v", err)
 	}
 
