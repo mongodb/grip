@@ -172,6 +172,10 @@ func (s *SenderSuite) SetupTest() {
 		ref:  "master",
 	}
 	s.NoError(s.senders["gh-status-mocked"].SetFormatter(MakeDefaultFormatter()))
+
+	s.senders["inmemory"], err = NewInMemorySender("inmemory", l, 100)
+	s.Require().NoError(err)
+	s.NoError(s.senders["inmemory"].SetFormatter(MakeDefaultFormatter()))
 }
 
 func (s *SenderSuite) TearDownTest() {
