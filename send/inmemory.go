@@ -1,7 +1,6 @@
 package send
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"log"
@@ -46,87 +45,45 @@ func NewInMemorySender(name string, info LevelInfo, capacity int) (*InMemorySend
 	return s, nil
 }
 
-// Get returns at most n most recent messages. If there are fewer than n messages, returns all currently
-// available messages in the buffer.
-func (s *InMemorySender) Get(n int) ([]message.Composer, error) {
+// Get returns the messages in the buffer.
+func (s *InMemorySender) Get() []message.Composer {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
-
-	if n <= 0 {
-		return nil, errors.New("must request at least 1 message")
-	}
 
 	var start int
 	var tmp []message.Composer
 
-	if n > len(s.buffer) {
-		if len(s.buffer) < cap(s.buffer) {
-			start = 0
-		} else {
-			start = s.head - len(s.buffer)
-		}
-		tmp = make([]message.Composer, 0, len(s.buffer))
-	} else {
-		start = s.head - n
-		tmp = make([]message.Composer, 0, n)
-	}
-
+	start = s.head - len(s.buffer)
 	if start < 0 {
 		start = start + len(s.buffer)
 		tmp = append(tmp, s.buffer[start:len(s.buffer)]...)
-		return append(tmp, s.buffer[:s.head]...), nil
+		return append(tmp, s.buffer[:s.head]...)
 	}
-	return append(tmp, s.buffer[start:s.head]...), nil
+	return append(tmp, s.buffer[start:s.head]...)
 }
 
-// String returns the n most recent formatted messages. If there are fewer than n messages, it
-// returns all the currently available messages in the buffer.
-func (s *InMemorySender) String(n int) (string, error) {
-	msgs, err := s.Get(n)
-	if err != nil {
-		return "", err
-	}
-
-	buf := bytes.Buffer{}
+// GetString returns the messages in the buffer as formatted strings.
+func (s *InMemorySender) GetString() ([]string, error) {
+	msgs := s.Get()
+	strs := make([]string, 0, len(msgs))
 	for _, msg := range msgs {
 		str, err := s.Formatter(msg)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
-		buf.WriteString(str)
+		strs = append(strs, str)
 	}
-
-	return buf.String(), nil
+	return strs, nil
 }
 
-// Raw returns the n most recent messages as empty interfaces. If there are fewer than n messages, it
-// returns all the currently available messages in the buffer.
-func (s *InMemorySender) Raw(n int) ([]interface{}, error) {
-	msgs, err := s.Get(n)
-	if err != nil {
-		return nil, err
-	}
-
-	raw := make([]interface{}, 0, n)
+// GetRaw returns the messages in the buffer as empty interfaces.
+func (s *InMemorySender) GetRaw() []interface{} {
+	msgs := s.Get()
+	raw := make([]interface{}, 0, len(msgs))
 	for _, msg := range msgs {
 		raw = append(raw, msg.Raw())
 	}
-
-	return raw, nil
-}
-
-// Len returns the current number of messages in the buffer.
-func (s *InMemorySender) Len() int {
-	s.mutex.RLock()
-	defer s.mutex.RUnlock()
-	return len(s.buffer)
-}
-
-// Cap returns the maximum number of allowed messages in the buffer.
-func (s *InMemorySender) Cap() int {
-	s.mutex.RLock()
-	defer s.mutex.RUnlock()
-	return cap(s.buffer)
+	return raw
 }
 
 // Send adds the given message to the buffer. If the buffer is at max capacity, it removes the oldest

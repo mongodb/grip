@@ -1,7 +1,6 @@
 package send
 
 import (
-	"bytes"
 	"fmt"
 	"testing"
 
@@ -17,14 +16,14 @@ type InMemorySuite struct {
 	suite.Suite
 }
 
-func (s *InMemorySuite) msgsToString(msgs []message.Composer) string {
-	buf := bytes.Buffer{}
+func (s *InMemorySuite) msgsToString(msgs []message.Composer) []string {
+	strs := make([]string, 0, len(msgs))
 	for _, msg := range msgs {
-		str, err := s.sender.formatter(msg)
-		s.Assert().NoError(err)
-		buf.WriteString(str)
+		str, err := s.sender.Formatter(msg)
+		s.Require().NoError(err)
+		strs = append(strs, str)
 	}
-	return buf.String()
+	return strs
 }
 
 func (s *InMemorySuite) msgsToRaw(msgs []message.Composer) []interface{} {
@@ -59,189 +58,82 @@ func (s *InMemorySuite) TestInvalidCapacityErrors() {
 	s.Require().Nil(sender)
 }
 
-func (s *InMemorySuite) TestInitialLengthAndCapacity() {
-	s.Assert().Equal(s.maxCap, s.sender.Cap())
-	s.Assert().Equal(0, s.sender.Len())
-}
-
-func (s *InMemorySuite) TestSendUpdatesLength() {
-	for i := 0; i < s.maxCap; i++ {
-		s.sender.Send(s.msgs[i])
-		s.Assert().Equal(i+1, s.sender.Len())
-	}
-}
-
-func (s *InMemorySuite) TestLenIsAtMostCap() {
-	for i, msg := range s.msgs {
-		s.sender.Send(msg)
-		if s.sender.Len() < s.sender.Cap() {
-			s.Assert().Equal(i+1, s.sender.Len())
-		} else {
-			s.Assert().Equal(s.maxCap, s.sender.Len())
-		}
-	}
-}
-
-func (s *InMemorySuite) TestNegativeGetFails() {
-	found, err := s.sender.Get(-1)
-	s.Assert().Error(err)
-	s.Assert().Nil(found)
-}
-
 func (s *InMemorySuite) TestSendIgnoresMessagesWithPrioritiesBelowThreshold() {
 	msg := message.NewDefaultMessage(level.Trace, "foo")
 	s.sender.Send(msg)
-	s.Assert().Equal(0, s.sender.Len())
+	s.Assert().Equal(0, len(s.sender.buffer))
 }
 
-func (s *InMemorySuite) TestGetMessageEmptyBuffer() {
-	found, err := s.sender.Get(1)
-	s.Assert().NoError(err)
-	s.Assert().Empty(found)
-}
-
-func (s *InMemorySuite) TestGetOneMessage() {
-	s.Require().NotZero(len(s.msgs))
-	s.sender.Send(s.msgs[0])
-	found, err := s.sender.Get(1)
-	s.Assert().NoError(err)
-	s.Require().Equal(1, len(found))
-	s.Assert().Equal(s.msgs[0], found[0])
-}
-
-func (s *InMemorySuite) TestGetMultipleMessages() {
-	numSent := s.maxCap
-	for i := 0; i < numSent; i++ {
-		s.sender.Send(s.msgs[i])
-	}
-
-	for n := 1; n <= numSent; n++ {
-		found, err := s.sender.Get(n)
-		s.Assert().NoError(err)
-		s.Require().Equal(n, len(found))
-		for i := 0; i < n; i++ {
-			s.Assert().Equal(s.msgs[numSent-n+i], found[i])
-		}
-	}
-}
-
-func (s *InMemorySuite) TestGetGreaterThanLength() {
-	numSent := s.maxCap
-	for i := 0; i < numSent; i++ {
-		s.sender.Send(s.msgs[i])
-	}
-
-	n := s.maxCap + 1
-	found, err := s.sender.Get(n)
-	s.Assert().NoError(err)
-	s.Require().Equal(s.maxCap, len(found))
-	for i := 0; i < s.maxCap; i++ {
-		s.Assert().Equal(s.msgs[i], found[i])
-	}
+func (s *InMemorySuite) TestGetEmptyBuffer() {
+	s.Assert().Empty(s.sender.Get())
 }
 
 func (s *InMemorySuite) TestGetWithOverflow() {
-	numSent := s.maxCap + 1
-	for i := 0; i < numSent; i++ {
-		s.sender.Send(s.msgs[i])
-	}
+	for i, msg := range s.msgs {
+		s.sender.Send(msg)
+		found := s.sender.Get()
 
-	for n := 1; n <= s.maxCap; n++ {
-		found, err := s.sender.Get(n)
-		s.Assert().NoError(err)
-		s.Require().Equal(n, len(found))
-		for i := 0; i < n; i++ {
-			s.Assert().Equal(s.msgs[numSent-n+i], found[i])
+		if i < s.maxCap {
+			for j := 0; j < i+1; j++ {
+				s.Assert().Equal(s.msgs[j], found[j])
+			}
+		} else {
+			for j := 0; j < s.maxCap; j++ {
+				s.Assert().Equal(s.msgs[i+1-s.maxCap+j], found[j])
+			}
 		}
 	}
 }
 
-func (s *InMemorySuite) TestGetGreaterThanLengthWithOverflow() {
-	numSent := s.maxCap + 1
-	for i := 0; i < numSent; i++ {
-		s.sender.Send(s.msgs[i])
-	}
-
-	n := s.maxCap + 1
-	found, err := s.sender.Get(n)
+func (s *InMemorySuite) TestGetStringEmptyBuffer() {
+	str, err := s.sender.GetString()
 	s.Assert().NoError(err)
-	s.Require().Equal(s.maxCap, len(found))
-	for i := 0; i < s.maxCap; i++ {
-		s.Assert().Equal(s.msgs[numSent-s.maxCap+i], found[i])
-	}
+	s.Assert().Empty(str)
 }
 
-func (s *InMemorySuite) TestNegativeString() {
-	str, err := s.sender.String(-1)
-	s.Assert().Error(err)
-	s.Assert().Zero(str)
-}
+func (s *InMemorySuite) TestGetStringWithOverflow() {
+	for i, msg := range s.msgs {
+		s.sender.Send(msg)
+		found, err := s.sender.GetString()
+		s.Require().NoError(err)
 
-func (s *InMemorySuite) TestStringEmptyBuffer() {
-	str, err := s.sender.String(1)
-	s.Assert().NoError(err)
-	s.Assert().Zero(str)
-}
+		var expected []string
+		if i+1 < s.maxCap {
+			s.Require().Equal(i+1, len(found))
+			expected = s.msgsToString(s.msgs[:i+1])
+		} else {
+			s.Require().Equal(s.maxCap, len(found))
+			expected = s.msgsToString(s.msgs[i+1-s.maxCap : i+1])
+		}
+		s.Require().Equal(len(expected), len(found))
 
-func (s *InMemorySuite) TestStringOneMessage() {
-	s.Require().NotZero(len(s.msgs))
-	s.sender.Send(s.msgs[0])
-	str, err := s.sender.String(1)
-	s.Assert().NoError(err)
-	expected, err := s.sender.formatter(s.msgs[0])
-	s.Require().NoError(err)
-	s.Assert().Equal(expected, str)
-}
-
-func (s *InMemorySuite) TestStringMultipleMessages() {
-	numSent := s.maxCap
-	for i := 0; i < s.maxCap; i++ {
-		s.sender.Send(s.msgs[i])
-	}
-
-	for n := 1; n <= numSent; n++ {
-		str, err := s.sender.String(n)
-		s.Assert().NoError(err)
-		expected := s.msgsToString(s.msgs[numSent-n : numSent])
-		s.Assert().Equal(expected, str)
+		for j := 0; j < len(found); j++ {
+			s.Assert().Equal(expected[j], found[j])
+		}
 	}
 }
 
-func (s *InMemorySuite) TestNegativeRaw() {
-	raw, err := s.sender.Raw(-1)
-	s.Assert().Error(err)
-	s.Assert().Zero(raw)
+func (s *InMemorySuite) TestGetRawEmptyBuffer() {
+	s.Assert().Empty(s.sender.GetRaw())
 }
 
-func (s *InMemorySuite) TestRawEmptyBuffer() {
-	raw, err := s.sender.Raw(1)
-	s.Assert().NoError(err)
-	s.Assert().Empty(raw)
-}
+func (s *InMemorySuite) TestGetRawWithOverflow() {
+	for i, msg := range s.msgs {
+		s.sender.Send(msg)
+		found := s.sender.GetRaw()
+		var expected []interface{}
 
-func (s *InMemorySuite) TestRawOneMessage() {
-	s.Require().NotZero(len(s.msgs))
-	s.sender.Send(s.msgs[0])
-	raw, err := s.sender.Raw(1)
-	s.Assert().NoError(err)
-	s.Require().Equal(1, len(raw))
-	expected := s.msgs[0].Raw()
-	s.Assert().Equal(expected, raw[0])
-}
+		if i+1 < s.maxCap {
+			s.Require().Equal(i+1, len(found))
+			expected = s.msgsToRaw(s.msgs[:i+1])
+		} else {
+			s.Require().Equal(s.maxCap, len(found))
+			expected = s.msgsToRaw(s.msgs[i+1-s.maxCap : i+1])
+		}
 
-func (s *InMemorySuite) TestRawMultipleMessages() {
-	numSent := s.maxCap
-	for i := 0; i < numSent; i++ {
-		s.sender.Send(s.msgs[i])
-	}
-
-	for n := 1; n <= numSent; n++ {
-		raw, err := s.sender.Raw(n)
-		s.Assert().NoError(err)
-		expected := s.msgsToRaw(s.msgs[numSent-n : numSent])
-		s.Require().Equal(len(expected), len(raw))
-		for i := 0; i < n; i++ {
-			s.Assert().Equal(expected[i], raw[i])
+		s.Assert().Equal(len(expected), len(found))
+		for j := 0; j < len(found); j++ {
+			s.Assert().Equal(expected[j], found[j])
 		}
 	}
 }
