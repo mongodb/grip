@@ -20,7 +20,7 @@ type InMemorySender struct {
 }
 
 // NewInMemorySender creates an in-memory buffered sender with the given capacity.
-func NewInMemorySender(name string, info LevelInfo, capacity int) (*InMemorySender, error) {
+func NewInMemorySender(name string, info LevelInfo, capacity int) (Sender, error) {
 	if capacity <= 0 {
 		return nil, errors.New("cannot have capacity <= 0")
 	}
@@ -107,7 +107,7 @@ func (s *InMemorySender) Send(msg message.Composer) {
 	s.totalBytesSent += int64(len(msg.String()))
 }
 
-// TotalBytes returns the total number of bytes sent.
+// TotalBytesSent returns the total number of bytes sent.
 func (s *InMemorySender) TotalBytesSent() int64 {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
