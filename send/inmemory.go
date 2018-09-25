@@ -13,9 +13,10 @@ import (
 // InMemorySender represents an in-memory buffered sender with a fixed message capacity.
 type InMemorySender struct {
 	Base
-	buffer []message.Composer
-	mutex  sync.RWMutex
-	head   int
+	buffer         []message.Composer
+	mutex          sync.RWMutex
+	head           int
+	totalBytesSent int64
 }
 
 // NewInMemorySender creates an in-memory buffered sender with the given capacity.
@@ -102,4 +103,13 @@ func (s *InMemorySender) Send(msg message.Composer) {
 		s.buffer[s.head] = msg
 	}
 	s.head = (s.head + 1) % cap(s.buffer)
+
+	s.totalBytesSent += int64(len(msg.String()))
+}
+
+// TotalBytes returns the total number of bytes sent.
+func (s *InMemorySender) TotalBytesSent() int64 {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+	return s.totalBytesSent
 }

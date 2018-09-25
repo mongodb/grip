@@ -137,3 +137,12 @@ func (s *InMemorySuite) TestGetRawWithOverflow() {
 		}
 	}
 }
+
+func (s *InMemorySuite) TestTotalBytes() {
+	var totalBytes int64 = 0
+	for _, msg := range s.msgs {
+		s.sender.Send(msg)
+		totalBytes += int64(len(msg.String()))
+		s.Assert().Equal(totalBytes, s.sender.TotalBytesSent())
+	}
+}
