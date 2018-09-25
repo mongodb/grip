@@ -41,10 +41,10 @@ func TestInMemorySuite(t *testing.T) {
 func (s *InMemorySuite) SetupTest() {
 	s.maxCap = 10
 	info := LevelInfo{Default: level.Debug, Threshold: level.Debug}
-	var err error
-	s.sender, err = NewInMemorySender("inmemory", info, s.maxCap)
+	sender, err := NewInMemorySender("inmemory", info, s.maxCap)
 	s.Require().NoError(err)
-	s.Require().NotNil(s.sender)
+	s.Require().NotNil(sender)
+	s.sender = sender.(*InMemorySender)
 	s.msgs = make([]message.Composer, 2*s.maxCap)
 	for i := range s.msgs {
 		s.msgs[i] = message.NewDefaultMessage(info.Default, fmt.Sprint(i))
@@ -139,7 +139,7 @@ func (s *InMemorySuite) TestGetRawWithOverflow() {
 }
 
 func (s *InMemorySuite) TestTotalBytes() {
-	var totalBytes int64 = 0
+	var totalBytes int64
 	for _, msg := range s.msgs {
 		s.sender.Send(msg)
 		totalBytes += int64(len(msg.String()))
