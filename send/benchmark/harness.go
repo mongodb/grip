@@ -21,10 +21,8 @@ const (
 	hundred = ten * ten
 
 	executionTimeout = five * time.Minute
-	standardRuntime  = time.Minute
-	minimumRuntime   = five * time.Second
-	minIterations    = five
-	maxIterations    = hundred
+	minRuntime       = five * time.Second
+	minIterations    = hundred
 )
 
 func defaultLevelInfo() send.LevelInfo {
@@ -75,20 +73,21 @@ func sendMessages(ctx context.Context, tm TimerManager, iters int, s send.Sender
 	return nil
 }
 
-func bufferedSenderCase(ctx context.Context, tm TimerManager, iters int, size int, numMsgs int) error {
+func bufferedSenderCase(ctx context.Context, tm TimerManager, iters int, size int, numMsgs int) (err error) {
 	internal, err := send.NewInternalLogger("buffered", defaultLevelInfo())
-	if err != nil {
-		return err
-	}
 	if err != nil {
 		return err
 	}
 	minBufferLength := 5 * time.Second
 	s := send.NewBufferedSender(internal, minBufferLength, 100000)
+	defer func(s send.Sender) {
+		if e := s.Close(); e != nil {
+			err = e
+		}
+	}(s)
+
 	msgs := makeMessages(numMsgs, size, defaultLevelInfo().Default)
-	err = sendMessages(ctx, tm, iters, s, msgs)
-	time.Sleep(minBufferLength)
-	return err
+	return sendMessages(ctx, tm, iters, s, msgs)
 }
 
 func callSiteFileLoggerCase(ctx context.Context, tm TimerManager, iters int, size int, numMsgs int) error {
@@ -102,8 +101,7 @@ func callSiteFileLoggerCase(ctx context.Context, tm TimerManager, iters int, siz
 		return err
 	}
 	msgs := makeMessages(numMsgs, size, defaultLevelInfo().Default)
-	err = sendMessages(ctx, tm, iters, s, msgs)
-	return err
+	return sendMessages(ctx, tm, iters, s, msgs)
 }
 
 func fileLoggerCase(ctx context.Context, tm TimerManager, iters int, size int, numMsgs int) error {
@@ -113,13 +111,15 @@ func fileLoggerCase(ctx context.Context, tm TimerManager, iters int, size int, n
 	}
 	defer os.Remove(file.Name())
 	s, err := send.NewPlainFileLogger("plain", file.Name(), defaultLevelInfo())
-	_ = s.SetFormatter(send.MakePlainFormatter())
+	if err != nil {
+		return err
+	}
+	err = s.SetFormatter(send.MakePlainFormatter())
 	if err != nil {
 		return err
 	}
 	msgs := makeMessages(numMsgs, size, defaultLevelInfo().Default)
-	err = sendMessages(ctx, tm, iters, s, msgs)
-	return err
+	return sendMessages(ctx, tm, iters, s, msgs)
 }
 
 func inMemorySenderCase(ctx context.Context, tm TimerManager, iters int, size int, numMsgs int) error {
@@ -137,8 +137,7 @@ func internalSenderCase(ctx context.Context, tm TimerManager, iters int, size in
 		return err
 	}
 	msgs := makeMessages(numMsgs, size, defaultLevelInfo().Default)
-	err = sendMessages(ctx, tm, iters, s, msgs)
-	return err
+	return sendMessages(ctx, tm, iters, s, msgs)
 }
 
 func jsonFileLoggerCase(ctx context.Context, tm TimerManager, iters int, size int, numMsgs int) error {
@@ -152,8 +151,7 @@ func jsonFileLoggerCase(ctx context.Context, tm TimerManager, iters int, size in
 		return err
 	}
 	msgs := makeMessages(numMsgs, size, defaultLevelInfo().Default)
-	err = sendMessages(ctx, tm, iters, s, msgs)
-	return err
+	return sendMessages(ctx, tm, iters, s, msgs)
 }
 
 func streamLoggerCase(ctx context.Context, tm TimerManager, iters int, size int, numMsgs int) error {
@@ -174,13 +172,13 @@ func getAllCases() []*caseDefinition {
 			for _, msgCount := range messageCounts() {
 				cases = append(cases,
 					&caseDefinition{
-						name:               fmt.Sprintf("%s/%dBytesPerMessage/Send%dMessages", senderName, msgSize, msgCount),
-						bench:              senderCase,
-						count:              one,
-						numOps:             msgCount,
-						size:               msgSize,
-						runtime:            minimumRuntime,
-						requiredIterations: minIterations,
+						name:       fmt.Sprintf("%s/%dBytesPerMessage/Send%dMessages", senderName, msgSize, msgCount),
+						bench:      senderCase,
+						count:      one,
+						numOps:     msgCount,
+						size:       msgSize,
+						runtime:    minRuntime,
+						iterations: minIterations,
 					},
 				)
 			}

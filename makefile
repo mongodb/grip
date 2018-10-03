@@ -107,7 +107,7 @@ test-%:$(buildDir)/output.%.test
 	@grep -s -q -e "^PASS" $<
 benchmark-send:
 	@mkdir -p build
-	go test -v -bench=$(if $(RUN_BENCH),$(RUN_BENCH) ,BenchmarkAllSenders )./send/ ./send/benchmark/ -run=^^$$
+	go test -v -bench=$(if $(RUN_BENCH),$(RUN_BENCH),BenchmarkAllSenders) ./send/ ./send/benchmark/ -run=^^$$
 coverage-%:$(buildDir)/output.%.coverage
 	@grep -s -q -e "^PASS" $<
 html-coverage-%:$(buildDir)/output.%.coverage $(buildDir)/output.%.coverage.html

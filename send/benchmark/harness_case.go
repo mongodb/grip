@@ -10,13 +10,13 @@ import (
 )
 
 type caseDefinition struct {
-	name               string
-	bench              benchCase
-	count              int
-	numOps             int
-	size               int
-	requiredIterations int
-	runtime            time.Duration
+	name       string
+	bench      benchCase
+	count      int
+	numOps     int
+	size       int
+	iterations int
+	runtime    time.Duration
 
 	cumulativeRuntime time.Duration
 	elapsed           time.Duration
@@ -45,7 +45,7 @@ func (c *caseDefinition) StartTimer() {
 
 func (c *caseDefinition) StopTimer() {
 	if !c.isRunning {
-		return
+		panic("StopTimer called on stopped timer")
 	}
 	c.elapsed += time.Since(c.startAt)
 	c.isRunning = false
@@ -62,12 +62,12 @@ func (c *caseDefinition) Run(ctx context.Context) *benchResult {
 		operations: c.numOps * c.count,
 	}
 	var cancel context.CancelFunc
-	ctx, cancel = context.WithTimeout(ctx, 2*executionTimeout)
+	ctx, cancel = context.WithTimeout(ctx, executionTimeout)
 	defer cancel()
 
 	fmt.Println("=== RUN", out.name)
-	if c.requiredIterations == 0 {
-		c.requiredIterations = minIterations
+	if c.iterations == 0 {
+		c.iterations = minIterations
 	}
 
 benchRepeat:
@@ -75,13 +75,7 @@ benchRepeat:
 		if ctx.Err() != nil {
 			break
 		}
-		if c.cumulativeRuntime >= c.runtime {
-			if out.trials >= c.requiredIterations {
-				break
-			} else if c.cumulativeRuntime >= executionTimeout {
-				break
-			}
-		} else if out.trials >= maxIterations {
+		if out.trials >= c.iterations || c.cumulativeRuntime >= c.runtime || c.cumulativeRuntime >= executionTimeout {
 			break
 		}
 
@@ -112,8 +106,8 @@ benchRepeat:
 	}
 
 	out.duration = out.totalDuration()
-	fmt.Printf("    --- REPORT: count=%d trials=%d requiredtrials=%d runtime=%s\n",
-		c.count, out.trials, c.requiredIterations, c.runtime)
+	fmt.Printf("    --- REPORT: count=%d trials=%d iters=%d required_runtime=%s cumulative_runtime=%s\n",
+		c.count, out.trials, c.iterations, c.runtime, c.cumulativeRuntime)
 	if out.hasErrors() {
 		fmt.Printf("    --- ERRORS: %s\n", strings.Join(out.errReport(), "\n       "))
 		fmt.Printf("--- FAIL: %s (%s)\n", out.name, out.roundedRuntime())
@@ -126,8 +120,8 @@ benchRepeat:
 }
 
 func (c *caseDefinition) String() string {
-	return fmt.Sprintf("name=%s, count=%d, runtime=%s timeout=%s, maxiters=%d",
-		c.name, c.count, c.runtime, executionTimeout, maxIterations)
+	return fmt.Sprintf("name=%s, count=%d, iters=%d timeout=%s, required_runtime=%d",
+		c.name, c.count, c.iterations, executionTimeout, c.runtime)
 }
 
 func getProjectRoot() string { return filepath.Dir(filepath.Dir(getDirectoryOfFile())) }

@@ -127,11 +127,7 @@ type result struct {
 }
 
 func roundDurationMS(d time.Duration) time.Duration {
-	rounded := d / 1e6
-	if rounded == 1<<63-1 {
-		return 0
-	}
-	return rounded * time.Millisecond
+	return d / 1e6 * time.Millisecond
 }
 
 func bytesToMB(numBytes int) float64 {
