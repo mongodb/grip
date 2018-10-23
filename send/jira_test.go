@@ -227,4 +227,7 @@ func (j *JiraSuite) TestCustomFields() {
 	j.NoError(err)
 	j.Len(bytes, 79)
 	j.Equal(`{"customfield_12345":["hi","bye"],"issuetype":{"name":"type"},"summary":"test"}`, string(bytes))
+
+	issue := m.Raw().(message.JiraIssue)
+	j.Equal(mock.issueKey, issue.Fields[JiraIssueKey])
 }

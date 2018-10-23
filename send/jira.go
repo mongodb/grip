@@ -15,6 +15,8 @@ import (
 	"github.com/trivago/tgo/tcontainer"
 )
 
+const JiraIssueKey = "jira-key"
+
 type jiraJournal struct {
 	opts *JiraOptions
 	*Base
@@ -90,9 +92,12 @@ func (j *jiraJournal) Send(m message.Composer) {
 		if err := j.opts.client.Authenticate(j.opts.Username, j.opts.Password, j.opts.UseBasicAuth); err != nil {
 			j.errHandler(fmt.Errorf("jira authentication error: %v", err), message.NewFormattedMessage(m.Priority(), m.String()))
 		}
-		if err := j.opts.client.PostIssue(issueFields); err != nil {
+		issueKey, err := j.opts.client.PostIssue(issueFields)
+		if err != nil {
 			j.errHandler(err, message.NewFormattedMessage(m.Priority(), m.String()))
+			return
 		}
+		j.errHandler(m.Annotate(JiraIssueKey, issueKey), message.NewFormattedMessage(m.Priority(), m.String()))
 	}
 }
 
@@ -199,7 +204,7 @@ func getFields(m message.Composer) *jira.IssueFields {
 type jiraClient interface {
 	CreateClient(*http.Client, string) error
 	Authenticate(string, string, bool) error
-	PostIssue(*jira.IssueFields) error
+	PostIssue(*jira.IssueFields) (string, error)
 	PostComment(string, string) error
 }
 
@@ -230,22 +235,24 @@ func (c *jiraClientImpl) Authenticate(username string, password string, useBasic
 	return nil
 }
 
-func (c *jiraClientImpl) PostIssue(issueFields *jira.IssueFields) error {
+func (c *jiraClientImpl) PostIssue(issueFields *jira.IssueFields) (string, error) {
 	i := jira.Issue{Fields: issueFields}
-	_, resp, err := c.Client.Issue.Create(&i)
-
+	issue, resp, err := c.Client.Issue.Create(&i)
 	if err != nil {
 		if resp != nil {
 			defer resp.Body.Close()
 			data, _ := ioutil.ReadAll(resp.Body)
-			return fmt.Errorf("encountered error logging to jira: %s [%s]",
+			return "", fmt.Errorf("encountered error logging to jira: %s [%s]",
 				err.Error(), string(data))
 		}
 
-		return err
+		return "", err
+	}
+	if issue == nil {
+		return "", errors.New("no issue returned from Jira")
 	}
 
-	return nil
+	return issue.Key, nil
 }
 
 // todo: allow more parameters than just body?
