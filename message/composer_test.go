@@ -300,7 +300,9 @@ func TestProcessTreeDoesNotHaveDuplicates(t *testing.T) {
 func TestJiraIssueAnnotationOnlySupportsStrings(t *testing.T) {
 	assert := assert.New(t) // nolint
 
-	m := &jiraMessage{}
+	m := &jiraMessage{
+		issue: &JiraIssue{},
+	}
 
 	assert.Error(m.Annotate("k", 1))
 	assert.Error(m.Annotate("k", true))
