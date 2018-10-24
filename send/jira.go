@@ -15,7 +15,7 @@ import (
 	"github.com/trivago/tgo/tcontainer"
 )
 
-// JiraIssueKey is the annotated field in which the key of the issue created will be set
+// JiraIssueKey is the key in a message.Fields that will hold the ID of the issue created
 const JiraIssueKey = "jira-key"
 
 type jiraJournal struct {
