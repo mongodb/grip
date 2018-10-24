@@ -15,8 +15,8 @@ import (
 	"github.com/trivago/tgo/tcontainer"
 )
 
-// JiraIssueKey is the key in a message.Fields that will hold the ID of the issue created
-const JiraIssueKey = "jira-key"
+// jiraIssueKey is the key in a message.Fields that will hold the ID of the issue created
+const jiraIssueKey = "jira-key"
 
 type jiraJournal struct {
 	opts *JiraOptions
@@ -201,7 +201,7 @@ func populateKey(m message.Composer, issueKey string) {
 	case *message.JiraIssue:
 		msg.IssueKey = issueKey
 	case message.Fields:
-		msg[JiraIssueKey] = issueKey
+		msg[jiraIssueKey] = issueKey
 	}
 }
 

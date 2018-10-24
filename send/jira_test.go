@@ -250,5 +250,5 @@ func (j *JiraSuite) TestPopulateKey() {
 	})
 	sender.Send(messageFields)
 	messageIssue := messageFields.Raw().(message.Fields)
-	j.Equal(mock.issueKey, messageIssue[JiraIssueKey])
+	j.Equal(mock.issueKey, messageIssue[jiraIssueKey])
 }
