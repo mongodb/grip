@@ -98,7 +98,7 @@ func (j *jiraJournal) Send(m message.Composer) {
 			j.errHandler(err, message.NewFormattedMessage(m.Priority(), m.String()))
 			return
 		}
-		j.errHandler(m.Annotate(JiraIssueKey, issueKey), message.NewFormattedMessage(m.Priority(), m.String()))
+		populateKey(m, issueKey)
 	}
 }
 
@@ -141,7 +141,7 @@ func getFields(m message.Composer) *jira.IssueFields {
 	var issueFields *jira.IssueFields
 
 	switch msg := m.Raw().(type) {
-	case message.JiraIssue:
+	case *message.JiraIssue:
 		issueFields = &jira.IssueFields{
 			Project:     jira.Project{Key: msg.Project},
 			Summary:     msg.Summary,
@@ -194,6 +194,15 @@ func getFields(m message.Composer) *jira.IssueFields {
 		}
 	}
 	return issueFields
+}
+
+func populateKey(m message.Composer, issueKey string) {
+	switch msg := m.Raw().(type) {
+	case *message.JiraIssue:
+		msg.IssueKey = issueKey
+	case message.Fields:
+		msg[JiraIssueKey] = issueKey
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
