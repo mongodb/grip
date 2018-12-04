@@ -216,7 +216,13 @@ type timeAnnotatingCatcher struct {
 	mu       sync.RWMutex
 }
 
-func NewTimestampCatcher() Catcher         { return &timeAnnotatingCatcher{} }
+// NewTimestampCatcher produces a Catcher instance that reports the
+// short form of all constituent errors and annotates those errors
+// with a timestamp to reflect when the error was collected.
+func NewTimestampCatcher() Catcher { return &timeAnnotatingCatcher{} }
+
+// NewExtendedTimestampCatcher adds long-form annotation to the
+// aggregated error message (e.g. including stacks, when possible.)
 func NewExtendedTimestampCatcher() Catcher { return &timeAnnotatingCatcher{extended: true} }
 
 func (c *timeAnnotatingCatcher) Add(err error) {

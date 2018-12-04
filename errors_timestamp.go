@@ -12,6 +12,9 @@ type errorCauser interface {
 	Cause() error
 }
 
+// ErrorTimeFinder unwraps a timestamp annotated error if possible and
+// is capable of finding a timestamp in an error that has been
+// annotated using pkg/errors.
 func ErrorTimeFinder(err error) (time.Time, bool) {
 	if err == nil {
 		return time.Time{}, false
@@ -73,14 +76,23 @@ func newTimeStampError(err error) *timestampError {
 
 func (e *timestampError) setExtended(v bool) *timestampError { e.extended = v; return e }
 
+// WrapErrorTime annotates an error with the timestamp. The underlying
+// concrete object implements message.Composer as well as error.
 func WrapErrorTime(err error) error {
 	return newTimeStampError(err)
 }
 
+// WrapErrorTimeMessage annotates an error with the timestamp and a
+// string form. The underlying concrete object implements
+// message.Composer as well as error.
 func WrapErrorTimeMessage(err error, m string) error {
 	return newTimeStampError(errors.WithMessage(err, m))
 }
 
+// WrapErrorTimeMessagef annotates an error with a timestamp and a
+// string formated message, like fmt.Sprintf or fmt.Errorf. The
+// underlying concrete object implements  message.Composer as well as
+// error.
 func WrapErrorTimeMessagef(err error, m string, args ...interface{}) error {
 	return newTimeStampError(errors.WithMessage(err, fmt.Sprintf(m, args...)))
 }
@@ -107,13 +119,13 @@ func (e *timestampError) Format(s fmt.State, verb rune) {
 	switch verb {
 	case 'v':
 		if s.Flag('+') {
-			fmt.Fprintf(s, "[%s] %+v", e.time.Format(time.RFC3339), e.Cause())
+			_, _ = fmt.Fprintf(s, "[%s] %+v", e.time.Format(time.RFC3339), e.Cause())
 		}
 		fallthrough
 	case 's':
-		fmt.Fprintf(s, "[%s] %s", e.time.Format(time.RFC3339), e.String())
+		_, _ = fmt.Fprintf(s, "[%s] %s", e.time.Format(time.RFC3339), e.String())
 	case 'q':
-		fmt.Fprintf(s, "[%s] %q", e.time.Format(time.RFC3339), e.String())
+		_, _ = fmt.Fprintf(s, "[%s] %q", e.time.Format(time.RFC3339), e.String())
 	}
 }
 

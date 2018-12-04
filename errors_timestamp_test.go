@@ -183,8 +183,8 @@ func TestTimestampError(t *testing.T) {
 			assert.Contains(t, fmt.Sprintf("%+v", err), "hello world")
 			assert.Contains(t, fmt.Sprintf("%q", err), err.time.Format(time.RFC3339))
 			assert.Contains(t, fmt.Sprintf("%q", err), "hello world")
-			assert.Contains(t, fmt.Sprintf("%s", err), err.time.Format(time.RFC3339))
-			assert.Contains(t, fmt.Sprintf("%s", err), "hello world")
+			assert.Contains(t, fmt.Sprintf("%s", err), err.time.Format(time.RFC3339)) // nolint
+			assert.Contains(t, fmt.Sprintf("%s", err), "hello world")                 // nolint
 		})
 		t.Run("Composer", func(t *testing.T) {
 			assert.Implements(t, (*message.Composer)(nil), &timestampError{})
