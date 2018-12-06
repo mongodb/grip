@@ -268,6 +268,9 @@ func (c *timeAnnotatingCatcher) HasErrors() bool {
 }
 
 func (c *timeAnnotatingCatcher) Errors() []error {
+	c.mu.RLock()
+	defer c.mu.UUnlock()
+
 	out := make([]error, len(c.errs))
 	for idx, err := range c.errs {
 		out[idx] = err
@@ -277,6 +280,9 @@ func (c *timeAnnotatingCatcher) Errors() []error {
 }
 
 func (c *timeAnnotatingCatcher) String() string {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
 	output := make([]string, len(c.errs))
 
 	for idx, err := range c.errs {
