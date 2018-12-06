@@ -7,10 +7,11 @@ operations and then aggregate them as a single error.
 package grip
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 	"sync"
+
+	"github.com/pkg/errors"
 )
 
 // TODO: make a new catcher package, leave constructors in this
@@ -89,12 +90,14 @@ func NewExtendedCatcher() Catcher {
 // Add takes an error object and, if it's non-nil, adds it to the
 // internal collection of errors.
 func (c *baseCatcher) Add(err error) {
+	if err == nil {
+		return
+	}
+
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
-	if err != nil {
-		c.errs = append(c.errs, err)
-	}
+	c.errs = append(c.errs, err)
 }
 
 // Len returns the number of errors stored in the collector.
@@ -201,4 +204,102 @@ func (c *basicCatcher) String() string {
 	}
 
 	return strings.Join(output, "\n")
+}
+
+////////////////////////////////////////////////////////////////////////
+//
+// an implementation to annotate errors with timestamps
+
+type timeAnnotatingCatcher struct {
+	errs     []*timestampError
+	extended bool
+	mu       sync.RWMutex
+}
+
+// NewTimestampCatcher produces a Catcher instance that reports the
+// short form of all constituent errors and annotates those errors
+// with a timestamp to reflect when the error was collected.
+func NewTimestampCatcher() Catcher { return &timeAnnotatingCatcher{} }
+
+// NewExtendedTimestampCatcher adds long-form annotation to the
+// aggregated error message (e.g. including stacks, when possible.)
+func NewExtendedTimestampCatcher() Catcher { return &timeAnnotatingCatcher{extended: true} }
+
+func (c *timeAnnotatingCatcher) Add(err error) {
+	if err == nil {
+		return
+	}
+
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	c.errs = append(c.errs, newTimeStampError(err).setExtended(c.extended))
+}
+
+func (c *timeAnnotatingCatcher) Extend(errs []error) {
+	if len(errs) == 0 {
+		return
+	}
+
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	for _, err := range errs {
+		if err == nil {
+			continue
+		}
+
+		c.errs = append(c.errs, newTimeStampError(err).setExtended(c.extended))
+	}
+}
+
+func (c *timeAnnotatingCatcher) Len() int {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	return len(c.errs)
+}
+
+func (c *timeAnnotatingCatcher) HasErrors() bool {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	return len(c.errs) > 0
+}
+
+func (c *timeAnnotatingCatcher) Errors() []error {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	out := make([]error, len(c.errs))
+	for idx, err := range c.errs {
+		out[idx] = err
+	}
+
+	return out
+}
+
+func (c *timeAnnotatingCatcher) String() string {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	output := make([]string, len(c.errs))
+
+	for idx, err := range c.errs {
+		if err.extended {
+			output[idx] = err.String()
+		} else {
+			output[idx] = err.String()
+		}
+	}
+
+	return strings.Join(output, "\n")
+}
+
+func (c *timeAnnotatingCatcher) Resolve() error {
+	if !c.HasErrors() {
+		return nil
+	}
+
+	return errors.New(c.String())
 }

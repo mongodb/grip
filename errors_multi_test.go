@@ -34,6 +34,18 @@ func TestSimpleCatcherSuite(t *testing.T) {
 	suite.Run(t, s)
 }
 
+func TestTimestampCatcherSuite(t *testing.T) {
+	s := new(CatcherSuite)
+	s.reset = func() Catcher { return NewTimestampCatcher() }
+	suite.Run(t, s)
+}
+
+func TestExtendedTimestampCatcherSuite(t *testing.T) {
+	s := new(CatcherSuite)
+	s.reset = func() Catcher { return NewExtendedTimestampCatcher() }
+	suite.Run(t, s)
+}
+
 // CatcherSuite provides
 type CatcherSuite struct {
 	catcher Catcher
