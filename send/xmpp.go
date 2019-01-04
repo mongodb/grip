@@ -167,10 +167,10 @@ type xmppClientImpl struct {
 }
 
 func (c *xmppClientImpl) Create(info XMPPConnectionInfo) error {
-	client, err := xmpp.NewClient(info.Hostname, info.Username, info.Password, false)
+	client, err := xmpp.NewClient(info.Hostname, info.Username, info.Password, true)
 	if err != nil {
 		errs := []string{err.Error()}
-		client, err = xmpp.NewClientNoTLS(info.Hostname, info.Username, info.Password, false)
+		client, err = xmpp.NewClientNoTLS(info.Hostname, info.Username, info.Password, true)
 		if err != nil {
 			errs = append(errs, err.Error())
 			return fmt.Errorf("cannot connect to server '%s', as '%s': %s",
