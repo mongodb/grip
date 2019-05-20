@@ -280,15 +280,18 @@ func (s *InMemorySuite) TestResetRead() {
 		s.sender.Send(s.msgs[i])
 	}
 
+	var err error
+	var n int
+	var msgs []message.Composer
 	for i := 0; i < s.maxCap-1; i++ {
-		msgs, n, err := s.sender.GetCount(1)
+		msgs, n, err = s.sender.GetCount(1)
 		s.Require().NoError(err)
 		s.Require().Equal(1, n)
 		s.Equal(s.msgs[i], msgs[0])
 	}
 	s.True(s.sender.readHeadCaughtUp)
 
-	_, _, err := s.sender.GetCount(1)
+	_, _, err = s.sender.GetCount(1)
 	s.Equal(io.EOF, err)
 
 	s.sender.ResetRead()
@@ -296,7 +299,7 @@ func (s *InMemorySuite) TestResetRead() {
 	s.False(s.sender.readHeadCaughtUp)
 
 	for i := 0; i < s.maxCap-1; i++ {
-		msgs, n, err := s.sender.GetCount(1)
+		msgs, n, err = s.sender.GetCount(1)
 		s.Require().NoError(err)
 		s.Require().Equal(1, n)
 		s.Equal(s.msgs[i], msgs[0])
