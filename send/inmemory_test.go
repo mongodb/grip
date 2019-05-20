@@ -144,7 +144,6 @@ func (s *InMemorySuite) TestGetCountMultipleWithOverflow() {
 	}
 
 	for count := 1; count <= s.maxCap; count++ {
-		// print("***GetCount with count = %d***", count)
 		s.sender.ResetRead()
 		for i := 0; i < s.maxCap; i += count {
 			msgs, n, err := s.sender.GetCount(count)
@@ -157,7 +156,6 @@ func (s *InMemorySuite) TestGetCountMultipleWithOverflow() {
 				remaining = end - start
 			}
 			s.Equal(remaining, n)
-			// print("actual message range: (%d, %d)", start, end)
 			s.Equal(s.msgs[start:end], msgs)
 		}
 		s.True(s.sender.readHeadCaughtUp)

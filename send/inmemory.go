@@ -61,12 +61,6 @@ func NewInMemorySender(name string, info LevelInfo, capacity int) (Sender, error
 	return s, nil
 }
 
-func print(format string, args ...interface{}) {
-	fmt.Printf("kim: ")
-	fmt.Printf(format, args...)
-	fmt.Println()
-}
-
 func (s *InMemorySender) overflow() bool {
 	return len(s.buffer) == cap(s.buffer)
 }
@@ -77,7 +71,6 @@ func (s *InMemorySender) overflow() bool {
 // currently reading at has been truncated, this returns ErrorTruncated. To
 // continue reading, the read stream must be reset using ResetRead.
 func (s *InMemorySender) GetCount(count int) ([]message.Composer, int, error) {
-	print("GetCount")
 	if count <= 0 {
 		return nil, 0, errors.New("cannot have count <= 0")
 	}
@@ -100,38 +93,26 @@ func (s *InMemorySender) GetCount(count int) ([]message.Composer, int, error) {
 		return nil, 0, ErrorTruncated
 	}
 
-	print("old read head = %d, write head = %d", s.readHead, s.writeHead)
 	remaining := s.writeHead - s.readHead
-	print("remaining = %d", remaining)
 	if remaining < 0 {
-		// write head is below read head
 		remaining += len(s.buffer)
-		print("corrected remaining (for overflow): %d", remaining)
 	} else if remaining == 0 && !s.readHeadCaughtUp {
-		// write head and read head are even but the read head has just been
-		// initialized, so it still has to read all the buffer contents before
-		// being caught up
-		print("read head and write head are even but read head was just initialized")
 		remaining = len(s.buffer)
 	}
 	if remaining < count {
 		count = remaining
 	}
-	print("count = %d", count)
 	if count == 0 {
 		return nil, 0, io.EOF
 	}
 
 	defer func() {
 		s.readHead = (s.readHead + count) % cap(s.buffer)
-		// If read head is even with write head, it is caught up.
 		s.readHeadCaughtUp = s.readHead == s.writeHead
-		print("new read head = %d, caught up = %t", s.readHead, s.readHeadCaughtUp)
 	}()
 
 	start := s.readHead
 	end := s.readHead + count
-	print("start = %d, end = %d", start, end)
 
 	if end > len(s.buffer) {
 		end = end - len(s.buffer)
@@ -189,22 +170,17 @@ func (s *InMemorySender) GetRaw() []interface{} {
 // Send adds the given message to the buffer. If the buffer is at max capacity,
 // it truncates the oldest message.
 func (s *InMemorySender) Send(msg message.Composer) {
-	print("Send %s", msg.String())
 	if !s.Level().ShouldLog(msg) {
 		return
 	}
 
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-	print("old write head = %d", s.writeHead)
 	if s.writeHead == s.readHead {
 		if s.readHeadCaughtUp {
-			// If read head was even with write head, it is not anymore.
 			s.readHeadCaughtUp = false
-			print("read head was caught up, but no longer caught up at position %d", s.writeHead)
 		} else {
 			s.readHead = readHeadTruncated
-			print("truncated read head at position %d", s.writeHead)
 		}
 	}
 
@@ -214,7 +190,6 @@ func (s *InMemorySender) Send(msg message.Composer) {
 		s.buffer[s.writeHead] = msg
 	}
 	s.writeHead = (s.writeHead + 1) % cap(s.buffer)
-	print("new write head = %d", s.writeHead)
 
 	s.totalBytesSent += int64(len(msg.String()))
 }
