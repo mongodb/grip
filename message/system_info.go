@@ -43,7 +43,6 @@ type StatCPUTimes struct {
 	Steal     int64 `json:"steal" bson:"steal"`
 	Guest     int64 `json:"guest" bson:"guest"`
 	GuestNice int64 `json:"guestNice" bson:"guestNice"`
-	Stolen    int64 `json:"stolen" bson:"stolen"`
 }
 
 func convertCPUTimes(in cpu.TimesStat) StatCPUTimes {
@@ -58,7 +57,6 @@ func convertCPUTimes(in cpu.TimesStat) StatCPUTimes {
 		Steal:     int64(in.Steal * cpu.CPUTick),
 		Guest:     int64(in.Guest * cpu.CPUTick),
 		GuestNice: int64(in.GuestNice * cpu.CPUTick),
-		Stolen:    int64(in.Stolen * cpu.CPUTick),
 	}
 }
 
