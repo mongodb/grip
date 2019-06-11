@@ -73,7 +73,7 @@ func TestPopulatedMessageComposerConstructors(t *testing.T) {
 
 		if strings.HasPrefix(output, "[") {
 			output = strings.Trim(output, "[]")
-			assert.True(strings.Contains(msg.String(), output))
+			assert.True(strings.Contains(msg.String(), output), fmt.Sprintf("%T: %s (%s)", msg, msg.String(), output))
 
 		} else {
 			// run the string test to make sure it doesn't change:
@@ -148,7 +148,10 @@ func TestDataCollecterComposerConstructors(t *testing.T) {
 		CollectProcessInfo(int32(1)):                             "",
 		CollectProcessInfoSelf():                                 "",
 		CollectSystemInfo():                                      "",
-		CollectGoStats():                                         "",
+		CollectBasicGoStats():                                    "",
+		CollectGoStatsDelta():                                    "",
+		CollectGoStatsRate():                                     "",
+		CollectGoStatsTotals():                                   "",
 	}
 
 	for msg, prefix := range cases {

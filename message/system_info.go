@@ -117,9 +117,8 @@ func NewSystemInfo(priority level.Priority, message string) Composer {
 // populated.
 func (s *SystemInfo) Loggable() bool { return s.loggable }
 
-// Raw always returns the SystemInfo object, however it will call the
-// Collect method of the base operation first.
-func (s *SystemInfo) Raw() interface{} { _ = s.Collect(); return s }
+// Raw always returns the SystemInfo object.
+func (s *SystemInfo) Raw() interface{} { return s }
 
 // String returns a string representation of the message, lazily
 // rendering the message, and caching it privately.
