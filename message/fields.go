@@ -170,7 +170,7 @@ func (m *fieldMessage) String() string {
 			}
 		}
 
-		sort.Sort(sort.StringSlice(out))
+		sort.Strings(out)
 
 		m.cachedOutput = fmt.Sprintf("[%s]", strings.Join(out, " "))
 	}
