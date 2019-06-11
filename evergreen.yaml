@@ -126,7 +126,7 @@ buildvariants:
   - name: ubuntu1604
     display_name: Ubuntu 16.04
     expansions:
-      build_env: "PATH=/opt/go/bin:$PATH GOROOT=/opt/go"
+      build_env: "PATH=/opt/golang/go1.9/bin:$PATH GOROOT=/opt/golang/go1.9"
     run_on:
       - ubuntu1604-build
     tasks: [ ".test" ]
@@ -134,7 +134,7 @@ buildvariants:
   - name: macos
     display_name: macOS
     expansions:
-      build_env: "PATH=/usr/local/go/bin:$PATH"
+      build_env: "PATH=/opt/golang/go1.9/bin:$PATH"
     run_on:
       - macos-1014
     tasks: [ ".test" ]
@@ -144,5 +144,5 @@ buildvariants:
     run_on:
       - windows-64-vs2017-small
     expansions:
-      build_env: "GOROOT=c:/go DISABLE_COVERAGE=yes"
+      build_env: "GOROOT=c:/golang/go1.9 DISABLE_COVERAGE=yes"
     tasks: [ ".test" ]
