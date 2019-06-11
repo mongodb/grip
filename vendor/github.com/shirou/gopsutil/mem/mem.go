@@ -29,7 +29,7 @@ type VirtualMemoryStat struct {
 	// Percentage of RAM used by programs
 	//
 	// This value is computed from the kernel specific values.
-	UsedPercent float64 `json:"usedPercent" bson:"usedPercent"`
+	UsedPercent float64 `json:"usedPercent,omitempty" bson:"usedPercent,omitempty"`
 
 	// This is the kernel's notion of free memory; RAM chips whose bits nobody
 	// cares about the value of right now. For a human consumable number,
@@ -80,7 +80,7 @@ type SwapMemoryStat struct {
 	Total       uint64  `json:"total" bson:"total"`
 	Used        uint64  `json:"used" bson:"used"`
 	Free        uint64  `json:"free" bson:"free"`
-	UsedPercent float64 `json:"usedPercent" bson:"usedPercent"`
+	UsedPercent float64 `json:"usedPercent,omitempty" bson:"usedPercent,omitempty"`
 	Sin         uint64  `json:"sin" bson:"sin"`
 	Sout        uint64  `json:"sout" bson:"sout"`
 }
