@@ -132,11 +132,11 @@ buildvariants:
     tasks: [ ".test" ]
 
   - name: macos
-    display_name: macOS 10.12
+    display_name: macOS
     expansions:
       build_env: "PATH=/usr/local/go/bin:$PATH"
     run_on:
-      - macos-1012
+      - macos-1014
     tasks: [ ".test" ]
 
   - name: windows
