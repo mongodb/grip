@@ -122,6 +122,7 @@ func TestUnpopulatedMessageComposers(t *testing.T) {
 		NewStackFormatted(1, ""),
 		MakeGroupComposer(),
 		&GroupComposer{},
+		&GoRuntimeInfo{},
 		When(false, ""),
 		Whenf(false, "", ""),
 		Whenln(false, "", ""),
@@ -149,9 +150,15 @@ func TestDataCollecterComposerConstructors(t *testing.T) {
 		CollectProcessInfoSelf():                                 "",
 		CollectSystemInfo():                                      "",
 		CollectBasicGoStats():                                    "",
-		CollectGoStatsDelta():                                    "",
-		CollectGoStatsRate():                                     "",
+		CollectGoStatsDeltas():                                   "",
+		CollectGoStatsRates():                                    "",
 		CollectGoStatsTotals():                                   "",
+		MakeGoStatsDeltas(testMsg):                               testMsg,
+		MakeGoStatsRates(testMsg):                                testMsg,
+		MakeGoStatsTotals(testMsg):                               testMsg,
+		NewGoStatsDeltas(level.Error, testMsg):                   testMsg,
+		NewGoStatsRates(level.Error, testMsg):                    testMsg,
+		NewGoStatsTotals(level.Error, testMsg):                   testMsg,
 	}
 
 	for msg, prefix := range cases {

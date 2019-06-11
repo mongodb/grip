@@ -4,6 +4,8 @@ import (
 	"runtime"
 	"sync"
 	"time"
+
+	"github.com/mongodb/grip/level"
 )
 
 var goStatsCache *goStats
@@ -62,7 +64,7 @@ type statRate struct {
 	Duration time.Duration `bson:"duration" json:"duration" yaml:"duration"`
 }
 
-func (s *goStats) changePerSecond(stat int64) statRate {
+func (s *goStats) getRate(stat int64) statRate {
 	if s.durSinceLastUpdate == 0 {
 		return statRate{}
 	}
@@ -70,13 +72,13 @@ func (s *goStats) changePerSecond(stat int64) statRate {
 	return statRate{Delta: stat, Duration: s.durSinceLastUpdate}
 }
 
+func (s *goStats) cgo() statRate     { return s.getRate(s.cgoCalls.diff()) }
+func (s *goStats) mallocs() statRate { return s.getRate(s.mallocCounter.diff()) }
+func (s *goStats) frees() statRate   { return s.getRate(s.freesCounter.diff()) }
+func (s *goStats) gcs() statRate     { return s.getRate(s.gcRate.diff()) }
+
 func (s statRate) float() float64 { return float64(s.Delta) / float64(s.Duration) }
 func (s statRate) int() int64     { return s.Delta / int64(s.Duration) }
-
-func (s *goStats) cgo() statRate     { return s.changePerSecond(s.cgoCalls.diff()) }
-func (s *goStats) mallocs() statRate { return s.changePerSecond(s.mallocCounter.diff()) }
-func (s *goStats) frees() statRate   { return s.changePerSecond(s.freesCounter.diff()) }
-func (s *goStats) gcs() statRate     { return s.changePerSecond(s.gcRate.diff()) }
 
 // CollectBasicGoStats returns some very basic runtime statistics about the
 // current go process, using runtime.MemStats and
@@ -156,7 +158,27 @@ func CollectGoStatsTotals() Composer {
 	return s
 }
 
-// CollectGoStatsDelta constructs a Composer, which is a
+// MakeGoStatsTotals has the same semantics as CollectGoStatsTotals,
+// but additionally allows you to set a message string to annotate the
+// data.
+func MakeGoStatsTotals(msg string) Composer {
+	s := &GoRuntimeInfo{Message: msg}
+	s.build()
+
+	return s
+}
+
+// NewGoStatsTotals has the same semantics as CollectGoStatsTotals,
+// but additionally allows you to set a message string and log level
+// to annotate the data.
+func NewGoStatsTotals(p level.Priority, msg string) Composer {
+	s := &GoRuntimeInfo{Message: msg}
+	s.build()
+	_ = s.SetPriority(p)
+	return s
+}
+
+// CollectGoStatsDeltas constructs a Composer, which is a
 // GoRuntimeInfo internally, that contains data collected from the Go
 // runtime about the state of memory use and garbage collection.
 //
@@ -166,15 +188,33 @@ func CollectGoStatsTotals() Composer {
 //
 // Values are cached between calls, to produce the deltas. For the
 // best results, collect these messages on a regular interval.
-func CollectGoStatsDelta() Composer {
-	s := &GoRuntimeInfo{}
-	s.useDeltas = true
+func CollectGoStatsDeltas() Composer {
+	s := &GoRuntimeInfo{useDeltas: true}
 	s.build()
 
 	return s
 }
 
-// CollectGoStatsDelta constructs a Composer, which is a
+// MakeGoStatsDeltas has the same semantics as CollectGoStatsDeltas,
+// but additionally allows you to set a message string to annotate the
+// data.
+func MakeGoStatsDeltas(msg string) Composer {
+	s := &GoRuntimeInfo{Message: msg, useDeltas: true}
+	s.build()
+	return s
+}
+
+// NewGoStatsDeltas has the same semantics as CollectGoStatsDeltas,
+// but additionally allows you to set a message string to annotate the
+// data.
+func NewGoStatsDeltas(p level.Priority, msg string) Composer {
+	s := &GoRuntimeInfo{Message: msg, useDeltas: true}
+	s.build()
+	_ = s.SetPriority(p)
+	return s
+}
+
+// CollectGoStatsRates constructs a Composer, which is a
 // GoRuntimeInfo internally, that contains data collected from the Go
 // runtime about the state of memory use and garbage collection.
 //
@@ -185,11 +225,29 @@ func CollectGoStatsDelta() Composer {
 // calculated using integer division.
 //
 // For the best results, collect these messages on a regular interval.
-func CollectGoStatsRate() Composer {
-	s := &GoRuntimeInfo{}
-	s.useRates = true
+func CollectGoStatsRates() Composer {
+	s := &GoRuntimeInfo{useRates: true}
 	s.build()
 
+	return s
+}
+
+// MakeGoStatsRates has the same semantics as CollectGoStatsRates,
+// but additionally allows you to set a message string to annotate the
+// data.
+func MakeGoStatsRates(msg string) Composer {
+	s := &GoRuntimeInfo{Message: msg, useRates: true}
+	s.build()
+	return s
+}
+
+// NewGoStatsRates has the same semantics as CollectGoStatsRates,
+// but additionally allows you to set a message string to annotate the
+// data.
+func NewGoStatsRates(p level.Priority, msg string) Composer {
+	s := &GoRuntimeInfo{Message: msg, useRates: true}
+	s.build()
+	_ = s.SetPriority(p)
 	return s
 }
 
@@ -230,7 +288,12 @@ func (s *GoRuntimeInfo) build() {
 	s.loggable = true
 }
 
-func (s *GoRuntimeInfo) Loggable() bool   { return s.loggable }
+// Loggable returns true when the GoRuntimeInfo structure is
+// populated. Loggable is part of the Composer interface.
+func (s *GoRuntimeInfo) Loggable() bool { return s.loggable }
+
+// Raw is part of the Composer interface and returns the GoRuntimeInfo
+// object itself.
 func (s *GoRuntimeInfo) Raw() interface{} { s.doCollect(); return s }
 func (s *GoRuntimeInfo) String() string {
 	s.doCollect()
