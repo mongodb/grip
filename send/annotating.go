@@ -1,6 +1,11 @@
 package send
 
-import "github.com/mongodb/grip/message"
+import (
+	"errors"
+	"strings"
+
+	"github.com/mongodb/grip/message"
+)
 
 type annotatingSender struct {
 	Sender
@@ -29,8 +34,16 @@ func (s *annotatingSender) Send(m message.Composer) {
 		return
 	}
 
+	errs := []string{}
 	for k, v := range s.annotations {
-		m.Annotate(k, v)
+		err := m.Annotate(k, v)
+		if err != nil {
+			errs = append(errs, err.Error())
+		}
 	}
+	if len(errs) > 0 {
+		s.ErrorHandler()(errors.New(strings.Join(errs, ";\n")), m)
+	}
+
 	s.Sender.Send(m)
 }

@@ -57,13 +57,13 @@ func (s *githubStatusMessageLogger) Send(m message.Composer) {
 			owner = s.ref
 		}
 		if status == nil {
-			s.ErrorHandler(errors.New("composer cannot be converted to github status"), m)
+			s.ErrorHandler()(errors.New("composer cannot be converted to github status"), m)
 			return
 		}
 
 		_, _, err := s.gh.CreateStatus(context.TODO(), owner, repo, ref, status)
 		if err != nil {
-			s.ErrorHandler(err, m)
+			s.ErrorHandler()(err, m)
 		}
 	}
 }

@@ -311,7 +311,7 @@ func TestBaseConstructor(t *testing.T) {
 			assert.Error(s.SetFormatter(nil))
 			assert.Error(s.SetErrorHandler(nil))
 			assert.NoError(s.SetErrorHandler(handler))
-			s.ErrorHandler(errors.New("failed"), message.NewString("fated"))
+			s.ErrorHandler()(errors.New("failed"), message.NewString("fated"))
 		}
 	}
 
