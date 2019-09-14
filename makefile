@@ -143,8 +143,18 @@ $(buildDir)/test.$(name):$(testSrcFiles) $(coverDeps)
 $(buildDir)/race.$(name):$(testSrcFiles)
 	go test -race -c -o $@ ./
 #  targets to run the tests and report the output
+# Due to a bug in go1.9 for MacOS, the test binaries cannot be linked.
+ifeq (${GOOS}, darwin)
+$(buildDir)/output.%.test: .FORCE
+	@mkdir -p $(buildDir)
+	$(testRunEnv) go test $(testArgs) ./$(subst -,/,$*) | tee $@
+$(buildDir)/output.$(name).test: .FORCE
+	$(testRunEnv) go test $(testArgs) ./ | tee $@
+else
 $(buildDir)/output.%.test:$(buildDir)/test.% .FORCE
 	$(testRunEnv) ./$< $(testArgs) 2>&1 | tee $@
+endif
+
 $(buildDir)/output.%.race:$(buildDir)/race.% .FORCE
 	$(testRunEnv) ./$< $(testArgs) 2>&1 | tee $@
 #  targets to generate gotest output from the linter.
