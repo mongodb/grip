@@ -152,5 +152,5 @@ buildvariants:
       - windows-64-vs2015-small
       - windows-64-vs2015-large
     expansions:
-      build_env: "GOROOT=c:/golang/go1.9 PATH=c:/golang/go1.9/bin:$PATH DISABLE_COVERAGE=yes"
+      build_env: "GOROOT='C:\\golang\\go1.9' PATH='C:\\golang\\go1.9\\bin':$PATH DISABLE_COVERAGE=yes"
     tasks: [ ".test" ]
