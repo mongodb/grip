@@ -155,9 +155,11 @@ $(buildDir)/output.lint:$(buildDir)/run-linter .FORCE
 	@./$< --output="$@" --lintArgs='$(lintArgs)' --packages="$(packages)"
 #  targets to process and generate coverage reports
 $(buildDir)/output.%.coverage: .FORCE $(coverDeps)
+	@mkdir -p $(buildDir)
 	go test $(testArgs) -test.coverprofile=$@ | tee $(subst coverage,test,$@)
 	@-[ -f $@ ] && go tool cover -func=$@ | sed 's%$(projectPath)/%%' | column -t
 $(buildDir)/output.%.coverage.html:$(buildDir)/output.%.coverage $(coverDeps)
+	@mkdir -p $(buildDir)
 	go tool cover -html=$< -o $@
 # end test and coverage artifacts
 
