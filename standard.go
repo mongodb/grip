@@ -30,5 +30,6 @@ func MakeStandardLogger(p level.Priority) *log.Logger { send.MakeStandardLogger(
 // logging instance to use grip's global logger at the specified
 // level.
 func SetDefaultStandardLogger(p level.Priority) {
+	log.SetFlags(0)
 	log.SetOutput(send.MakeWriterSender(std.GetSender(), p))
 }
