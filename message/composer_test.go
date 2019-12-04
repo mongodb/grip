@@ -142,53 +142,119 @@ func TestUnpopulatedMessageComposers(t *testing.T) {
 func TestDataCollecterComposerConstructors(t *testing.T) {
 	const testMsg = "hello"
 	// map objects to output (prefix)
-	cases := map[Composer]string{
-		NewProcessInfo(level.Error, int32(os.Getpid()), testMsg): "",
-		NewSystemInfo(level.Error, testMsg):                      testMsg,
-		MakeSystemInfo(testMsg):                                  testMsg,
-		CollectProcessInfo(int32(1)):                             "",
-		CollectProcessInfoSelf():                                 "",
-		CollectSystemInfo():                                      "",
-		CollectBasicGoStats():                                    "",
-		CollectGoStatsDeltas():                                   "",
-		CollectGoStatsRates():                                    "",
-		CollectGoStatsTotals():                                   "",
-		MakeGoStatsDeltas(testMsg):                               testMsg,
-		MakeGoStatsRates(testMsg):                                testMsg,
-		MakeGoStatsTotals(testMsg):                               testMsg,
-		NewGoStatsDeltas(level.Error, testMsg):                   testMsg,
-		NewGoStatsRates(level.Error, testMsg):                    testMsg,
-		NewGoStatsTotals(level.Error, testMsg):                   testMsg,
-	}
 
-	for msg, prefix := range cases {
-		t.Run(fmt.Sprintf("%T", msg), func(t *testing.T) {
-			assert.NotNil(t, msg)
-			assert.NotNil(t, msg.Raw())
-			assert.Implements(t, (*Composer)(nil), msg)
-			assert.True(t, msg.Loggable())
-			assert.True(t, strings.HasPrefix(msg.String(), prefix), "%T: %s", msg, msg)
-		})
-	}
+	t.Run("Single", func(t *testing.T) {
+		for _, test := range []struct {
+			Name       string
+			Msg        Composer
+			Expected   string
+			ShouldSkip bool
+		}{
+			{
+				Name: "ProcessInfoCurrentProc",
+				Msg:  NewProcessInfo(level.Error, int32(os.Getpid()), testMsg),
+			},
+			{
+				Name:     "NewSystemInfo",
+				Msg:      NewSystemInfo(level.Error, testMsg),
+				Expected: testMsg,
+			},
 
-	multiCases := [][]Composer{
-		CollectProcessInfoSelfWithChildren(),
-		CollectProcessInfoWithChildren(int32(1)),
-		CollectAllProcesses(),
-	}
-
-	for idx, group := range multiCases {
-		require.True(t, len(group) >= 1)
-		t.Run(fmt.Sprintf("%T.%d", group[0], idx), func(t *testing.T) {
-			for _, msg := range group {
-				assert.NotNil(t, msg)
-				assert.Implements(t, (*Composer)(nil), msg)
-				assert.NotEqual(t, "", msg.String())
-				assert.True(t, msg.Loggable())
+			{
+				Name:     "MakeSystemInfo",
+				Msg:      MakeSystemInfo(testMsg),
+				Expected: testMsg,
+			},
+			{
+				Name: "CollectProcInfoPidOne",
+				Msg:  CollectProcessInfo(int32(1)),
+			},
+			{
+				Name: "CollectProcInfoSelf",
+				Msg:  CollectProcessInfoSelf(),
+			},
+			{
+				Name: "CollectSystemInfo",
+				Msg:  CollectSystemInfo(),
+			},
+			{
+				Name: "CollectBasicGoStats",
+				Msg:  CollectBasicGoStats(),
+			},
+			{
+				Name: "CollectGoStatsDeltas",
+				Msg:  CollectGoStatsDeltas(),
+			},
+			{
+				Name: "CollectGoStatsRates",
+				Msg:  CollectGoStatsRates(),
+			},
+			{
+				Name: "CollectGoStatsTotals",
+				Msg:  CollectGoStatsTotals(),
+			},
+			{
+				Name:     "MakeGoStatsDelta",
+				Msg:      MakeGoStatsDeltas(testMsg),
+				Expected: testMsg,
+			},
+			{
+				Name:     "MakeGoStatsRates",
+				Msg:      MakeGoStatsRates(testMsg),
+				Expected: testMsg,
+			},
+			{
+				Name:     "MakeGoStatsTotals",
+				Msg:      MakeGoStatsTotals(testMsg),
+				Expected: testMsg,
+			},
+			{
+				Name:     "NewGoStatsDeltas",
+				Msg:      NewGoStatsDeltas(level.Error, testMsg),
+				Expected: testMsg,
+			},
+			{
+				Name:     "NewGoStatsRates",
+				Msg:      NewGoStatsRates(level.Error, testMsg),
+				Expected: testMsg,
+			},
+			{
+				Name:     "NewGoStatsTotals",
+				Msg:      NewGoStatsTotals(level.Error, testMsg),
+				Expected: testMsg,
+			},
+		} {
+			if test.ShouldSkip {
+				continue
 			}
-		})
+			t.Run(test.Name, func(t *testing.T) {
+				assert.NotNil(t, test.Msg)
+				assert.NotNil(t, test.Msg.Raw())
+				assert.Implements(t, (*Composer)(nil), test.Msg)
+				assert.True(t, test.Msg.Loggable())
+				assert.True(t, strings.HasPrefix(test.Msg.String(), test.Expected), "%T: %s", test.Msg, test.Msg)
+			})
+		}
+	})
 
-	}
+	t.Run("Multi", func(t *testing.T) {
+		for idx, group := range [][]Composer{
+			CollectProcessInfoSelfWithChildren(),
+			CollectProcessInfoWithChildren(int32(1)),
+			CollectAllProcesses(),
+		} {
+			require.True(t, len(group) >= 1)
+			t.Run(fmt.Sprintf("%T.%d", group[0], idx), func(t *testing.T) {
+				for _, msg := range group {
+					assert.NotNil(t, msg)
+					assert.Implements(t, (*Composer)(nil), msg)
+					assert.NotEqual(t, "", msg.String())
+					assert.True(t, msg.Loggable())
+				}
+			})
+
+		}
+	})
 }
 
 func TestStackMessages(t *testing.T) {
