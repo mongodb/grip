@@ -250,8 +250,9 @@ func TestDataCollecterComposerConstructors(t *testing.T) {
 				Group: CollectProcessInfoSelfWithChildren(),
 			},
 			{
-				Name:  "PidOneWithChildren",
-				Group: CollectProcessInfoWithChildren(int32(1)),
+				Name:       "PidOneWithChildren",
+				Group:      CollectProcessInfoWithChildren(int32(1)),
+				ShouldSkip: runtime.GOOS == "windows",
 			},
 			{
 				Name:  "AllProcesses",
