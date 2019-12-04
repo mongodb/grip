@@ -24,7 +24,9 @@ func init() {
 
 // MakeStandardLogger constructs a standard library logging instance
 // that logs all messages to the global grip logging instance.
-func MakeStandardLogger(p level.Priority) *log.Logger { send.MakeStandardLogger(std.GetSender(), p) }
+func MakeStandardLogger(p level.Priority) *log.Logger {
+	return send.MakeStandardLogger(std.GetSender(), p)
+}
 
 // SetDefaultStandardLogger set's the standard library's global
 // logging instance to use grip's global logger at the specified
