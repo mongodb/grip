@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -166,8 +167,9 @@ func TestDataCollecterComposerConstructors(t *testing.T) {
 				Expected: testMsg,
 			},
 			{
-				Name: "CollectProcInfoPidOne",
-				Msg:  CollectProcessInfo(int32(1)),
+				Name:       "CollectProcInfoPidOne",
+				Msg:        CollectProcessInfo(int32(1)),
+				ShouldSkip: runtime.GOOS == "windows",
 			},
 			{
 				Name: "CollectProcInfoSelf",
@@ -238,14 +240,30 @@ func TestDataCollecterComposerConstructors(t *testing.T) {
 	})
 
 	t.Run("Multi", func(t *testing.T) {
-		for idx, group := range [][]Composer{
-			CollectProcessInfoSelfWithChildren(),
-			CollectProcessInfoWithChildren(int32(1)),
-			CollectAllProcesses(),
+		for _, test := range []struct {
+			Name       string
+			Group      []Composer
+			ShouldSkip bool
+		}{
+			{
+				Name:  "SelfWithChildren",
+				Group: CollectProcessInfoSelfWithChildren(),
+			},
+			{
+				Name:  "PidOneWithChildren",
+				Group: CollectProcessInfoWithChildren(int32(1)),
+			},
+			{
+				Name:  "AllProcesses",
+				Group: CollectAllProcesses(),
+			},
 		} {
-			require.True(t, len(group) >= 1)
-			t.Run(fmt.Sprintf("%T.%d", group[0], idx), func(t *testing.T) {
-				for _, msg := range group {
+			if test.ShouldSkip {
+				continue
+			}
+			t.Run(test.Name, func(t *testing.T) {
+				require.True(t, len(test.Group) >= 1)
+				for _, msg := range test.Group {
 					assert.NotNil(t, msg)
 					assert.Implements(t, (*Composer)(nil), msg)
 					assert.NotEqual(t, "", msg.String())
