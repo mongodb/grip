@@ -9,6 +9,7 @@ import (
 
 	"github.com/mongodb/grip/level"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPopulatedMessageComposerConstructors(t *testing.T) {
@@ -162,11 +163,13 @@ func TestDataCollecterComposerConstructors(t *testing.T) {
 	}
 
 	for msg, prefix := range cases {
-		assert.NotNil(msg)
-		assert.NotNil(msg.Raw())
-		assert.Implements((*Composer)(nil), msg)
-		assert.True(msg.Loggable())
-		assert.True(strings.HasPrefix(msg.String(), prefix), "%T: %s", msg, msg)
+		t.Run(fmt.Sprintf("%T", msg), func(t *testing.T) {
+			assert.NotNil(msg)
+			assert.NotNil(msg.Raw())
+			assert.Implements((*Composer)(nil), msg)
+			assert.True(msg.Loggable())
+			assert.True(strings.HasPrefix(msg.String(), prefix), "%T: %s", msg, msg)
+		})
 	}
 
 	multiCases := [][]Composer{
@@ -175,14 +178,17 @@ func TestDataCollecterComposerConstructors(t *testing.T) {
 		CollectAllProcesses(),
 	}
 
-	for _, group := range multiCases {
-		assert.True(len(group) >= 1)
-		for _, msg := range group {
-			assert.NotNil(msg)
-			assert.Implements((*Composer)(nil), msg)
-			assert.NotEqual("", msg.String())
-			assert.True(msg.Loggable())
-		}
+	for idx, group := range multiCases {
+		require.True(len(group) >= 1)
+		t.Run(fmt.Sprintf("%T.%d", group[0], idx), func(t *testing.T) {
+			for _, msg := range group {
+				assert.NotNil(msg)
+				assert.Implements((*Composer)(nil), msg)
+				assert.NotEqual("", msg.String())
+				assert.True(msg.Loggable())
+			}
+		})
+
 	}
 }
 
