@@ -141,7 +141,6 @@ func TestUnpopulatedMessageComposers(t *testing.T) {
 
 func TestDataCollecterComposerConstructors(t *testing.T) {
 	const testMsg = "hello"
-	assert := assert.New(t) // nolint
 	// map objects to output (prefix)
 	cases := map[Composer]string{
 		NewProcessInfo(level.Error, int32(os.Getpid()), testMsg): "",
@@ -164,11 +163,11 @@ func TestDataCollecterComposerConstructors(t *testing.T) {
 
 	for msg, prefix := range cases {
 		t.Run(fmt.Sprintf("%T", msg), func(t *testing.T) {
-			assert.NotNil(msg)
-			assert.NotNil(msg.Raw())
-			assert.Implements((*Composer)(nil), msg)
-			assert.True(msg.Loggable())
-			assert.True(strings.HasPrefix(msg.String(), prefix), "%T: %s", msg, msg)
+			assert.NotNil(t, msg)
+			assert.NotNil(t, msg.Raw())
+			assert.Implements(t, (*Composer)(nil), msg)
+			assert.True(t, msg.Loggable())
+			assert.True(t, strings.HasPrefix(msg.String(), prefix), "%T: %s", msg, msg)
 		})
 	}
 
@@ -179,13 +178,13 @@ func TestDataCollecterComposerConstructors(t *testing.T) {
 	}
 
 	for idx, group := range multiCases {
-		require.True(len(group) >= 1)
+		require.True(t, len(group) >= 1)
 		t.Run(fmt.Sprintf("%T.%d", group[0], idx), func(t *testing.T) {
 			for _, msg := range group {
-				assert.NotNil(msg)
-				assert.Implements((*Composer)(nil), msg)
-				assert.NotEqual("", msg.String())
-				assert.True(msg.Loggable())
+				assert.NotNil(t, msg)
+				assert.Implements(t, (*Composer)(nil), msg)
+				assert.NotEqual(t, "", msg.String())
+				assert.True(t, msg.Loggable())
 			}
 		})
 
