@@ -59,8 +59,8 @@ type Sender interface {
 // LevelInfo provides a sender-independent structure for storing
 // information about a sender's configured log levels.
 type LevelInfo struct {
-	Default   level.Priority `json:"default"`
-	Threshold level.Priority `json:"threshold"`
+	Default   level.Priority `json:"default" bson:"default"`
+	Threshold level.Priority `json:"threshold" bson:"threshold"`
 }
 
 // Valid checks that the priorities stored in the LevelInfo document are valid.
