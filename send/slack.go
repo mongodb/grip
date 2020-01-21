@@ -103,6 +103,8 @@ func (s *slackJournal) Send(m message.Composer) {
 	}
 }
 
+func (s *slackJournal) Flush() error { return nil }
+
 // SlackOptions configures the behavior for constructing messages sent
 // to slack.
 type SlackOptions struct {

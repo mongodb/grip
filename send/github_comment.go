@@ -70,3 +70,5 @@ func (s *githubCommentLogger) Send(m message.Composer) {
 		}
 	}
 }
+
+func (s *githubCommentLogger) Flush() error { return nil }

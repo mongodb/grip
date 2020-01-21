@@ -128,3 +128,5 @@ func (s *nativeLogger) Send(m message.Composer) {
 		s.logger.Print(out)
 	}
 }
+
+func (s *nativeLogger) Flush() error { return nil }

@@ -139,3 +139,5 @@ func (s *multiSender) Send(m message.Composer) {
 		sender.Send(m)
 	}
 }
+
+func (s *multiSender) Flush() error { return nil }

@@ -107,3 +107,5 @@ func (s *InternalSender) Send(m message.Composer) {
 		Logged:   s.Level().ShouldLog(m),
 	}
 }
+
+func (s *InternalSender) Flush() error { return nil }

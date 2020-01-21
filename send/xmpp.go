@@ -150,6 +150,8 @@ func (s *xmppLogger) Send(m message.Composer) {
 	}
 }
 
+func (s *xmppLogger) Flush() error { return nil }
+
 ////////////////////////////////////////////////////////////////////////
 //
 // interface to wrap xmpp client interaction

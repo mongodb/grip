@@ -111,3 +111,5 @@ func (s *syslogger) sendToSysLog(p level.Priority, message string) error {
 
 	return fmt.Errorf("encountered error trying to send: {%s}. Possibly, priority related", message)
 }
+
+func (s *syslogger) Flush() error { return nil }

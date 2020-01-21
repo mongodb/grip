@@ -104,3 +104,5 @@ func (s *asyncGroupSender) Send(m message.Composer) {
 		p <- m
 	}
 }
+
+func (s *asyncGroupSender) Flush() error { return nil }

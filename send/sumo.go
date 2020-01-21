@@ -83,6 +83,8 @@ func (s *sumoLogger) Send(m message.Composer) {
 	}
 }
 
+func (s *sumoLogger) Flush() error { return nil }
+
 ////////////////////////////////////////////////////////////////////////
 //
 // interface to wrap sumologic client interaction

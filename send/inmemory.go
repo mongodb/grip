@@ -194,6 +194,8 @@ func (s *InMemorySender) Send(msg message.Composer) {
 	s.totalBytesSent += int64(len(msg.String()))
 }
 
+func (s *InMemorySender) Flush() error { return nil }
+
 // TotalBytesSent returns the total number of bytes sent.
 func (s *InMemorySender) TotalBytesSent() int64 {
 	s.mutex.RLock()

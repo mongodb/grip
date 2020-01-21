@@ -12,14 +12,16 @@ import (
 	"github.com/mongodb/grip/message"
 )
 
-// The Sender interface describes how the Journaler type's method in
-// primary "grip" package's methods interact with a logging output
-// method. The Journaler type provides Sender() and SetSender()
-// methods that allow client code to swap logging backend
-// implementations dependency-injection style.
+// The Sender interface describes how the Journaler type's method in primary
+// "grip" package's methods interact with a logging output method. The
+// Journaler type provides Sender() and SetSender() methods that allow client
+// code to swap logging backend implementations dependency-injection style.
 type Sender interface {
-	// returns the name of the logging system. Typically this corresponds directly with
+	// TODO: finish this comment
+	// Name returns the name of the logging system. Typically this
+	// corresponds directly with the
 	Name() string
+	//SetName sets the name of the logging system.
 	SetName(string)
 
 	// Method that actually sends messages (the string) to the
@@ -28,31 +30,34 @@ type Sender interface {
 	// generic MessageInfo.ShouldLog() function.
 	Send(message.Composer)
 
-	// SetLevel allows you to modify the level
-	// configuration. Returns an error if you specify impossible
-	// values.
+	// Flush flushes any potential buffered messages to the logging capture
+	// system. If the underlying Sender is not buffered, this function
+	// should no-op and return nil.
+	Flush() error
+
+	// SetLevel allows you to modify the level configuration. Returns an
+	// error if you specify impossible values.
 	SetLevel(LevelInfo) error
 
 	// Level returns the level configuration document.
 	Level() LevelInfo
 
-	// SetErrorHandler provides a method to inject error handling
-	// behavior to a sender. Not all sender implementations use
-	// the error handler, although some, use a default handler to
-	// write logging errors to standard output.
+	// SetErrorHandler provides a method to inject error handling behavior
+	// to a sender. Not all sender implementations use the error handler,
+	// although some, use a default handler to write logging errors to
+	// standard output.
 	SetErrorHandler(ErrorHandler) error
 	ErrorHandler() ErrorHandler
 
-	// SetFormatter allows users to inject formatting functions to
-	// modify the output of the log sender by providing a function
-	// that takes a message and returns string and error.
+	// SetFormatter allows users to inject formatting functions to modify
+	// the output of the log sender by providing a function that takes a
+	// message and returns string and error.
 	SetFormatter(MessageFormatter) error
 	Formatter() MessageFormatter
 
-	// If the logging sender holds any resources that require
-	// desecration, they should be cleaned up tin the Close()
-	// method. Close() is called by the SetSender() method before
-	// changing loggers.
+	// If the logging sender holds any resources that require desecration
+	// they should be cleaned up in the Close() method. Close() is called
+	// by the SetSender() method before changing loggers.
 	Close() error
 }
 

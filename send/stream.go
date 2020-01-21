@@ -60,3 +60,5 @@ func (s *streamLogger) Send(m message.Composer) {
 		}
 	}
 }
+
+func (s *streamLogger) Flush() error { return nil }

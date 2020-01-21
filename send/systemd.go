@@ -68,6 +68,8 @@ func (s *systemdJournal) Send(m message.Composer) {
 	}
 }
 
+func (s *systemdJournal) Flush() error { return nil }
+
 func (l LevelInfo) convertPrioritySystemd(p level.Priority) journal.Priority {
 	switch p {
 	case level.Emergency:

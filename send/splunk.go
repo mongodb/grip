@@ -81,6 +81,8 @@ func (s *splunkLogger) Send(m message.Composer) {
 	}
 }
 
+func (s *splunkLogger) Flush() error { return nil }
+
 // NewSplunkLogger constructs a new Sender implementation that sends
 // messages to a Splunk event collector using the credentials specified
 // in the SplunkConnectionInfo struct.

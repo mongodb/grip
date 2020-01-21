@@ -74,3 +74,5 @@ func (j *jiraCommentJournal) Send(m message.Composer) {
 		}
 	}
 }
+
+func (j *jiraCommentJournal) Flush() error { return nil }

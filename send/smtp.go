@@ -76,6 +76,8 @@ func (s *smtpLogger) Send(m message.Composer) {
 	}
 }
 
+func (s *smtpLogger) Flush() error { return nil }
+
 ///////////////////////////////////////////////////////////////////////////
 //
 // Implemntation of the Configuration Object

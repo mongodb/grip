@@ -132,6 +132,8 @@ func (s *bufferedSender) Send(msg message.Composer) {
 	}
 }
 
+func (s *bufferedSender) Flush() error { return nil }
+
 func (s *bufferedSender) Close() (err error) {
 	defer func() {
 		if r := recover(); r != nil {

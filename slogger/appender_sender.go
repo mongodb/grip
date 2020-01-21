@@ -73,3 +73,5 @@ func (a *appenderSender) Send(m message.Composer) {
 		}
 	}
 }
+
+func (a *appenderSender) Flush() error { return nil }

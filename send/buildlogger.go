@@ -277,6 +277,8 @@ func (b *buildlogger) Send(m message.Composer) {
 	}
 }
 
+func (b *buildlogger) Flush() error { return nil }
+
 func (b *buildlogger) SetName(n string) {
 	b.conf.Local.SetName(n)
 	b.Base.SetName(n)
