@@ -49,9 +49,9 @@ func TestBufferedSend(t *testing.T) {
 
 		bs.Send(message.ConvertToComposer(level.Debug, "should flush"))
 		time.Sleep(6 * time.Second)
-		b.mu.Lock()
+		bs.mu.Lock()
 		assert.True(t, time.Since(bs.lastFlush) <= 2*time.Second)
-		b.mu.Unlock()
+		bs.mu.Unlock()
 		msg, ok := s.GetMessageSafe()
 		require.True(t, ok)
 		assert.Equal(t, "should flush", msg.Message.String())
