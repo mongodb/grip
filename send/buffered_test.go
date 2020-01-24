@@ -82,9 +82,9 @@ func TestBufferedClose(t *testing.T) {
 		bs := newBufferedSender(s, time.Minute, 10)
 		bs.buffer = append(
 			bs.buffer,
-			message.ConvertToComposer(level.Debug, "message 1"),
-			message.ConvertToComposer(level.Debug, "message 2"),
-			message.ConvertToComposer(level.Debug, "message 3"),
+			message.ConvertToComposer(level.Debug, "message1"),
+			message.ConvertToComposer(level.Debug, "message2"),
+			message.ConvertToComposer(level.Debug, "message3"),
 		)
 
 		assert.Nil(t, bs.Close())
@@ -92,7 +92,7 @@ func TestBufferedClose(t *testing.T) {
 		assert.Empty(t, bs.buffer)
 		msgs, ok := s.GetMessageSafe()
 		require.True(t, ok)
-		assert.Equal(t, "message1\nmessage2\nmessage3\n", msgs.Message.String())
+		assert.Equal(t, "message1\nmessage2\nmessage3", msgs.Message.String())
 	})
 	t.Run("NoopWhenClosed", func(t *testing.T) {
 		bs := newBufferedSender(s, time.Minute, 10)

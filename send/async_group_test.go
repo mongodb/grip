@@ -39,5 +39,6 @@ func TestAsyncGroupSender(t *testing.T) {
 	assert.NoError(impl.SetLevel(newLevel))
 	assert.Equal(newLevel, s.Level())
 
+	assert.NoError(s.Flush())
 	assert.NoError(s.Close())
 }

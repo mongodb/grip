@@ -16,13 +16,12 @@ type asyncGroupSender struct {
 	*Base
 }
 
-// NewAsyncGroupSender produces an implementation of the Sender
-// interface that, like the MultiSender, distributes a single message
-// to a group of underlying sender implementations.
+// NewAsyncGroupSender produces an implementation of the Sender interface that,
+// like the MultiSender, distributes a single message to a group of underlying
+// sender implementations.
 //
-// This sender does not guarantee ordering of messages, and Send
-// operations may block if the underlying senders fall behind the
-// buffer size.
+// This sender does not guarantee ordering of messages, and Send operations may
+// if the underlying senders fall behind the buffer size.
 func NewAsyncGroupSender(ctx context.Context, bufferSize int, senders ...Sender) Sender {
 	s := &asyncGroupSender{
 		senders: senders,
@@ -105,4 +104,13 @@ func (s *asyncGroupSender) Send(m message.Composer) {
 	}
 }
 
-func (s *asyncGroupSender) Flush() error { return nil }
+func (s *asyncGroupSender) Flush() error {
+	var lastErr error
+	for _, sender := range s.senders {
+		if err := sender.Flush(); err != nil {
+			lastErr = nil
+		}
+	}
+
+	return lastErr
+}

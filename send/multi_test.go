@@ -37,4 +37,6 @@ func TestMultiSenderRespectsLevel(t *testing.T) {
 	m, ok = mock.GetMessageSafe()
 	assert.True(ok)
 	assert.True(m.Logged)
+
+	assert.NoError(multi.Flush())
 }

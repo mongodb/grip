@@ -140,4 +140,13 @@ func (s *multiSender) Send(m message.Composer) {
 	}
 }
 
-func (s *multiSender) Flush() error { return nil }
+func (s *multiSender) Flush() error {
+	var lastErr error
+	for _, sender := range s.senders {
+		if err := sender.Flush(); err != nil {
+			lastErr = err
+		}
+	}
+
+	return lastErr
+}
