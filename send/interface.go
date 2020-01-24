@@ -6,6 +6,7 @@
 package send
 
 import (
+	"context"
 	"log"
 
 	"github.com/mongodb/grip/level"
@@ -33,7 +34,7 @@ type Sender interface {
 	// Flush flushes any potential buffered messages to the logging capture
 	// system. If the underlying Sender is not buffered, this function
 	// should no-op and return nil.
-	Flush() error
+	Flush(context.Context) error
 
 	// SetLevel allows you to modify the level configuration. Returns an
 	// error if you specify impossible values.

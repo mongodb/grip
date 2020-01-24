@@ -68,7 +68,7 @@ func (s *githubStatusMessageLogger) Send(m message.Composer) {
 	}
 }
 
-func (s *githubStatusMessageLogger) Flush() error { return nil }
+func (s *githubStatusMessageLogger) Flush(_ context.Context) error { return nil }
 
 // NewGithubStatusLogger returns a Sender to send payloads to the Github Status
 // API. Statuses will be attached to the given ref.

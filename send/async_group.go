@@ -104,10 +104,10 @@ func (s *asyncGroupSender) Send(m message.Composer) {
 	}
 }
 
-func (s *asyncGroupSender) Flush() error {
+func (s *asyncGroupSender) Flush(ctx context.Context) error {
 	var lastErr error
 	for _, sender := range s.senders {
-		if err := sender.Flush(); err != nil {
+		if err := sender.Flush(ctx); err != nil {
 			lastErr = nil
 		}
 	}

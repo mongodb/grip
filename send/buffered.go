@@ -70,7 +70,7 @@ func (s *bufferedSender) Send(msg message.Composer) {
 	}
 }
 
-func (s *bufferedSender) Flush() error {
+func (s *bufferedSender) Flush(_ context.Context) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 

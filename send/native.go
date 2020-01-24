@@ -1,6 +1,7 @@
 package send
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -129,4 +130,4 @@ func (s *nativeLogger) Send(m message.Composer) {
 	}
 }
 
-func (s *nativeLogger) Flush() error { return nil }
+func (s *nativeLogger) Flush(_ context.Context) error { return nil }
