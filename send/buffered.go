@@ -74,7 +74,9 @@ func (s *bufferedSender) Flush(_ context.Context) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	s.flush()
+	if !s.closed {
+		s.flush()
+	}
 
 	return nil
 }

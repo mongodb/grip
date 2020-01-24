@@ -68,6 +68,38 @@ func TestBufferedSend(t *testing.T) {
 	})
 }
 
+func TestFlush(t *testing.T) {
+	s, err := NewInternalLogger("buffs", LevelInfo{level.Debug, level.Debug})
+	require.NoError(t, err)
+
+	t.Run("ForceFlush", func(t *testing.T) {
+		bs := newBufferedSender(s, time.Minute, 10)
+		defer bs.cancel()
+
+		bs.Send(message.ConvertToComposer(level.Debug, "message"))
+		assert.Len(t, bs.buffer, 1)
+		bs.Flush(context.TODO())
+		bs.mu.Lock()
+		assert.True(t, time.Since(bs.lastFlush) <= time.Second)
+		bs.mu.Unlock()
+		assert.Empty(t, bs.buffer)
+		msg, ok := s.GetMessageSafe()
+		require.True(t, ok)
+		assert.Equal(t, "message", msg.Message.String())
+	})
+	t.Run("ClosedSender", func(t *testing.T) {
+		bs := newBufferedSender(s, time.Minute, 10)
+		bs.buffer = append(bs.buffer, message.ConvertToComposer(level.Debug, "message"))
+		bs.cancel()
+		bs.closed = true
+
+		assert.NoError(t, bs.Flush(context.TODO()))
+		assert.Len(t, bs.buffer, 1)
+		_, ok := s.GetMessageSafe()
+		assert.False(t, ok)
+	})
+}
+
 func TestBufferedClose(t *testing.T) {
 	s, err := NewInternalLogger("buffs", LevelInfo{level.Debug, level.Debug})
 	require.NoError(t, err)
