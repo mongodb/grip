@@ -78,7 +78,7 @@ func TestFlush(t *testing.T) {
 
 		bs.Send(message.ConvertToComposer(level.Debug, "message"))
 		assert.Len(t, bs.buffer, 1)
-		bs.Flush(context.TODO())
+		assert.NoError(bs.Flush(context.TODO()))
 		bs.mu.Lock()
 		assert.True(t, time.Since(bs.lastFlush) <= time.Second)
 		bs.mu.Unlock()
