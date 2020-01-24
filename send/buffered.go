@@ -8,7 +8,6 @@ import (
 	"github.com/mongodb/grip/message"
 )
 
-// TODO: do we want a non-interval-flushing option?
 const minInterval = 5 * time.Second
 
 type bufferedSender struct {
@@ -25,10 +24,6 @@ type bufferedSender struct {
 // NewBufferedSender provides a Sender implementation that wraps an existing
 // Sender sending messages in batches, on a specified buffer size or after an
 // interval has passed.
-//
-// Be aware that while messages are sent asynchronously, each message is sent
-// individually. Furthermore, no more than 2 batches of events can be sent at
-// once.
 //
 // If the interval is 0, the constructor sets an interval of 1 minute, and if
 // it is less than 5 seconds, the constructor sets it to 5 seconds. If the
