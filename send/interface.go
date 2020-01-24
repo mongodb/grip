@@ -18,22 +18,21 @@ import (
 // Journaler type provides Sender() and SetSender() methods that allow client
 // code to swap logging backend implementations dependency-injection style.
 type Sender interface {
-	// TODO: finish this comment
 	// Name returns the name of the logging system. Typically this
-	// corresponds directly with the
+	// corresponds directly with the underlying logging capture system.
 	Name() string
 	//SetName sets the name of the logging system.
 	SetName(string)
 
-	// Method that actually sends messages (the string) to the
-	// logging capture system. The Send() method filters out
-	// logged messages based on priority, typically using the
-	// generic MessageInfo.ShouldLog() function.
+	// Method that actually sends messages (the string) to the logging
+	// capture system. The Send() method filters out logged messages based
+	// based on priority, typically using the generic
+	// MessageInfo.ShouldLog() function.
 	Send(message.Composer)
 
 	// Flush flushes any potential buffered messages to the logging capture
-	// system. If the underlying Sender is not buffered, this function
-	// should no-op and return nil.
+	// system. If the Sender is not buffered, this function should noop and
+	// return nil.
 	Flush(context.Context) error
 
 	// SetLevel allows you to modify the level configuration. Returns an
@@ -62,8 +61,8 @@ type Sender interface {
 	Close() error
 }
 
-// LevelInfo provides a sender-independent structure for storing
-// information about a sender's configured log levels.
+// LevelInfo provides a sender-independent structure for storing information
+// about a sender's configured log levels.
 type LevelInfo struct {
 	Default   level.Priority `json:"default" bson:"default"`
 	Threshold level.Priority `json:"threshold" bson:"threshold"`
@@ -74,9 +73,9 @@ func (l LevelInfo) Valid() bool {
 	return level.IsValidPriority(l.Default) && level.IsValidPriority(l.Threshold)
 }
 
-// ShouldLog checks to see if the log message should be logged, and
-// returns false if there is no message or if the message's priority
-// is below the logging threshold.
+// ShouldLog checks to see if the log message should be logged, and returns
+// false if there is no message or if the message's priority is below the
+// logging threshold.
 func (l LevelInfo) ShouldLog(m message.Composer) bool {
 	// priorities are 0 = Emergency; 7 = debug
 	return m.Loggable() && (m.Priority() >= l.Threshold)
@@ -92,9 +91,8 @@ func setup(s Sender, name string, l LevelInfo) (Sender, error) {
 	return s, nil
 }
 
-// MakeStandardLogger creates a standard library logging
-// instance that logs all messages to the underlying sender
-// directly at the specified level.
+// MakeStandardLogger creates a standard library logging instance that logs all
+// messages to the underlying sender directly at the specified level.
 func MakeStandardLogger(s Sender, p level.Priority) *log.Logger {
 	return log.New(MakeWriterSender(s, p), "", 0)
 }
