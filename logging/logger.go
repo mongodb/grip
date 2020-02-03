@@ -14,14 +14,16 @@ import (
 // provide a single, global logging interface that requires minimal
 // configuration.
 type Grip struct {
-	impl send.Sender
-	mu   sync.RWMutex
+	impl         send.Sender
+	defaultLevel level.Priority
+	mu           sync.RWMutex
 }
 
 // MakeGrip builds a new logging interface from a sender implmementation
 func MakeGrip(s send.Sender) *Grip {
 	return &Grip{
-		impl: s,
+		impl:         s,
+		defaultLevel: level.Info,
 	}
 }
 
@@ -50,6 +52,13 @@ func (g *Grip) SetName(n string) {
 	defer g.mu.RUnlock()
 
 	g.impl.SetName(n)
+}
+
+func (g *Grip) Send(m interface{}) {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	return g.impl.Send(message.ConvertToComposer(g.defaultLevel, m))
 }
 
 // Internal
