@@ -14,12 +14,10 @@ import (
 const testMessage = "hello world"
 
 type (
-	basicMethod  func(interface{})
-	lnMethod     func(...interface{})
-	fMethod      func(string, ...interface{})
-	whenMethod   func(bool, interface{})
-	whenlnMethod func(bool, ...interface{})
-	whenfMethod  func(bool, string, ...interface{})
+	basicMethod func(interface{})
+	lnMethod    func(...interface{})
+	fMethod     func(string, ...interface{})
+	whenMethod  func(bool, interface{})
 )
 
 type LoggingMethodSuite struct {

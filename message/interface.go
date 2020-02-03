@@ -37,12 +37,14 @@ type Composer interface {
 }
 
 // ConvertToComposer can coerce unknown objects into Composer
-// instances, as possible.
+// instances, as possible. This method will override the priority of
+// composers set to it.
 func ConvertToComposer(p level.Priority, message interface{}) Composer {
 	return convert(p, message, true)
 }
 
-//ConvertToComposerWithLevel
+// ConvertToComposerWithLevel can coerce unknown objects into
+// Composers, but will only override the priority of Composers.
 func ConvertToComposerWithLevel(p level.Priority, message interface{}) Composer {
 	return convert(p, message, false)
 }
