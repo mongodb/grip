@@ -1,6 +1,7 @@
 package send
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -65,6 +66,8 @@ func (s *systemdJournal) Send(m message.Composer) {
 		}
 	}
 }
+
+func (s *systemdJournal) Flush(_ context.Context) error { return nil }
 
 func (l LevelInfo) convertPrioritySystemd(p level.Priority) journal.Priority {
 	switch p {
