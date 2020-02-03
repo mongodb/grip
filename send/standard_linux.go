@@ -1,3 +1,5 @@
+// +build linux
+
 package send
 
 import "github.com/coreos/go-systemd/journal"

@@ -15,6 +15,7 @@ type Journaler interface {
 	// Methods to access the underlying message sending backend.
 	GetSender() send.Sender
 	SetSender(send.Sender) error
+	SetLevel(send.LevelInfo) error
 
 	// Send allows you to push a composer which stores its own
 	// priorty (or uses the sender's default priority).
