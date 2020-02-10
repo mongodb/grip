@@ -13,9 +13,10 @@ import (
 // implementations. All implementations of the functions
 type Base struct {
 	// data exposed via the interface and tools to track them
-	name  string
-	level LevelInfo
-	mutex sync.RWMutex
+	name   string
+	level  LevelInfo
+	mutex  sync.RWMutex
+	closed bool
 
 	// function literals which allow customizable functionality.
 	// they are set either in the constructor (e.g. MakeBase) of
@@ -23,7 +24,6 @@ type Base struct {
 	errHandler ErrorHandler
 	reset      func()
 	closer     func() error
-	closed     bool
 	formatter  MessageFormatter
 }
 

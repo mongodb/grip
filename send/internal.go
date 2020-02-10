@@ -15,13 +15,9 @@ import (
 // purposes.
 type InternalSender struct {
 	*Base
-	name         string
-	level        LevelInfo
-	formatter    MessageFormatter
-	errorHandler ErrorHandler
-	output       chan *InternalMessage
-	mu           sync.RWMutex
-	closed       bool
+	name   string
+	output chan *InternalMessage
+	mu     sync.RWMutex
 }
 
 // InternalMessage provides a complete representation of all
