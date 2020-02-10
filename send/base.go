@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/pkg/errors"
-
 	"github.com/mongodb/grip/message"
+	"github.com/pkg/errors"
 )
 
 // Base provides most of the functionality of the Sender interface,

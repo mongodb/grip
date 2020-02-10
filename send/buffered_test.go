@@ -105,7 +105,7 @@ func TestBufferedClose(t *testing.T) {
 		"EmptyBuffer": func(t *testing.T, s *InternalSender, bs *bufferedSender) {
 			assert.Nil(t, bs.Close())
 			assert.True(t, bs.closed)
-			msgs, ok := s.GetMessageSafe()
+			_, ok := s.GetMessageSafe()
 			assert.False(t, ok)
 		},
 		"NonEmptyBuffer": func(t *testing.T, s *InternalSender, bs *bufferedSender) {
@@ -136,34 +136,6 @@ func TestBufferedClose(t *testing.T) {
 			testCase(t, s, bs)
 		})
 	}
-	// s, err := NewInternalLogger("buffs", LevelInfo{level.Debug, level.Debug})
-	// require.NoError(t, err)
-	//
-	// t.Run("EmptyBuffer", func(t *testing.T) {
-	// })
-	// t.Run("NonEmptyBuffer", func(t *testing.T) {
-	//     bs := newBufferedSender(s, time.Minute, 10)
-	//     bs.buffer = append(
-	//         bs.buffer,
-	//         message.ConvertToComposer(level.Debug, "message1"),
-	//         message.ConvertToComposer(level.Debug, "message2"),
-	//         message.ConvertToComposer(level.Debug, "message3"),
-	//     )
-	//
-	//     assert.Nil(t, bs.Close())
-	//     assert.True(t, bs.closed)
-	//     assert.Empty(t, bs.buffer)
-	//     msgs, ok := s.GetMessageSafe()
-	//     require.True(t, ok)
-	//     assert.Equal(t, "message1\nmessage2\nmessage3", msgs.Message.String())
-	// })
-	// t.Run("NoopWhenClosed", func(t *testing.T) {
-	//     bs := newBufferedSender(s, time.Minute, 10)
-	//
-	//     assert.NoError(t, bs.Close())
-	//     assert.True(t, bs.closed)
-	//     assert.NoError(t, bs.Close())
-	// })
 }
 
 func TestIntervalFlush(t *testing.T) {

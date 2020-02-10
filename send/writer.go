@@ -9,7 +9,6 @@ import (
 
 	"github.com/mongodb/grip/level"
 	"github.com/mongodb/grip/message"
-	"github.com/pkg/errors"
 )
 
 // WriterSender wraps another sender and also provides an io.Writer.
@@ -21,7 +20,6 @@ type WriterSender struct {
 	buffer   *bytes.Buffer
 	priority level.Priority
 	mu       sync.Mutex
-	closed   bool
 }
 
 // NewWriterSender wraps another sender and also provides an io.Writer.
@@ -92,28 +90,18 @@ func (s *WriterSender) doSend() error {
 	}
 }
 
-// Close writes any buffered messages to the underlying Sender and closes the
-// underlying sender.
+// Close writes any buffered messages to the underlying Sender. Does
+// not close the underlying sender.
 func (s *WriterSender) Close() error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	if s.closed {
-		return nil
-	}
-	defer func() {
-		s.closed = true
-	}()
-
 	if err := s.writer.Flush(); err != nil {
 		return err
 	}
+
 	s.Send(message.NewBytesMessage(s.priority, bytes.TrimRightFunc(s.buffer.Bytes(), unicode.IsSpace)))
-	if err := s.Sender.Close(); err != nil {
-		return errors.Wrap(err, "failed to close underlying sender")
-	}
 	s.buffer.Reset()
 	s.writer.Reset(s.buffer)
-
 	return nil
 }

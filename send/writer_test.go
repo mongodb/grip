@@ -40,7 +40,7 @@ func TestSenderWriter(t *testing.T) {
 	assert.True(m.Logged)
 	assert.Equal(m.Message.String(), "hello world")
 	// the above trimmed the final new line off, which is correct,
-	// given how senders will actually newline delimit messages anyway.
+	// given how senders will actually newline deelimit messages anyway.
 	//
 	// at the same time, we should make sure that we preserve newlines internally
 	msg = []byte("hello world\nhello grip\n")
@@ -71,20 +71,17 @@ func TestSenderWriter(t *testing.T) {
 	assert.NotEqual(ws.buffer.Len(), 0)
 	assert.NoError(ws.Close())
 	assert.True(sink.HasMessage())
-	m, ok := sink.GetMessageSafe()
-	require.True(ok)
+	m = sink.GetMessage()
 	assert.True(m.Logged)
 	assert.Equal(m.Message.String(), "hello world")
 	numMessages := sink.Len()
 	assert.Equal(ws.buffer.Len(), 0)
 	assert.Equal(numMessages, sink.Len())
 
-	assert.Equal(ws.buffer.Len(), 0)
+	for i := 0; i < 10; i++ {
+		assert.NoError(ws.Close())
+		assert.False(sink.GetMessage().Logged)
+	}
 
-	// no-op on subsequent closes
-	n, err = ws.Write(msg)
-	assert.Equal(len(msg), n)
-	require.NoError(err)
-	require.NoError(ws.Close())
-	assert.Zero(sink.Len())
+	assert.Equal(ws.buffer.Len(), 0)
 }
