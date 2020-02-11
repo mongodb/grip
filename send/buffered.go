@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/mongodb/grip/message"
-	"github.com/pkg/errors"
 )
 
 const minInterval = 5 * time.Second
@@ -82,8 +81,8 @@ func (s *bufferedSender) Flush(_ context.Context) error {
 	return nil
 }
 
-// Close writes any buffered messages to the underlying Sender and closes the
-// underlying sender.
+// Close writes any buffered messages to the underlying Sender. This does not
+// close the underlying sender.
 func (s *bufferedSender) Close() error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -92,17 +91,11 @@ func (s *bufferedSender) Close() error {
 		return nil
 	}
 
-	defer func() {
-		s.closed = true
-	}()
-
 	s.cancel()
 	if len(s.buffer) > 0 {
 		s.flush()
 	}
-	if err := s.Sender.Close(); err != nil {
-		return errors.Wrap(err, "could not close underlying sender")
-	}
+	s.closed = true
 
 	return nil
 }
