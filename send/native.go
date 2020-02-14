@@ -48,11 +48,8 @@ func MakeFileLogger(filePath string) (Sender, error) {
 
 	s.reset = func() {
 		prefix := fmt.Sprintf("[%s] ", s.Name())
-
 		s.logger = log.New(f, prefix, log.LstdFlags)
-
-		fallback := log.New(os.Stderr, prefix, log.LstdFlags)
-		_ = s.SetErrorHandler(ErrorHandlerFromLogger(fallback))
+		_ = s.SetErrorHandler(ErrorHandlerFromLogger(log.New(os.Stderr, prefix, log.LstdFlags)))
 	}
 
 	s.closer = func() error {
@@ -89,7 +86,8 @@ func NewErrorLogger(name string, l LevelInfo) (Sender, error) {
 }
 
 // WrapWriterLogger constructs a new unconfigured sender that directly wraps any
-// writer implementation.
+// writer implementation. These loggers prepend time and logger name
+// information to the beginning of log lines.
 func WrapWriterLogger(wr io.Writer) Sender {
 	s := &nativeLogger{
 		Base: NewBase(""),
@@ -99,8 +97,7 @@ func WrapWriterLogger(wr io.Writer) Sender {
 	s.level = LevelInfo{level.Trace, level.Trace}
 
 	s.reset = func() {
-		prefix := fmt.Sprintf("[%s] ", s.Name())
-		s.logger = log.New(wr, prefix, log.LstdFlags)
+		s.logger = log.New(wr, fmt.Sprintf("[%s] ", s.Name()), log.LstdFlags)
 		_ = s.SetErrorHandler(ErrorHandlerFromLogger(s.logger))
 	}
 
@@ -109,8 +106,22 @@ func WrapWriterLogger(wr io.Writer) Sender {
 
 // NewWrappedWriterLogger constructs a fully configured Sender
 // implementation that writes all data to the underlying writer.
+// These loggers prepend time and logger name information to the
+// beginning of log lines.
 func NewWrappedWriterLogger(name string, wr io.Writer, l LevelInfo) (Sender, error) {
-	return setup(WrapWriter(wr), name, l)
+	return setup(WrapWriterLogger(wr), name, l)
+}
+
+// WrapWriter produces a simple writer that does not modify the log
+// lines passed to the writer.
+func WrapWriter(wr io.Writer) Sender {
+	s := &nativeLogger{
+		Base: NewBase(""),
+	}
+	_ = s.SetFormatter(MakePlainFormatter())
+	s.level = LevelInfo{level.Trace, level.Trace}
+	s.logger = log.New(wr, "", 0)
+	return s
 }
 
 func (s *nativeLogger) Send(m message.Composer) {
