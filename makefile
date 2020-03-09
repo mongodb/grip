@@ -12,7 +12,7 @@ $(buildDir)/.lintSetup:$(buildDir)/golangci-lint
 	@mkdir -p $(buildDir)
 	@touch $@
 $(buildDir)/golangci-lint:$(buildDir)
-	@curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(buildDir) v1.10.2 >/dev/null 2>&1 && touch $@
+	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/76a82c6ed19784036bbf2d4c84d0228ca12381a4/install.sh | sh -s -- -b $(buildDir) v1.23.8 >/dev/null 2>&1
 $(buildDir)/run-linter:buildscripts/run-linter.go $(buildDir)/.lintSetup
 	@mkdir -p $(buildDir)
 	go build -o $@ $<
