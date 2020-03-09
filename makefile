@@ -30,12 +30,8 @@ $(buildDir)/run-linter:buildscripts/run-linter.go $(buildDir)/.lintSetup
 # start dependency installation tools
 #   implementation details for being able to lazily install dependencies
 gopath := $(shell go env GOPATH)
-srcFiles := makefile $(shell find . -name "*.go" -not -path "./$(buildDir)/*" -not -name "*_test.go")
-testSrcFiles := makefile $(shell find . -name "*.go" -not -path "./$(buildDir)/*")
 testOutput := $(foreach target,$(packages),$(buildDir)/output.$(target).test)
 raceOutput := $(foreach target,$(packages),$(buildDir)/output.$(target).race)
-testBin := $(foreach target,$(packages),$(buildDir)/test.$(target))
-raceBin := $(foreach target,$(packages),$(buildDir)/race.$(target))
 coverageOutput := $(foreach target,$(packages),$(buildDir)/output.$(target).coverage)
 coverageHtmlOutput := $(foreach target,$(packages),$(buildDir)/output.$(target).coverage.html)
 # end dependency installation tools
@@ -43,15 +39,15 @@ coverageHtmlOutput := $(foreach target,$(packages),$(buildDir)/output.$(target).
 
 # userfacing targets for basic build and development operations
 lint:$(buildDir)/output.lint
-build:$(deps) $(srcFiles) $(gopath)/src/$(projectPath)
+build: $(gopath)/src/$(projectPath)
 	go build $(subst $(name),,$(subst -,/,$(foreach pkg,$(packages),./$(pkg))))
-build-race:$(deps) $(srcFiles) $(gopath)/src/$(projectPath)
+build-race: $(gopath)/src/$(projectPath)
 	go build -race $(subst -,/,$(foreach pkg,$(packages),./$(pkg)))
 test:$(testOutput)
 race:$(raceOutput)
 coverage:$(coverageOutput)
 coverage-html:$(coverageHtmlOutput)
-phony := lint build build-race race test benchmark-send coverage coverage-html deps
+phony := lint build build-race race test benchmark-send coverage coverage-html
 .PRECIOUS:$(testOutput) $(raceOutput) $(coverageOutput) $(coverageHtmlOutput)
 .PRECIOUS:$(foreach target,$(packages),$(buildDir)/test.$(target))
 .PRECIOUS:$(foreach target,$(packages),$(buildDir)/race.$(target))
@@ -68,9 +64,9 @@ $(gopath)/src/$(projectPath):$(gopath)/src/$(orgPath)
 	@[ -L $@ ] || ln -s $(shell pwd) $@
 $(name):$(buildDir)/$(name)
 	@[ -L $@ ] || ln -s $< $@
-$(buildDir)/$(name):$(gopath)/src/$(projectPath) $(srcFiles) $(deps)
+$(buildDir)/$(name):$(gopath)/src/$(projectPath)
 	go build -o $@ main/$(name).go
-$(buildDir)/$(name).race:$(gopath)/src/$(projectPath) $(srcFiles) $(deps)
+$(buildDir)/$(name).race:$(gopath)/src/$(projectPath)
 	go build -race -o $@ main/$(name).go
 
 # convenience targets for runing tests and coverage tasks on a
@@ -117,10 +113,10 @@ $(buildDir)/output.$(name).race: .FORCE
 	@mkdir -p $(buildDir)
 	go test -race $(testArgs) ./ 2>&1 | tee $@
 #  targets to generate gotest output from the linter.
-$(buildDir)/output.%.lint:$(buildDir)/run-linter $(testSrcFiles) .FORCE
-	@./$< --output=$@ --lintArgs='$(lintArgs)' --packages='$*'
+$(buildDir)/output.%.lint:$(buildDir)/run-linter .FORCE
+	@./$< --output=$@ --lintBin=$(buildDir)/golangci-lint --packages='$*'
 $(buildDir)/output.lint:$(buildDir)/run-linter .FORCE
-	@./$< --output="$@" --lintArgs='$(lintArgs)' --packages="$(packages)"
+	@./$< --output=$@ --lintBin=$(buildDir)/golangci-lint --packages='$(packages)'
 #  targets to process and generate coverage reports
 $(buildDir)/output.%.coverage: .FORCE
 	@mkdir -p $(buildDir)
@@ -149,7 +145,7 @@ phony += vendor-clean
 
 # clean and other utility targets
 clean:
-	rm -rf $(name) $(lintDeps) $(buildDir)/test.* $(buildDir)/coverage.* $(buildDir)/race.*
+	rm -rf $(name) $(lintDeps) $(buildDir)/output.*
 phony += clean
 # end dependency targets
 
