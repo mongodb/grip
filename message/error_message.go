@@ -73,12 +73,12 @@ func (m *errorComposerWrap) Format(s fmt.State, verb rune) {
 	case 'v':
 		if s.Flag('+') {
 			fmt.Fprintf(s, "%+v\n", errors.Cause(m.err))
-			io.WriteString(s, m.String())
+			_, _ = io.WriteString(s, m.String())
 			return
 		}
 		fallthrough
 	case 's', 'q':
-		io.WriteString(s, m.Error())
+		_, _ = io.WriteString(s, m.Error())
 	}
 }
 
