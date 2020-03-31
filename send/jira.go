@@ -297,6 +297,8 @@ type JiraOauthCredentials struct {
 	ConsumerKey string
 }
 
+// Oauth1Client is used to generate a http.Client that supports OAuth 1.0, to be used as the
+// HTTP client in the Jira client implementation above
 func Oauth1Client(ctx context.Context, credentials JiraOauthCredentials) (*http.Client, error) {
 	keyDERBlock, _ := pem.Decode(credentials.PrivateKey)
 	if keyDERBlock == nil {
