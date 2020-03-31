@@ -2,7 +2,8 @@ package send
 
 import (
 	"context"
-	"errors"
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -11,8 +12,10 @@ import (
 	"strings"
 
 	jira "github.com/andygrunwald/go-jira"
+	"github.com/dghubble/oauth1"
 	"github.com/mongodb/grip/level"
 	"github.com/mongodb/grip/message"
+	"github.com/pkg/errors"
 	"github.com/trivago/tgo/tcontainer"
 )
 
@@ -285,4 +288,34 @@ func (c *jiraClientImpl) PostIssue(issueFields *jira.IssueFields) (string, error
 func (c *jiraClientImpl) PostComment(issueID string, commentToPost string) error {
 	_, _, err := c.Client.Issue.AddComment(issueID, &jira.Comment{Body: commentToPost})
 	return err
+}
+
+type JiraOauthCredentials struct {
+	PrivateKey  []byte
+	AccessToken string
+	TokenSecret string
+	ConsumerKey string
+}
+
+func Oauth1Client(ctx context.Context, credentials JiraOauthCredentials) (*http.Client, error) {
+	keyDERBlock, _ := pem.Decode(credentials.PrivateKey)
+	if keyDERBlock == nil {
+		return nil, errors.New("unable to decode jira private key")
+	}
+	if !(keyDERBlock.Type == "PRIVATE KEY" || strings.HasSuffix(keyDERBlock.Type, " PRIVATE KEY")) {
+		return nil, errors.Errorf("malformed key block type: %s", keyDERBlock.Type)
+	}
+	privateKey, err := x509.ParsePKCS1PrivateKey(keyDERBlock.Bytes)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to parse jira private key")
+	}
+	oauthConfig := oauth1.Config{
+		ConsumerKey: credentials.ConsumerKey,
+		CallbackURL: "oob",
+		Signer: &oauth1.RSASigner{
+			PrivateKey: privateKey,
+		},
+	}
+	oauthToken := oauth1.NewToken(credentials.AccessToken, credentials.TokenSecret)
+	return oauthConfig.Client(ctx, oauthToken), nil
 }
