@@ -57,7 +57,8 @@ func MakeJiraLogger(ctx context.Context, opts *JiraOptions) (Sender, error) {
 }
 
 // NewJiraLogger constructs a Sender that creates issues to jira, given
-// options defined in a JiraOptions struct.
+// options defined in a JiraOptions struct. ctx is used as the request context
+// in the OAuth HTTP client
 func NewJiraLogger(ctx context.Context, opts *JiraOptions, l LevelInfo) (Sender, error) {
 	if err := opts.Validate(); err != nil {
 		return nil, err
@@ -298,7 +299,7 @@ func (c *jiraClientImpl) Authenticate(ctx context.Context, opts jiraAuthOpts) er
 			TokenSecret: opts.tokenSecret,
 			ConsumerKey: opts.consumerKey,
 		}
-		httpClient, err := Oauth1Client(ctx, credentials)
+		httpClient, err := oauth1Client(ctx, credentials)
 		if err != nil {
 			return err
 		}
@@ -341,9 +342,9 @@ type JiraOauthCredentials struct {
 	ConsumerKey string
 }
 
-// Oauth1Client is used to generate a http.Client that supports OAuth 1.0, to be used as the
+// oauth1Client is used to generate a http.Client that supports OAuth 1.0, to be used as the
 // HTTP client in the Jira client implementation above
-func Oauth1Client(ctx context.Context, credentials JiraOauthCredentials) (*http.Client, error) {
+func oauth1Client(ctx context.Context, credentials JiraOauthCredentials) (*http.Client, error) {
 	keyDERBlock, _ := pem.Decode(credentials.PrivateKey)
 	if keyDERBlock == nil {
 		return nil, errors.New("unable to decode jira private key")
