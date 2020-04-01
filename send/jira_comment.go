@@ -23,7 +23,8 @@ func MakeJiraCommentLogger(ctx context.Context, id string, opts *JiraOptions) (S
 }
 
 // NewJiraCommentLogger constructs a Sender that creates issues to jira, given
-// options defined in a JiraOptions struct. id parameter is the ID of the issue
+// options defined in a JiraOptions struct. id parameter is the ID of the issue.
+// ctx is used as the request context in the OAuth HTTP client
 func NewJiraCommentLogger(ctx context.Context, id string, opts *JiraOptions, l LevelInfo) (Sender, error) {
 	if err := opts.Validate(); err != nil {
 		return nil, err
