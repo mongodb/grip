@@ -290,6 +290,7 @@ func (c *jiraClientImpl) Authenticate(ctx context.Context, opts jiraAuthOpts) er
 				return fmt.Errorf("problem authenticating to jira as '%s'", opts.username)
 			}
 		}
+		return nil
 	} else if opts.accessToken != "" {
 		credentials := JiraOauthCredentials{
 			PrivateKey:  opts.privateKey,
@@ -304,7 +305,7 @@ func (c *jiraClientImpl) Authenticate(ctx context.Context, opts jiraAuthOpts) er
 		return c.CreateClient(httpClient, c.baseURL)
 	}
 
-	return nil
+	return errors.New("no authentication method specified")
 }
 
 func (c *jiraClientImpl) PostIssue(issueFields *jira.IssueFields) (string, error) {
