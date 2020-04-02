@@ -299,7 +299,7 @@ func (c *jiraClientImpl) Authenticate(ctx context.Context, opts jiraAuthOpts) er
 			TokenSecret: opts.tokenSecret,
 			ConsumerKey: opts.consumerKey,
 		}
-		httpClient, err := oauth1Client(ctx, credentials)
+		httpClient, err := Oauth1Client(ctx, credentials)
 		if err != nil {
 			return err
 		}
@@ -342,9 +342,9 @@ type JiraOauthCredentials struct {
 	ConsumerKey string
 }
 
-// oauth1Client is used to generate a http.Client that supports OAuth 1.0, to be used as the
+// Oauth1Client is used to generate a http.Client that supports OAuth 1.0, to be used as the
 // HTTP client in the Jira client implementation above
-func oauth1Client(ctx context.Context, credentials JiraOauthCredentials) (*http.Client, error) {
+func Oauth1Client(ctx context.Context, credentials JiraOauthCredentials) (*http.Client, error) {
 	keyDERBlock, _ := pem.Decode(credentials.PrivateKey)
 	if keyDERBlock == nil {
 		return nil, errors.New("unable to decode jira private key")
