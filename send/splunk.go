@@ -206,7 +206,7 @@ func (c *splunkClientImpl) Create(client *http.Client, info SplunkConnectionInfo
 	}
 
 	c.HEC.SetKeepAlive(false)
-	c.HEC.SetMaxRetry(0)
+	c.HEC.SetMaxRetry(2)
 	c.HEC.SetHTTPClient(client)
 
 	return nil
