@@ -28,7 +28,7 @@ func NewGroupComposer(msgs []Composer) Composer {
 	}
 }
 
-// BuildGroupComposer constructs a group composer from a collection of composers.
+// NewGroupComposerWithPriority constructs a group composer from a collection of composers.
 func NewGroupComposerWithPriority(p level.Priority, msgs []Composer) Composer {
 	cmp := NewGroupComposer(msgs)
 	_ = cmp.SetPriority(p)
@@ -159,7 +159,7 @@ func (g *GroupComposer) Messages() []Composer {
 	return g.messages
 }
 
-// Add supports add messages to an existing group composer.
+// Add supports adding messages to an existing group composer.
 func (g *GroupComposer) Add(msg Composer) {
 	g.mutex.Lock()
 	defer g.mutex.Unlock()
