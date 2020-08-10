@@ -131,7 +131,6 @@ vendor-clean:
 	rm -rf vendor/github.com/mattn/go-xmpp/_example/
 	rm -rf vendor/github.com/bluele/slack/examples/
 	sed -ri 's%(\tlog.*)%// \1%g' `find vendor/github.com/nutmegdevelopment/sumologic/upload/upload.go`
-	sed -ri 's/json:"(.*)"/json:"\1" bson:"\1,omitempty"/' `grep -R -l 'json:\".*\" [^bson]' vendor/github.com/shirou/gopsutil/*` || true
 	find vendor/ -name "*.go" | xargs gofmt -w -r '"golang.org/x/net/context" -> "context"'
 	find vendor/github.com/shirou/gopsutil/ -name "*.go" | xargs -n 1 gofmt -w || true
 	find vendor/ -name "*.gif" -o -name "*.gz" -o -name "*.png" -o -name "*.ico" -o -name "*.dat" -o -name "*testdata" | xargs rm -fr
