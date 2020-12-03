@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	"github.com/mongodb/grip/message"
-	"github.com/mongodb/grip/send"
 )
 
 // MockSender is a simple mock implementation of the Sender interface.
@@ -16,13 +15,13 @@ type MockSender struct {
 	CloseErr bool
 	Closed   bool
 
-	*send.Base
+	*Base
 }
 
 // NewMockSender returns a MockSender with the given name.
 func NewMockSender(name string) *MockSender {
 	return &MockSender{
-		Base: send.NewBase(name),
+		Base: NewBase(name),
 	}
 }
 
