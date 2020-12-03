@@ -29,7 +29,8 @@ func (s *MockSender) Send(m message.Composer) {
 	s.Messages = append(s.Messages, m)
 }
 
-// Flush noops unless the FlushErr flag is set to true.
+// Flush noops unless FlushErr is set to true, in which case an error is
+// returned.
 func (s *MockSender) Flush(_ context.Context) error {
 	if s.FlushErr {
 		return errors.New("flush error")
@@ -38,8 +39,8 @@ func (s *MockSender) Flush(_ context.Context) error {
 	return nil
 }
 
-// Close sets the Closed flag to true. If either the CloseErr flag or the Close
-// flag are set to true, and error is returned.
+// Close sets Closed to true. If either CloseErr or Close are set to true, an
+// error is returned.
 func (s *MockSender) Close() error {
 	if s.CloseErr {
 		return errors.New("close error")
