@@ -39,7 +39,7 @@ func (s *MockSender) Flush(_ context.Context) error {
 	return nil
 }
 
-// Close sets Closed to true. If either CloseErr or Close are set to true, an
+// Close sets Closed to true. If either CloseErr or Closed are set to true, an
 // error is returned.
 func (s *MockSender) Close() error {
 	if s.CloseErr {
