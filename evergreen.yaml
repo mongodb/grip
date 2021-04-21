@@ -112,8 +112,8 @@ buildvariants:
       GO_BIN_PATH: /opt/golang/go1.13/bin/go
       GOROOT: /opt/golang/go1.13
     run_on:
-      - archlinux-test
-      - archlinux-build
+      - archlinux-new-small
+      - archlinux-new-large
     tasks: [ ".race", ".report" ]
 
   - name: ubuntu1604
