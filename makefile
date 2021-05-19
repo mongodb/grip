@@ -22,6 +22,7 @@ endif
 export GOCACHE := $(gocache)
 export GOPATH := $(gopath)
 export GOROOT := $(goroot)
+export GO111MODULE := off
 # end environment setup
 
 # Ensure the build directory exists, since most targets require it.
@@ -30,7 +31,7 @@ $(shell mkdir -p $(buildDir))
 # lint setup targets
 lintDeps := $(buildDir)/golangci-lint $(buildDir)/run-linter
 $(buildDir)/golangci-lint:
-	@curl --retry 10 --retry-max-time 60 -sSfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(buildDir) v1.30.0 >/dev/null 2>&1
+	@curl --retry 10 --retry-max-time 60 -sSfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(buildDir) v1.40.0 >/dev/null 2>&1
 $(buildDir)/run-linter:cmd/run-linter/run-linter.go $(buildDir)/golangci-lint
 	$(gobin) build -o $@ $<
 # end lint setup targets

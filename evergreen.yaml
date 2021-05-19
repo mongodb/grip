@@ -26,7 +26,7 @@ functions:
       working_dir: gopath/src/github.com/mongodb/grip
       binary: make
       args: ["${make_args}", "${target}"]
-      add_expansions_to_env: true
+      include_expansions_in_env: ["DISABLE_COVERAGE", "GO_BIN_PATH", "GOROOT"]
       env:
         GOPATH: ${workdir}/gopath
 
@@ -39,8 +39,6 @@ post:
     params:
       files:
         - "gopath/src/github.com/mongodb/grip/build/output.*"
-        - "gopath/src/github.com/mongodb/grip/build/test.*.out"
-        - "gopath/src/github.com/mongodb/grip/build/race.*.out"
   - command: s3.put
     type: system
     params:
@@ -109,30 +107,30 @@ buildvariants:
     display_name: Race Detector (Arch Linux)
     expansions:
       DISABLE_COVERAGE: true
-      GO_BIN_PATH: /opt/golang/go1.13/bin/go
-      GOROOT: /opt/golang/go1.13
+      GO_BIN_PATH: /opt/golang/go1.16/bin/go
+      GOROOT: /opt/golang/go1.16
     run_on:
       - archlinux-new-small
       - archlinux-new-large
     tasks: [ ".race", ".report" ]
 
-  - name: ubuntu1604
-    display_name: Ubuntu 16.04
+  - name: ubuntu
+    display_name: Ubuntu 18.04
     expansions:
       DISABLE_COVERAGE: true
-      GO_BIN_PATH: /opt/golang/go1.13/bin/go
-      GOROOT: /opt/golang/go1.13
+      GO_BIN_PATH: /opt/golang/go1.16/bin/go
+      GOROOT: /opt/golang/go1.16
     run_on:
-      - ubuntu1604-test
-      - ubuntu1604-build
+      - ubuntu1804-small
+      - ubuntu1804-large
     tasks: [ ".test" ]
 
   - name: macos
     display_name: macOS
     expansions:
       DISABLE_COVERAGE: true
-      GO_BIN_PATH: /opt/golang/go1.13/bin/go
-      GOROOT: /opt/golang/go1.13
+      GO_BIN_PATH: /opt/golang/go1.16/bin/go
+      GOROOT: /opt/golang/go1.16
     run_on:
       - macos-1014
     tasks: [ ".test" ]
@@ -146,6 +144,6 @@ buildvariants:
       - windows-64-vs2017-large
     expansions:
       DISABLE_COVERAGE: true
-      GO_BIN_PATH: /cygdrive/c/golang/go1.13/bin/go
-      GOROOT: C;/golang/go1.13
+      GO_BIN_PATH: /cygdrive/c/golang/go1.16/bin/go
+      GOROOT: C:/golang/go1.16
     tasks: [ ".test" ]
