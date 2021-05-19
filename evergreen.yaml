@@ -26,7 +26,7 @@ functions:
       working_dir: gopath/src/github.com/mongodb/grip
       binary: make
       args: ["${make_args}", "${target}"]
-      add_expansions_to_env: true
+      include_expansions_in_env: ["DISABLE_COVERAGE", "GO_BIN_PATH", "GOROOT"]
       env:
         GOPATH: ${workdir}/gopath
 
