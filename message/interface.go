@@ -36,6 +36,12 @@ type Composer interface {
 	SetPriority(level.Priority) error
 }
 
+// ErrorComposer defines an interface to a Composer that also includes an error.
+type ErrorComposer interface {
+	Composer
+	Error() string
+}
+
 // ConvertToComposer can coerce unknown objects into Composer
 // instances, as possible. This method will override the priority of
 // composers set to it.
