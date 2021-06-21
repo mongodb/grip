@@ -102,7 +102,7 @@ func TestPopulatedMessageComposerConstructors(t *testing.T) {
 }
 
 func TestUnpopulatedMessageComposers(t *testing.T) {
-	assert := assert.New(t) // nolint
+	assert := assert.New(t)
 	// map objects to output
 	cases := []Composer{
 		&stringMessage{},
@@ -280,7 +280,7 @@ func TestStackMessages(t *testing.T) {
 	const testMsg = "hello"
 	var stackMsg = "message/composer_test"
 
-	assert := assert.New(t) // nolint
+	assert := assert.New(t)
 	// map objects to output (prefix)
 	cases := map[Composer]string{
 		NewStack(1, testMsg):                testMsg,
@@ -313,7 +313,7 @@ func TestStackMessages(t *testing.T) {
 
 func TestComposerConverter(t *testing.T) {
 	const testMsg = "hello world"
-	assert := assert.New(t) // nolint
+	assert := assert.New(t)
 
 	cases := []interface{}{
 		NewLine(testMsg),
@@ -359,12 +359,11 @@ func TestComposerConverter(t *testing.T) {
 		assert.True(comp.Loggable())
 		assert.True(strings.HasPrefix(comp.String(), out))
 	}
-
 }
 
 func TestJiraMessageComposerConstructor(t *testing.T) {
 	const testMsg = "hello"
-	assert := assert.New(t) // nolint
+	assert := assert.New(t)
 	reporterField := JiraField{Key: "Reporter", Value: "Annie"}
 	assigneeField := JiraField{Key: "Assignee", Value: "Sejin"}
 	typeField := JiraField{Key: "Type", Value: "Bug"}
@@ -383,7 +382,7 @@ func TestJiraMessageComposerConstructor(t *testing.T) {
 }
 
 func TestProcessTreeDoesNotHaveDuplicates(t *testing.T) {
-	assert := assert.New(t) // nolint
+	assert := assert.New(t)
 
 	procs := CollectProcessInfoWithChildren(1)
 	seen := make(map[int32]struct{})
@@ -398,7 +397,7 @@ func TestProcessTreeDoesNotHaveDuplicates(t *testing.T) {
 }
 
 func TestJiraIssueAnnotationOnlySupportsStrings(t *testing.T) {
-	assert := assert.New(t) // nolint
+	assert := assert.New(t)
 
 	m := &jiraMessage{
 		issue: &JiraIssue{},
@@ -413,8 +412,8 @@ type causer interface {
 	Cause() error
 }
 
-func TestErrors(t *testing.T) {
-	for name, cmp := range map[string]Composer{
+func TestErrorComposers(t *testing.T) {
+	for name, cmp := range map[string]ErrorComposer{
 		"Wrapped": WrapError(errors.New("err"), "msg"),
 		"Plain":   NewError(errors.New("err")),
 	} {
@@ -424,16 +423,15 @@ func TestErrors(t *testing.T) {
 				assert.Implements(t, (*causer)(nil), cmp)
 			})
 			t.Run("Value", func(t *testing.T) {
-				assert.Equal(t, cmp.(error).Error(), cmp.String())
+				assert.Equal(t, cmp.Error(), cmp.String())
 			})
 			t.Run("Causer", func(t *testing.T) {
-				cause := errors.Cause(cmp.(error))
+				cause := errors.Cause(cmp)
 				assert.NotEqual(t, cause, cmp)
 			})
 			t.Run("ExtendedFormat", func(t *testing.T) {
 				assert.NotEqual(t, fmt.Sprintf("%+v", cmp), fmt.Sprintf("%v", cmp))
 			})
-
 		})
 	}
 }

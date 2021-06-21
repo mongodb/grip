@@ -16,7 +16,7 @@ type errorComposerWrap struct {
 
 // NewErrorWrappedComposer provvides a way to construct a log message
 // that annotates an error.
-func NewErrorWrappedComposer(err error, m Composer) Composer {
+func NewErrorWrappedComposer(err error, m Composer) ErrorComposer {
 	return &errorComposerWrap{
 		err:      err,
 		Composer: m,
@@ -28,7 +28,7 @@ func NewErrorWrappedComposer(err error, m Composer) Composer {
 // loggable error message for non-nil errors with a normal formatted
 // message (e.g. fmt.Sprintf). These messages only log if the error is
 // non-nil.
-func NewErrorWrapMessage(p level.Priority, err error, base string, args ...interface{}) Composer {
+func NewErrorWrapMessage(p level.Priority, err error, base string, args ...interface{}) ErrorComposer {
 	return NewErrorWrappedComposer(err, NewFormattedMessage(p, base, args...))
 }
 
@@ -37,19 +37,19 @@ func NewErrorWrapMessage(p level.Priority, err error, base string, args ...inter
 // message for non-nil errors with a normal formatted message
 // (e.g. fmt.Sprintf). These messages only log if the error is
 // non-nil.
-func NewErrorWrap(err error, base string, args ...interface{}) Composer {
+func NewErrorWrap(err error, base string, args ...interface{}) ErrorComposer {
 	return NewErrorWrappedComposer(err, NewFormatted(base, args...))
 }
 
 // WrapError wraps an error and creates a composer converting the
 // argument into a composer in the same manner as the front end logging methods.
-func WrapError(err error, m interface{}) Composer {
+func WrapError(err error, m interface{}) ErrorComposer {
 	return NewErrorWrappedComposer(err, ConvertToComposer(level.Priority(0), m))
 }
 
 // WrapErrorf wraps an error and creates a composer using a
 // Sprintf-style formated composer.
-func WrapErrorf(err error, msg string, args ...interface{}) Composer {
+func WrapErrorf(err error, msg string, args ...interface{}) ErrorComposer {
 	return NewErrorWrappedComposer(err, NewFormatted(msg, args...))
 }
 
