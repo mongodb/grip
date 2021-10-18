@@ -12,12 +12,28 @@ ifneq (,$(GOROOT))
 gobin := $(GOROOT)/bin/go
 endif
 
+gocache := $(GOCACHE)
+ifeq (,$(gocache))
+gocache := $(abspath $(buildDir)/.cache)
+endif
+lintCache := $(GOLANGCI_LINT_CACHE)
+ifeq (,$(lintCache))
+lintCache := $(abspath $(buildDir)/.lint-cache)
+endif
+
 ifeq ($(OS),Windows_NT)
 gobin := $(shell cygpath $(gobin))
-export GOCACHE := $(shell cygpath -m $(abspath $(buildDir)/.cache))
-export GOLANGCI_LINT_CACHE := $(shell cygpath -m $(abspath $(buildDir)/.lint-cache))
+gocache := $(shell cygpath -m $(gocache))
+lintCache := $(shell cygpath -m $(lintCache))
 export GOPATH := $(shell cygpath -m $(GOPATH))
 export GOROOT := $(shell cygpath -m $(GOROOT))
+endif
+
+ifneq ($(gocache),$(GOCACHE))
+export GOCACHE := $(gocache)
+endif
+ifneq ($(lintCache),$(GOLANGCI_LINT_CACHE))
+export GOLANGCI_LINT_CACHE := $(lintCache)
 endif
 
 export GO111MODULE := off
@@ -35,7 +51,6 @@ $(shell mkdir -p $(buildDir))
 .DEFAULT_GOAL := compile
 
 # start lint setup targets
-lintDeps := $(buildDir)/golangci-lint $(buildDir)/run-linter
 $(buildDir)/golangci-lint:
 	@curl --retry 10 --retry-max-time 60 -sSfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(buildDir) v1.40.0 >/dev/null 2>&1
 $(buildDir)/run-linter: cmd/run-linter/run-linter.go $(buildDir)/golangci-lint
@@ -64,13 +79,13 @@ phony := compile lint test coverage coverage-html benchmark-send
 # start convenience targets for running tests and coverage tasks on a
 # specific package.
 test-%: $(buildDir)/output.%.test
-	@grep -s -q -e "^PASS" $<
+	
 coverage-%: $(buildDir)/output.%.coverage
-	@grep -s -q -e "^PASS" $(buildDir)/output.$*.test
+	
 html-coverage-%: $(buildDir)/output.%.coverage $(buildDir)/output.%.coverage.html
-	@grep -s -q -e "^PASS" $(buildDir)/output.$*.test
+	
 lint-%: $(buildDir)/output.%.lint
-	@grep -v -s -q "^--- FAIL" $<
+	
 # end convenience targets
 # end basic development targets
 
@@ -87,9 +102,11 @@ testArgs += -cover
 endif
 $(buildDir)/output.%.test: .FORCE
 	$(gobin) test $(testArgs) ./$(if $(subst $(name),,$*),$(subst -,/,$*),) | tee $@
+	@grep -s -q -e "^PASS" $@
 $(buildDir)/output.%.coverage: .FORCE
 	$(gobin) test $(testArgs) -covermode=count -coverprofile=$@ | tee $(buildDir)/output.$*.test
 	@-[ -f $@ ] && $(gobin) tool cover -func=$@ | sed 's%$(projectPath)/%%' | column -t
+	@grep -s -q -e "^PASS" $(subst coverage,test,$@)
 $(buildDir)/output.%.coverage.html: $(buildDir)/output.%.coverage
 	$(gobin) tool cover -html=$< -o $@
 
