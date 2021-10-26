@@ -153,7 +153,7 @@ func (f StackFrame) String() string {
 	}
 
 	var funcName, filePath string
-	if funcName := f.Function[strings.LastIndex(f.Function, ".")+1:]; funcName != f.Function {
+	if funcName = f.Function[strings.LastIndex(f.Function, ".")+1:]; funcName != f.Function {
 		// len(importPathAndFuncName) > 1 {
 		// If the function name includes the file path in it, its format will
 		// be:
