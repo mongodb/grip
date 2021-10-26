@@ -9,8 +9,6 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-
-	"github.com/mongodb/grip"
 )
 
 type result struct {
@@ -135,7 +133,7 @@ func main() {
 
 		for _, r := range results {
 			if _, err = f.WriteString(r.String() + "\n"); err != nil {
-				grip.Error(err)
+				fmt.Fprintf(os.Stderr, "%s", err)
 				os.Exit(1)
 			}
 		}
