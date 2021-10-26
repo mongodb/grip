@@ -143,33 +143,34 @@ func (f stackFrames) String() string {
 }
 
 func (f StackFrame) String() string {
-	if strings.HasPrefix(f.File, build.Default.GOPATH) {
-		funcNameParts := strings.Split(f.Function, ".")
-		var fname string
-		if len(funcNameParts) > 0 {
-			fname = funcNameParts[len(funcNameParts)-1]
-		} else {
-			fname = f.Function
-
-		}
-
-		return fmt.Sprintf("%s:%d (%s)",
-			f.File[len(build.Default.GOPATH)+5:],
-			f.Line,
-			fname)
-	}
-
 	if strings.HasPrefix(f.File, build.Default.GOROOT) {
+		// If the function's file is in the GOROOT, its format is:
+		// "<GOROOT>/src/<file_path>"
+		// Trim the "<GOROOT>/src/" prefix.
 		return fmt.Sprintf("%s:%d",
 			f.File[len(build.Default.GOROOT)+5:],
 			f.Line)
 	}
 
-	dir, fileName := filepath.Split(f.File)
+	var funcName, filePath string
+	if funcName := f.Function[strings.LastIndex(f.Function, ".")+1:]; funcName != f.Function {
+		// len(importPathAndFuncName) > 1 {
+		// If the function name includes the file path in it, its format will
+		// be:
+		// "<import_path>.<func_name>".
+		importPath := strings.TrimSuffix(f.Function, "."+funcName)
+		// The import path only includes the package containing the file and not
+		// the file name itself. Construct the file path from its import path
+		// and file name.
+		filePath = strings.Join([]string{importPath, filepath.Base(f.File)}, "/")
+	} else {
+		// If the function name does not include the import path, use the
+		// absolute file path as fallback.
+		funcName = f.Function
+		filePath = f.File
+	}
 
-	return fmt.Sprintf("%s:%d",
-		filepath.Join(filepath.Base(dir), fileName),
-		f.Line)
+	return fmt.Sprintf("%s:%d (%s)", filePath, f.Line, funcName)
 }
 
 func captureStack(skip int) []StackFrame {
