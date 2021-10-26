@@ -71,7 +71,22 @@ post:
 tasks:
   - <<: *run-build
     tags: ["report"]
-    name: lint
+    name: lint-grip
+  - <<: *run-build
+    tags: ["report"]
+    name: lint-logging
+  - <<: *run-build
+    tags: ["report"]
+    name: lint-message
+  - <<: *run-build
+    tags: ["report"]
+    name: lint-recovery
+  - <<: *run-build
+    tags: ["report"]
+    name: lint-send
+  - <<: *run-build
+    tags: ["report"]
+    name: lint-slogger
 
   - <<: *run-build
     tags: ["report"]
@@ -79,7 +94,22 @@ tasks:
 
   - <<: *run-build
     tags: ["test"]
-    name: test
+    name: test-grip
+  - <<: *run-build
+    tags: ["test"]
+    name: test-logging
+  - <<: *run-build
+    tags: ["test"]
+    name: test-message
+  - <<: *run-build
+    tags: ["test"]
+    name: test-recovery
+  - <<: *run-build
+    tags: ["test"]
+    name: test-send
+  - <<: *run-build
+    tags: ["test"]
+    name: test-slogger
 
   - <<: *run-build
     tags: ["test"]
