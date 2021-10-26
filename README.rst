@@ -2,8 +2,6 @@
 ``grip`` -- A Go Library for Logging and Error Handling
 =======================================================
 
-*Under Construction*
-
 ``grip`` isn't any thing special, but it does a few pretty great
 things:
 
@@ -25,13 +23,13 @@ Download:
 
 ::
 
-   go get -u github.com/tychoish/grip
+   go get -u github.com/mongodb/grip
 
 Import:
 
 ::
 
-   import "github.com/tychoish/grip"
+   import "github.com/mongodb/grip"
 
 Components
 ----------
@@ -54,7 +52,7 @@ SetSender() and CloneSender() methods allow to replace the sender
 implementation in your logger.
 
 See the documentation of the `Sender interface
-<https://godoc.org/github.com/tychoish/grip/send#Sender>`_ for more
+<https://godoc.org/github.com/mongodb/grip/send#Sender>`_ for more
 information on building new senders.
 
 Logging
