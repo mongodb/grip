@@ -221,7 +221,11 @@ func (p *ProcessInfo) populate(proc *process.Process) {
 	p.Threads = int(threads)
 	p.saveError("num_threads", err)
 
-	p.NetStat, err = proc.NetIOCounters(false)
+	// TODO: should this be removed entirely? process.NetIOCounters is not
+	// useful on Linux and is equivalent to the system-wide net.IOCounters,
+	// which is not per-process.
+	// Issue: https://github.com/shirou/gopsutil/issues/429
+	p.NetStat, err = net.IOCounters(false)
 	p.saveError("netstat", err)
 
 	p.Command, err = proc.Cmdline()
