@@ -6,8 +6,8 @@ import (
 	"sync"
 
 	"github.com/mongodb/grip/level"
-	"github.com/shirou/gopsutil/net"
-	"github.com/shirou/gopsutil/process"
+	"github.com/shirou/gopsutil/v3/net"
+	"github.com/shirou/gopsutil/v3/process"
 )
 
 // ProcessInfo holds the data for per-process statistics (e.g. cpu,
