@@ -94,7 +94,7 @@ tasks:
       - command: git.get_project
         type: system
         params:
-          directory: amboy
+          directory: grip
       - func: run-make
         vars: { target: "${task_name}" }
 
