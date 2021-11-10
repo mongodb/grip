@@ -88,6 +88,16 @@ tasks:
     tags: ["report"]
     name: lint-slogger
 
+  - name: verify-mod-tidy
+    tags: ["report"]
+    commands:
+      - command: git.get_project
+        type: system
+        params:
+          directory: amboy
+      - func: run-make
+        vars: { target: "${task_name}" }
+
   - <<: *run-build
     tags: ["report"]
     name: coverage
