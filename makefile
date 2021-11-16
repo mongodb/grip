@@ -102,11 +102,11 @@ testArgs := -v
 ifneq (,$(RUN_TEST))
 testArgs += -run='$(RUN_TEST)'
 endif
+ifneq (,$(RUN_COUNT))
+testArgs += -count=$(RUN_COUNT)
+endif
 ifneq (,$(RACE_DETECTOR))
 testArgs += -race
-endif
-ifeq (,$(DISABLE_COVERAGE))
-testArgs += -cover
 endif
 $(buildDir)/output.%.test: .FORCE
 	$(gobin) test $(testArgs) ./$(if $(subst $(name),,$*),$(subst -,/,$*),) | tee $@
