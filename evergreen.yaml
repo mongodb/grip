@@ -6,6 +6,7 @@ variables:
     # runs a build operation. The task name in evergreen should
     # correspond to a make target for the build operation.
     name: test
+    must_have_test_results: true
     commands:
       - func: get-project-and-modules
       - func: run-make
@@ -124,6 +125,7 @@ tasks:
   - <<: *run-build
     tags: ["test"]
     name: benchmark-send
+    must_have_test_results: false
 
 #######################################
 #           Buildvariants             #
