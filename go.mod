@@ -8,7 +8,7 @@ require (
 	github.com/coreos/go-systemd v0.0.0-20160607160209-6dc8b843c670
 	github.com/dghubble/oauth1 v0.7.0
 	github.com/fuyufjh/splunk-hec-go v0.3.4-0.20190414090710-10df423a9f36
-	github.com/google/go-github v8.0.1-0.20170604030111-7a51fb928f52+incompatible
+	github.com/google/go-github v17.0.0+incompatible
 	github.com/mattn/go-xmpp v0.0.0-20161121012536-f4550b539938
 	github.com/montanaflynn/stats v0.0.0-20180911141734-db72e6cae808
 	github.com/pkg/errors v0.9.1
