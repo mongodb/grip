@@ -297,9 +297,9 @@ func (s *SMTPSuite) TestSendMethodWithEmailComposerOverridesSMTPOptions() {
 		Body:              "just a test",
 		PlainTextContents: true,
 		Headers: map[string][]string{
-			"X-Custom-Header":           []string{"special"},
-			"Content-Type":              []string{"something/proprietary"},
-			"Content-Transfer-Encoding": []string{"somethingunexpected"},
+			"X-Custom-Header":           {"special"},
+			"Content-Type":              {"something/proprietary"},
+			"Content-Transfer-Encoding": {"somethingunexpected"},
 		},
 	})
 	s.True(m.Loggable())

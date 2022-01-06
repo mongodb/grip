@@ -45,14 +45,14 @@ func (s *LoggingMethodSuite) SetupTest() {
 
 func (s *LoggingMethodSuite) TestWhenMethods() {
 	cases := map[string][]whenMethod{
-		"emergency": []whenMethod{EmergencyWhen, s.logger.EmergencyWhen},
-		"alert":     []whenMethod{AlertWhen, s.logger.AlertWhen},
-		"critical":  []whenMethod{CriticalWhen, s.logger.CriticalWhen},
-		"error":     []whenMethod{ErrorWhen, s.logger.ErrorWhen},
-		"warning":   []whenMethod{WarningWhen, s.logger.WarningWhen},
-		"notice":    []whenMethod{NoticeWhen, s.logger.NoticeWhen},
-		"info":      []whenMethod{InfoWhen, s.logger.InfoWhen},
-		"debug":     []whenMethod{DebugWhen, s.logger.DebugWhen},
+		"emergency": {EmergencyWhen, s.logger.EmergencyWhen},
+		"alert":     {AlertWhen, s.logger.AlertWhen},
+		"critical":  {CriticalWhen, s.logger.CriticalWhen},
+		"error":     {ErrorWhen, s.logger.ErrorWhen},
+		"warning":   {WarningWhen, s.logger.WarningWhen},
+		"notice":    {NoticeWhen, s.logger.NoticeWhen},
+		"info":      {InfoWhen, s.logger.InfoWhen},
+		"debug":     {DebugWhen, s.logger.DebugWhen},
 	}
 
 	for kind, loggers := range cases {
@@ -83,14 +83,14 @@ func (s *LoggingMethodSuite) TestWhenMethods() {
 
 func (s *LoggingMethodSuite) TestBasicMethod() {
 	cases := map[string][]basicMethod{
-		"emergency": []basicMethod{Emergency, s.logger.Emergency},
-		"alert":     []basicMethod{Alert, s.logger.Alert},
-		"critical":  []basicMethod{Critical, s.logger.Critical},
-		"error":     []basicMethod{Error, s.logger.Error},
-		"warning":   []basicMethod{Warning, s.logger.Warning},
-		"notice":    []basicMethod{Notice, s.logger.Notice},
-		"info":      []basicMethod{Info, s.logger.Info},
-		"debug":     []basicMethod{Debug, s.logger.Debug},
+		"emergency": {Emergency, s.logger.Emergency},
+		"alert":     {Alert, s.logger.Alert},
+		"critical":  {Critical, s.logger.Critical},
+		"error":     {Error, s.logger.Error},
+		"warning":   {Warning, s.logger.Warning},
+		"notice":    {Notice, s.logger.Notice},
+		"info":      {Info, s.logger.Info},
+		"debug":     {Debug, s.logger.Debug},
 	}
 
 	inputs := []interface{}{true, false, []string{"a", "b"}, message.Fields{"a": 1}, 1, "foo"}
@@ -117,14 +117,14 @@ func (s *LoggingMethodSuite) TestBasicMethod() {
 
 func (s *LoggingMethodSuite) TestlnMethods() {
 	cases := map[string][]lnMethod{
-		"emergency": []lnMethod{Emergencyln, s.logger.Emergencyln},
-		"alert":     []lnMethod{Alertln, s.logger.Alertln},
-		"critical":  []lnMethod{Criticalln, s.logger.Criticalln},
-		"error":     []lnMethod{Errorln, s.logger.Errorln},
-		"warning":   []lnMethod{Warningln, s.logger.Warningln},
-		"notice":    []lnMethod{Noticeln, s.logger.Noticeln},
-		"info":      []lnMethod{Infoln, s.logger.Infoln},
-		"debug":     []lnMethod{Debugln, s.logger.Debugln},
+		"emergency": {Emergencyln, s.logger.Emergencyln},
+		"alert":     {Alertln, s.logger.Alertln},
+		"critical":  {Criticalln, s.logger.Criticalln},
+		"error":     {Errorln, s.logger.Errorln},
+		"warning":   {Warningln, s.logger.Warningln},
+		"notice":    {Noticeln, s.logger.Noticeln},
+		"info":      {Infoln, s.logger.Infoln},
+		"debug":     {Debugln, s.logger.Debugln},
 	}
 
 	for kind, loggers := range cases {
@@ -146,14 +146,14 @@ func (s *LoggingMethodSuite) TestlnMethods() {
 
 func (s *LoggingMethodSuite) TestfMethods() {
 	cases := map[string][]fMethod{
-		"emergency": []fMethod{Emergencyf, s.logger.Emergencyf},
-		"alert":     []fMethod{Alertf, s.logger.Alertf},
-		"critical":  []fMethod{Criticalf, s.logger.Criticalf},
-		"error":     []fMethod{Errorf, s.logger.Errorf},
-		"warning":   []fMethod{Warningf, s.logger.Warningf},
-		"notice":    []fMethod{Noticef, s.logger.Noticef},
-		"info":      []fMethod{Infof, s.logger.Infof},
-		"debug":     []fMethod{Debugf, s.logger.Debugf},
+		"emergency": {Emergencyf, s.logger.Emergencyf},
+		"alert":     {Alertf, s.logger.Alertf},
+		"critical":  {Criticalf, s.logger.Criticalf},
+		"error":     {Errorf, s.logger.Errorf},
+		"warning":   {Warningf, s.logger.Warningf},
+		"notice":    {Noticef, s.logger.Noticef},
+		"info":      {Infof, s.logger.Infof},
+		"debug":     {Debugf, s.logger.Debugf},
 	}
 
 	for kind, loggers := range cases {
