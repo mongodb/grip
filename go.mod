@@ -6,7 +6,7 @@ require (
 	github.com/andygrunwald/go-jira v0.0.0-20170512141550-c8c6680f245f
 	github.com/bluele/slack v0.0.0-20180528010058-b4b4d354a079
 	github.com/coreos/go-systemd v0.0.0-20160607160209-6dc8b843c670
-	github.com/dghubble/oauth1 v0.7.0
+	github.com/dghubble/oauth1 v0.7.1
 	github.com/fuyufjh/splunk-hec-go v0.3.4-0.20190414090710-10df423a9f36
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/mattn/go-xmpp v0.0.0-20161121012536-f4550b539938
