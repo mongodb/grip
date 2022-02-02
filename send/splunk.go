@@ -17,6 +17,8 @@ const (
 	splunkServerURL   = "GRIP_SPLUNK_SERVER_URL"
 	splunkClientToken = "GRIP_SPLUNK_CLIENT_TOKEN"
 	splunkChannel     = "GRIP_SPLUNK_CHANNEL"
+
+	splunkSendTimeout = 5 * time.Second
 )
 
 type splunkLogger struct {
@@ -78,7 +80,9 @@ func (s *splunkLogger) Send(m message.Composer) {
 					batch = append(batch, e)
 				}
 			}
-			if err := s.client.WriteBatch(batch); err != nil {
+			ctx, cancel := context.WithTimeout(context.Background(), splunkSendTimeout)
+			defer cancel()
+			if err := s.client.WriteBatchWithContext(ctx, batch); err != nil {
 				s.ErrorHandler()(err, m)
 			}
 			return
@@ -192,7 +196,7 @@ func MakeSplunkLoggerWithClient(name string, client *http.Client) (Sender, error
 type splunkClient interface {
 	Create(*http.Client, SplunkConnectionInfo) error
 	WriteEvent(*hec.Event) error
-	WriteBatch([]*hec.Event) error
+	WriteBatchWithContext(context.Context, []*hec.Event) error
 }
 
 type splunkClientImpl struct {

@@ -1,6 +1,7 @@
 package send
 
 import (
+	"context"
 	"errors"
 	"net/http"
 
@@ -34,7 +35,7 @@ func (c *splunkClientMock) WriteEvent(*hec.Event) error {
 	return nil
 }
 
-func (c *splunkClientMock) WriteBatch(b []*hec.Event) error {
+func (c *splunkClientMock) WriteBatchWithContext(ctx context.Context, b []*hec.Event) error {
 	if c.failSend {
 		return errors.New("write failed")
 	}
