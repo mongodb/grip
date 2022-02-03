@@ -78,8 +78,7 @@ func bufferedSenderCase(ctx context.Context, tm TimerManager, iters int, size in
 	if err != nil {
 		return err
 	}
-	minBufferLength := 5 * time.Second
-	s := send.NewBufferedSender(internal, minBufferLength, 100000)
+	s := send.NewBufferedSender(context.Background(), internal, send.BufferedSenderOptions{FlushInterval: 5 * time.Second, BufferSize: 100000})
 	defer func(s send.Sender) {
 		if e := s.Close(); e != nil {
 			err = e
