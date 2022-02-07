@@ -2,176 +2,134 @@ package send
 
 import (
 	"context"
-	"errors"
+	"sync"
 	"time"
 
 	"github.com/mongodb/grip/message"
 )
 
-const (
-	minInterval          = 5 * time.Second
-	defaultFlushInterval = time.Minute
-	defaultBufferSize    = 100
-
-	incomingBufferFactor = 10
-)
+const minInterval = 5 * time.Second
 
 type bufferedSender struct {
-	ctx        context.Context
-	cancel     context.CancelFunc
-	buffer     []message.Composer
-	opts       BufferedSenderOptions
-	flushTimer *time.Timer
-	incoming   chan message.Composer
-	needsFlush chan bool
+	mu        sync.Mutex
+	cancel    context.CancelFunc
+	buffer    []message.Composer
+	size      int
+	lastFlush time.Time
+	closed    bool
 
 	Sender
 }
 
 // NewBufferedSender provides a Sender implementation that wraps an existing
-// Sender sending messages in batches. Messages are automatically flushed
-// when the buffer reaches a specified size or or after a specified interval
-// has passed.
+// Sender sending messages in batches, on a specified buffer size or after an
+// interval has passed.
+//
+// If the interval is 0, the constructor sets an interval of 1 minute, and if
+// it is less than 5 seconds, the constructor sets it to 5 seconds. If the
+// size threshold is 0, then the constructor sets a threshold of 100.
 //
 // This Sender does not own the underlying Sender, so users are responsible for
 // closing the underlying Sender if/when it is appropriate to release its
 // resources.
-func NewBufferedSender(ctx context.Context, sender Sender, opts BufferedSenderOptions) (Sender, error) {
-	if err := opts.validate(); err != nil {
-		return nil, err
+func NewBufferedSender(sender Sender, interval time.Duration, size int) Sender {
+	if interval == 0 {
+		interval = time.Minute
+	} else if interval < minInterval {
+		interval = minInterval
 	}
 
-	ctx, cancel := context.WithCancel(ctx)
+	if size <= 0 {
+		size = 100
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
 	s := &bufferedSender{
-		Sender:     sender,
-		ctx:        ctx,
-		cancel:     cancel,
-		opts:       opts,
-		buffer:     make([]message.Composer, 0, opts.BufferSize),
-		needsFlush: make(chan bool, 1),
-		incoming:   make(chan message.Composer, incomingBufferFactor*opts.BufferSize),
+		Sender: sender,
+		cancel: cancel,
+		buffer: []message.Composer{},
+		size:   size,
 	}
 
-	go s.processMessages()
+	go s.intervalFlush(ctx, interval)
 
-	return s, nil
-}
-
-// BufferedSenderOptions configure the buffered sender.
-// If FlushInterval is less than 5 seconds, it is set to 5 seconds.
-// If BufferSize threshold is 0, it is set to 100.
-type BufferedSenderOptions struct {
-	// FlushInterval is the interval to automatically flush the buffer.
-	// By default it's set to 1 minute. If it's less than 5 seconds it is set to
-	// 5 seconds.
-	FlushInterval time.Duration
-	// BufferSize is the threshold at which the buffer is flushed.
-	// By default it's set to 100.
-	BufferSize int
-}
-
-func (opts *BufferedSenderOptions) validate() error {
-	if opts.FlushInterval < 0 {
-		return errors.New("FlushInterval can not be negative")
-	}
-	if opts.BufferSize < 0 {
-		return errors.New("BufferSize can not be negative")
-	}
-
-	if opts.FlushInterval == 0 {
-		opts.FlushInterval = defaultFlushInterval
-	} else if opts.FlushInterval < minInterval {
-		opts.FlushInterval = minInterval
-	}
-
-	if opts.BufferSize < 0 {
-		opts.BufferSize = defaultBufferSize
-	}
-
-	return nil
+	return s
 }
 
 func (s *bufferedSender) Send(msg message.Composer) {
-	if s.ctx.Err() != nil {
-		return
-	}
-
 	if !s.Level().ShouldLog(msg) {
 		return
 	}
 
-	select {
-	case s.incoming <- msg:
-	default:
-		if errHandler := s.ErrorHandler(); errHandler != nil {
-			errHandler(errors.New("the message was dropped because the buffer was full"), msg)
-		}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if s.closed {
+		return
+	}
+
+	s.buffer = append(s.buffer, msg)
+	if len(s.buffer) >= s.size {
+		s.flush()
 	}
 }
 
 func (s *bufferedSender) Flush(_ context.Context) error {
-	if s.ctx.Err() != nil {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if !s.closed {
+		s.flush()
+	}
+
+	return nil
+}
+
+// Close writes any buffered messages to the underlying Sender. This does not
+// close the underlying sender.
+func (s *bufferedSender) Close() error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if s.closed {
 		return nil
 	}
 
-	select {
-	case s.needsFlush <- true:
-	default:
-	}
-
-	return nil
-}
-
-// Close writes any buffered messages to the underlying Sender
-// and prevents new messages from being accepted.
-// This does not close the underlying sender.
-func (s *bufferedSender) Close() error {
 	s.cancel()
+	if len(s.buffer) > 0 {
+		s.flush()
+	}
+	s.closed = true
 
 	return nil
 }
 
-func (s *bufferedSender) processMessages() {
-	s.flushTimer = time.NewTimer(s.opts.FlushInterval)
-	defer s.flushTimer.Stop()
+func (s *bufferedSender) intervalFlush(ctx context.Context, interval time.Duration) {
+	timer := time.NewTimer(interval)
+	defer timer.Stop()
 
 	for {
 		select {
-		case <-s.ctx.Done():
-			s.flushAll()
+		case <-ctx.Done():
 			return
-		case msg := <-s.incoming:
-			s.addToBuffer(msg)
-		case <-s.needsFlush:
-			s.flushAll()
-		case <-s.flushTimer.C:
-			s.flush()
+		case <-timer.C:
+			s.mu.Lock()
+			if len(s.buffer) > 0 && time.Since(s.lastFlush) >= interval {
+				s.flush()
+			}
+			s.mu.Unlock()
+			_ = timer.Reset(interval)
 		}
-	}
-}
-
-func (s *bufferedSender) flushAll() {
-	for len(s.incoming) > 0 {
-		s.addToBuffer(<-s.incoming)
-	}
-
-	s.flush()
-}
-
-func (s *bufferedSender) addToBuffer(msg message.Composer) {
-	s.buffer = append(s.buffer, msg)
-	if len(s.buffer) == cap(s.buffer) {
-		s.flush()
 	}
 }
 
 func (s *bufferedSender) flush() {
 	if len(s.buffer) == 1 {
 		s.Sender.Send(s.buffer[0])
-	} else if len(s.buffer) > 1 {
+	} else {
 		s.Sender.Send(message.NewGroupComposer(s.buffer))
 	}
 
-	s.flushTimer.Reset(s.opts.FlushInterval)
-	s.buffer = s.buffer[:0]
+	s.buffer = []message.Composer{}
+	s.lastFlush = time.Now()
 }
