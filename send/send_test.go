@@ -200,12 +200,13 @@ func (s *SenderSuite) SetupTest() {
 }
 
 func (s *SenderSuite) TearDownTest() {
+	_ = s.senders["buffered-async"].Close()
+
 	if runtime.GOOS == "windows" {
 		_ = s.senders["native-file"].Close()
 		_ = s.senders["callsite-file"].Close()
 		_ = s.senders["json"].Close()
 		_ = s.senders["plain.file"].Close()
-		_ = s.senders["buffered-async"].Close()
 	}
 	s.Require().NoError(os.RemoveAll(s.tempDir))
 }
