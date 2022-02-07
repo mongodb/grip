@@ -134,8 +134,7 @@ func (s *bufferedSender) consumer() {
 
 func (s *bufferedSender) flushAll() {
 	for len(s.incoming) > 0 {
-		msg := <-s.incoming
-		s.addToBuffer(msg)
+		s.addToBuffer(<-s.incoming)
 	}
 
 	s.flush()
