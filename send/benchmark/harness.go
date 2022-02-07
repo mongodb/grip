@@ -99,7 +99,7 @@ func bufferedAsyncSenderCase(ctx context.Context, tm TimerManager, iters int, si
 	if err != nil {
 		return err
 	}
-	s, err := send.NewBufferedAsyncSender(context.Background(), internal, send.BufferedAsyncSenderOptions{FlushInterval: 5 * time.Second, BufferSize: 100000})
+	s, err := send.NewBufferedAsyncSender(ctx, internal, send.BufferedAsyncSenderOptions{FlushInterval: 5 * time.Second, BufferSize: 100000})
 	if err != nil {
 		return err
 	}
