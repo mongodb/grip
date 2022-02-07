@@ -139,11 +139,12 @@ func (s *SenderSuite) SetupTest() {
 
 	bufferedInternal, err := NewNativeLogger("buffered", l)
 	s.Require().NoError(err)
-	s.senders["buffered"] = NewBufferedSender(
+	s.senders["buffered"], err = NewBufferedSender(
 		context.Background(),
 		bufferedInternal,
 		BufferedSenderOptions{FlushInterval: minInterval, BufferSize: 1},
 	)
+	s.Require().NoError(err)
 
 	s.senders["github"], err = NewGithubIssuesLogger("gh", &GithubOptions{})
 	s.Require().NoError(err)

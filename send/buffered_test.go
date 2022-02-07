@@ -165,7 +165,7 @@ func TestConsumer(t *testing.T) {
 		done := make(chan bool)
 
 		go func() {
-			bs.consumer()
+			bs.processMessages()
 			done <- true
 		}()
 		assert.NoError(t, bs.Close())
@@ -184,7 +184,7 @@ func TestConsumer(t *testing.T) {
 func checkMessageSent(bs *bufferedSender, s *InternalSender) bool {
 	done := make(chan bool)
 	go func() {
-		bs.consumer()
+		bs.processMessages()
 		done <- true
 	}()
 
@@ -200,6 +200,7 @@ FOR:
 			break FOR
 		case <-ticker.C:
 			if s.HasMessage() || time.Since(begin) > maxProcessingDuration {
+				bs.Close()
 				break FOR
 			}
 		}

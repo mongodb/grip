@@ -17,13 +17,13 @@ const (
 )
 
 type bufferedSender struct {
-	ctx         context.Context
-	cancel      context.CancelFunc
-	buffer      []message.Composer
-	opts        BufferedSenderOptions
-	flushTicker *time.Ticker
-	incoming    chan message.Composer
-	needsFlush  chan bool
+	ctx        context.Context
+	cancel     context.CancelFunc
+	buffer     []message.Composer
+	opts       BufferedSenderOptions
+	flushTimer *time.Timer
+	incoming   chan message.Composer
+	needsFlush chan bool
 
 	Sender
 }
@@ -33,15 +33,13 @@ type bufferedSender struct {
 // when the buffer reaches a specified size or or after a specified interval
 // has passed.
 //
-// If the flushInterval is 0, the constructor sets an flushInterval of 1 minute.
-// If the flushInterval is less than 5 seconds, the constructor sets it to 5 seconds.
-// If the bufferSize threshold is 0, the constructor sets a threshold of 100.
-//
 // This Sender does not own the underlying Sender, so users are responsible for
 // closing the underlying Sender if/when it is appropriate to release its
 // resources.
-func NewBufferedSender(ctx context.Context, sender Sender, opts BufferedSenderOptions) Sender {
-	opts.validate()
+func NewBufferedSender(ctx context.Context, sender Sender, opts BufferedSenderOptions) (Sender, error) {
+	if err := opts.validate(); err != nil {
+		return nil, err
+	}
 
 	ctx, cancel := context.WithCancel(ctx)
 	s := &bufferedSender{
@@ -54,26 +52,43 @@ func NewBufferedSender(ctx context.Context, sender Sender, opts BufferedSenderOp
 		incoming:   make(chan message.Composer, incomingBufferFactor*opts.BufferSize),
 	}
 
-	go s.consumer()
+	go s.processMessages()
 
-	return s
+	return s, nil
 }
 
+// BufferedSenderOptions configure the buffered sender.
+// If FlushInterval is less than 5 seconds, it is set to 5 seconds.
+// If BufferSize threshold is 0, it is set to 100.
 type BufferedSenderOptions struct {
+	// FlushInterval is the interval to automatically flush the buffer.
+	// By default it's set to 1 minute. If it's less than 5 seconds it is set to
+	// 5 seconds.
 	FlushInterval time.Duration
-	BufferSize    int
+	// BufferSize is the threshold at which the buffer is flushed.
+	// By default it's set to 100.
+	BufferSize int
 }
 
-func (opts *BufferedSenderOptions) validate() {
+func (opts *BufferedSenderOptions) validate() error {
+	if opts.FlushInterval < 0 {
+		return errors.New("FlushInterval can not be negative")
+	}
+	if opts.BufferSize < 0 {
+		return errors.New("BufferSize can not be negative")
+	}
+
 	if opts.FlushInterval == 0 {
-		opts.FlushInterval = time.Minute
+		opts.FlushInterval = defaultFlushInterval
 	} else if opts.FlushInterval < minInterval {
 		opts.FlushInterval = minInterval
 	}
 
-	if opts.BufferSize <= 0 {
+	if opts.BufferSize < 0 {
 		opts.BufferSize = defaultBufferSize
 	}
+
+	return nil
 }
 
 func (s *bufferedSender) Send(msg message.Composer) {
@@ -88,7 +103,9 @@ func (s *bufferedSender) Send(msg message.Composer) {
 	select {
 	case s.incoming <- msg:
 	default:
-		s.ErrorHandler()(errors.New("the message has been dropped"), msg)
+		if errHandler := s.ErrorHandler(); errHandler != nil {
+			errHandler(errors.New("the message was dropped because the buffer was full"), msg)
+		}
 	}
 }
 
@@ -97,8 +114,9 @@ func (s *bufferedSender) Flush(_ context.Context) error {
 		return nil
 	}
 
-	if len(s.needsFlush) == 0 {
-		s.needsFlush <- true
+	select {
+	case s.needsFlush <- true:
+	default:
 	}
 
 	return nil
@@ -113,9 +131,9 @@ func (s *bufferedSender) Close() error {
 	return nil
 }
 
-func (s *bufferedSender) consumer() {
-	s.flushTicker = time.NewTicker(s.opts.FlushInterval)
-	defer s.flushTicker.Stop()
+func (s *bufferedSender) processMessages() {
+	s.flushTimer = time.NewTimer(s.opts.FlushInterval)
+	defer s.flushTimer.Stop()
 
 	for {
 		select {
@@ -126,7 +144,7 @@ func (s *bufferedSender) consumer() {
 			s.addToBuffer(msg)
 		case <-s.needsFlush:
 			s.flushAll()
-		case <-s.flushTicker.C:
+		case <-s.flushTimer.C:
 			s.flush()
 		}
 	}
@@ -154,6 +172,6 @@ func (s *bufferedSender) flush() {
 		s.Sender.Send(message.NewGroupComposer(s.buffer))
 	}
 
-	s.flushTicker.Reset(s.opts.FlushInterval)
+	s.flushTimer.Reset(s.opts.FlushInterval)
 	s.buffer = s.buffer[:0]
 }
