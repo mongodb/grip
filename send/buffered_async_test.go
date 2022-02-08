@@ -60,7 +60,7 @@ func TestBufferedAsyncSend(t *testing.T) {
 		var capturedErr error
 		assert.NoError(t, bs.SetErrorHandler(func(err error, _ message.Composer) { capturedErr = err }))
 
-		for x := 0; x < incomingBufferFactor*10; x++ {
+		for x := 0; x < defaultIncomingBufferFactor*10; x++ {
 			bs.Send(message.ConvertToComposer(level.Debug, "message"))
 		}
 
@@ -185,7 +185,7 @@ func newBufferedAsyncSender(sender Sender, interval time.Duration, size int) (*b
 		opts:       BufferedAsyncSenderOptions{FlushInterval: interval},
 		buffer:     make([]message.Composer, 0, size),
 		needsFlush: make(chan bool, 1),
-		incoming:   make(chan message.Composer, incomingBufferFactor*size),
+		incoming:   make(chan message.Composer, defaultIncomingBufferFactor*size),
 	}
 	return bs, ctx, cancel
 }

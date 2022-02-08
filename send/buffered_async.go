@@ -3,11 +3,11 @@ package send
 import (
 	"context"
 	"errors"
+	"log"
+	"os"
 	"time"
 
-	"github.com/mongodb/grip"
 	"github.com/mongodb/grip/message"
-	"github.com/mongodb/grip/recovery"
 )
 
 const (
@@ -52,6 +52,11 @@ func NewBufferedAsyncSender(ctx context.Context, sender Sender, opts BufferedAsy
 		incoming:   make(chan message.Composer, opts.IncomingBufferFactor*opts.BufferSize),
 	}
 
+	fallback := log.New(os.Stdout, "", log.LstdFlags)
+	if err := s.SetErrorHandler(ErrorHandlerFromLogger(fallback)); err != nil {
+		return nil, err
+	}
+
 	go s.processMessages(ctx)
 
 	return s, nil
@@ -77,15 +82,14 @@ type BufferedAsyncSenderOptions struct {
 }
 
 func (opts *BufferedAsyncSenderOptions) validate() error {
-	catcher := grip.NewBasicCatcher()
 	if opts.FlushInterval < 0 {
-		catcher.Add(errors.New("FlushInterval can not be negative"))
+		return errors.New("FlushInterval can not be negative")
 	}
 	if opts.BufferSize < 0 {
-		catcher.Add(errors.New("BufferSize can not be negative"))
+		return errors.New("BufferSize can not be negative")
 	}
 	if opts.IncomingBufferFactor < 0 {
-		catcher.Add(errors.New("IncomingBufferFactor can not be negative"))
+		return errors.New("IncomingBufferFactor can not be negative")
 	}
 
 	if opts.FlushInterval == 0 {
@@ -102,7 +106,7 @@ func (opts *BufferedAsyncSenderOptions) validate() error {
 		opts.IncomingBufferFactor = defaultIncomingBufferFactor
 	}
 
-	return catcher.Resolve()
+	return nil
 }
 
 // Send puts the message in the buffer to be flushed on the next flush interval
@@ -118,9 +122,7 @@ func (s *bufferedAsyncSender) Send(msg message.Composer) {
 	select {
 	case s.incoming <- msg:
 	default:
-		if errHandler := s.ErrorHandler(); errHandler != nil {
-			errHandler(errors.New("the message was dropped because the buffer was full"), msg)
-		}
+		s.ErrorHandler()(errors.New("the message was dropped because the buffer was full"), msg)
 	}
 }
 
@@ -147,11 +149,8 @@ func (s *bufferedAsyncSender) Close() error {
 
 func (s *bufferedAsyncSender) processMessages(ctx context.Context) {
 	defer func() {
-		if err := recovery.HandlePanicWithError(recover(), nil, "buffered async sender"); err != nil {
-			grip.Error(message.WrapError(err, message.Fields{
-				"message": "panic in buffered async sender processMessages loop",
-				"sender":  s.Name(),
-			}))
+		if r := recover(); r != nil {
+			s.ErrorHandler()(errors.New("panic in processMessages loop"), message.NewSimpleString(""))
 		}
 	}()
 
