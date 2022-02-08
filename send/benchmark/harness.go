@@ -49,7 +49,7 @@ func messageCounts() []int {
 func senderCases() map[string]benchCase {
 	return map[string]benchCase{
 		"BufferedSender":      bufferedSenderCase,
-		"bufferedAsyncSender": bufferedAsyncSenderCase,
+		"BufferedAsyncSender": bufferedAsyncSenderCase,
 		"CallSiteFileLogger":  callSiteFileLoggerCase,
 		"FileLogger":          fileLoggerCase,
 		"InMemorySender":      inMemorySenderCase,

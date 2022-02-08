@@ -5,15 +5,16 @@ import (
 	"errors"
 	"time"
 
+	"github.com/mongodb/grip"
 	"github.com/mongodb/grip/message"
+	"github.com/mongodb/grip/recovery"
 )
 
 const (
 	minBufferedAsyncFlushInterval     = 5 * time.Second
 	defaultBufferedAsyncFlushInterval = time.Minute
 	defaultBufferedAsyncBufferSize    = 100
-
-	incomingBufferFactor = 10
+	defaultIncomingBufferFactor       = 10
 )
 
 type bufferedAsyncSender struct {
@@ -30,7 +31,7 @@ type bufferedAsyncSender struct {
 // NewBufferedAsyncSender provides a Sender implementation that wraps an existing
 // Sender sending messages in batches. Messages are automatically flushed
 // when the buffer reaches a specified size or or after a specified interval
-// has passed. Because the sender is async calls to Send and Flush will return
+// has passed. Because the sender is asynchronous, calls to Send and Flush will return
 // immediately even if the buffer is full and even before messages have been sent.
 //
 // This Sender does not own the underlying Sender, so users are responsible for
@@ -48,7 +49,7 @@ func NewBufferedAsyncSender(ctx context.Context, sender Sender, opts BufferedAsy
 		opts:       opts,
 		buffer:     make([]message.Composer, 0, opts.BufferSize),
 		needsFlush: make(chan bool, 1),
-		incoming:   make(chan message.Composer, incomingBufferFactor*opts.BufferSize),
+		incoming:   make(chan message.Composer, opts.IncomingBufferFactor*opts.BufferSize),
 	}
 
 	go s.processMessages(ctx)
@@ -60,22 +61,31 @@ func NewBufferedAsyncSender(ctx context.Context, sender Sender, opts BufferedAsy
 // If FlushInterval is less than 5 seconds, it is set to 5 seconds.
 // If BufferSize threshold is 0, it is set to 100.
 type BufferedAsyncSenderOptions struct {
-	// FlushInterval is the interval to automatically flush the buffer.
-	// 1 minute by default.
-	// The minimum interval is 5 seconds.
+	// FlushInterval is the maximum duration between flushes. The buffer will automatically
+	// flush if it hasn't flushed within the past FlushInterval.
+	// FlushInterval is 1 minute by default. The minimum interval is 5 seconds.
 	// If an interval of less than 5 seconds is specified it is set to 5 seconds.
 	FlushInterval time.Duration
 	// BufferSize is the threshold at which the buffer is flushed.
-	// 100 by default.
+	// The size is 100 by default.
 	BufferSize int
+	// IncomingBufferFactor is multiplied with BufferSize to determine the number of
+	// messages the sender can hold in waiting. Incoming messages are dropped if they're sent
+	// while the number of messages waiting to be written to the buffer exceeds
+	// BufferSize * IncomingBufferFactor.
+	IncomingBufferFactor int
 }
 
 func (opts *BufferedAsyncSenderOptions) validate() error {
+	catcher := grip.NewBasicCatcher()
 	if opts.FlushInterval < 0 {
-		return errors.New("FlushInterval can not be negative")
+		catcher.Add(errors.New("FlushInterval can not be negative"))
 	}
 	if opts.BufferSize < 0 {
-		return errors.New("BufferSize can not be negative")
+		catcher.Add(errors.New("BufferSize can not be negative"))
+	}
+	if opts.IncomingBufferFactor < 0 {
+		catcher.Add(errors.New("IncomingBufferFactor can not be negative"))
 	}
 
 	if opts.FlushInterval == 0 {
@@ -84,18 +94,22 @@ func (opts *BufferedAsyncSenderOptions) validate() error {
 		opts.FlushInterval = minInterval
 	}
 
-	if opts.BufferSize < 0 {
+	if opts.BufferSize == 0 {
 		opts.BufferSize = defaultBufferedAsyncBufferSize
 	}
 
-	return nil
+	if opts.IncomingBufferFactor == 0 {
+		opts.IncomingBufferFactor = defaultIncomingBufferFactor
+	}
+
+	return catcher.Resolve()
 }
 
 // Send puts the message in the buffer to be flushed on the next flush interval
 // or when the buffer threshold is surpassed. It will return immediately and not block
 // on the underlying sender sending the messages.
-// If messages are received faster than the underlying sender can process them new messages
-// will be dropped.
+// If the number of messages being currently processed exceeds the processing limit,
+// any new messages will be dropped until the number of messages is below the limit.
 func (s *bufferedAsyncSender) Send(msg message.Composer) {
 	if !s.Level().ShouldLog(msg) {
 		return
@@ -117,12 +131,13 @@ func (s *bufferedAsyncSender) Flush(_ context.Context) error {
 	select {
 	case s.needsFlush <- true:
 	default:
+		// Nooping is fine because needsFlush already has a message telling the sender to flush.
 	}
 
 	return nil
 }
 
-// Close writes any buffered messages to the underlying Sender
+// Close flushes any buffered messages asynchronously
 // and signals that the sender should stop processing additional messages.
 func (s *bufferedAsyncSender) Close() error {
 	s.cancel()
@@ -131,6 +146,15 @@ func (s *bufferedAsyncSender) Close() error {
 }
 
 func (s *bufferedAsyncSender) processMessages(ctx context.Context) {
+	defer func() {
+		if err := recovery.HandlePanicWithError(recover(), nil, "buffered async sender"); err != nil {
+			grip.Error(message.WrapError(err, message.Fields{
+				"message": "panic in buffered async sender processMessages loop",
+				"sender":  s.Name(),
+			}))
+		}
+	}()
+
 	s.flushTimer = time.NewTimer(s.opts.FlushInterval)
 	defer s.flushTimer.Stop()
 
