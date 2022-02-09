@@ -2,12 +2,12 @@ package send
 
 import (
 	"context"
-	"errors"
 	"log"
 	"os"
 	"time"
 
 	"github.com/mongodb/grip/message"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -18,6 +18,7 @@ const (
 )
 
 type bufferedAsyncSender struct {
+	ctx        context.Context
 	cancel     context.CancelFunc
 	buffer     []message.Composer
 	opts       BufferedAsyncSenderOptions
@@ -45,6 +46,7 @@ func NewBufferedAsyncSender(ctx context.Context, sender Sender, opts BufferedAsy
 	ctx, cancel := context.WithCancel(ctx)
 	s := &bufferedAsyncSender{
 		Sender:     sender,
+		ctx:        ctx,
 		cancel:     cancel,
 		opts:       opts,
 		buffer:     make([]message.Composer, 0, opts.BufferSize),
@@ -57,14 +59,12 @@ func NewBufferedAsyncSender(ctx context.Context, sender Sender, opts BufferedAsy
 		return nil, err
 	}
 
-	go s.processMessages(ctx)
+	go s.processMessages()
 
 	return s, nil
 }
 
-// BufferedAsyncSenderOptions configure the buffered sender.
-// If FlushInterval is less than 5 seconds, it is set to 5 seconds.
-// If BufferSize threshold is 0, it is set to 100.
+// BufferedAsyncSenderOptions configure the buffered asynchronous sender.
 type BufferedAsyncSenderOptions struct {
 	// FlushInterval is the maximum duration between flushes. The buffer will automatically
 	// flush if it hasn't flushed within the past FlushInterval.
@@ -115,6 +115,10 @@ func (opts *BufferedAsyncSenderOptions) validate() error {
 // If the number of messages being currently processed exceeds the processing limit,
 // any new messages will be dropped until the number of messages is below the limit.
 func (s *bufferedAsyncSender) Send(msg message.Composer) {
+	if err := s.ctx.Err(); err != nil {
+		s.ErrorHandler()(errors.Wrap(err, "sending message"), msg)
+	}
+
 	if !s.Level().ShouldLog(msg) {
 		return
 	}
@@ -147,7 +151,7 @@ func (s *bufferedAsyncSender) Close() error {
 	return nil
 }
 
-func (s *bufferedAsyncSender) processMessages(ctx context.Context) {
+func (s *bufferedAsyncSender) processMessages() {
 	defer func() {
 		if r := recover(); r != nil {
 			s.ErrorHandler()(errors.New("panic in processMessages loop"), message.NewSimpleString(""))
@@ -159,7 +163,7 @@ func (s *bufferedAsyncSender) processMessages(ctx context.Context) {
 
 	for {
 		select {
-		case <-ctx.Done():
+		case <-s.ctx.Done():
 			s.flushAll()
 			return
 		case msg := <-s.incoming:
