@@ -14,12 +14,23 @@ import (
 )
 
 func TestBufferedSend(t *testing.T) {
-	s, err := NewInternalLogger("buffs", LevelInfo{level.Debug, level.Debug})
-	require.NoError(t, err)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+
+	newBufferedSender := func(interval time.Duration, size int) (*bufferedSender, *InternalSender, error) {
+		s, err := NewInternalLogger("buffs", LevelInfo{level.Debug, level.Debug})
+		if err != nil {
+			return nil, nil, err
+		}
+
+		bs, err := NewBufferedSender(ctx, s, BufferedSenderOptions{FlushInterval: interval, BufferSize: size})
+		return bs.(*bufferedSender), s, err
+	}
 
 	t.Run("RespectsPriority", func(t *testing.T) {
-		bs := newBufferedSender(s, time.Minute, 10)
+		bs, s, err := newBufferedSender(time.Minute, 10)
 		defer bs.cancel()
+		require.NoError(t, err)
 
 		bs.Send(message.ConvertToComposer(level.Trace, fmt.Sprintf("should not send")))
 		assert.Empty(t, bs.buffer)
@@ -27,8 +38,9 @@ func TestBufferedSend(t *testing.T) {
 		assert.False(t, ok)
 	})
 	t.Run("FlushesAtCapactiy", func(t *testing.T) {
-		bs := newBufferedSender(s, time.Minute, 10)
+		bs, s, err := newBufferedSender(time.Minute, 10)
 		defer bs.cancel()
+		require.NoError(t, err)
 
 		for i := 0; i < 12; i++ {
 			require.Len(t, bs.buffer, i%10)
@@ -44,8 +56,9 @@ func TestBufferedSend(t *testing.T) {
 		}
 	})
 	t.Run("FlushesOnInterval", func(t *testing.T) {
-		bs := newBufferedSender(s, 5*time.Second, 10)
+		bs, s, err := newBufferedSender(5*time.Second, 10)
 		defer bs.cancel()
+		require.NoError(t, err)
 
 		bs.Send(message.ConvertToComposer(level.Debug, "should flush"))
 		time.Sleep(6 * time.Second)
@@ -57,24 +70,20 @@ func TestBufferedSend(t *testing.T) {
 		assert.Equal(t, "should flush", msg.Message.String())
 	})
 	t.Run("ClosedSender", func(t *testing.T) {
-		bs := newBufferedSender(s, time.Minute, 10)
-		bs.closed = true
+		bs, s, err := newBufferedSender(time.Minute, 10)
 		defer bs.cancel()
+		require.NoError(t, err)
 
+		bs.closed = true
 		bs.Send(message.ConvertToComposer(level.Debug, "should not send"))
 		assert.Empty(t, bs.buffer)
 		_, ok := s.GetMessageSafe()
 		assert.False(t, ok)
 	})
-}
-
-func TestFlush(t *testing.T) {
-	s, err := NewInternalLogger("buffs", LevelInfo{level.Debug, level.Debug})
-	require.NoError(t, err)
-
 	t.Run("ForceFlush", func(t *testing.T) {
-		bs := newBufferedSender(s, time.Minute, 10)
+		bs, s, err := newBufferedSender(time.Minute, 10)
 		defer bs.cancel()
+		require.NoError(t, err)
 
 		bs.Send(message.ConvertToComposer(level.Debug, "message"))
 		assert.Len(t, bs.buffer, 1)
@@ -88,7 +97,10 @@ func TestFlush(t *testing.T) {
 		assert.Equal(t, "message", msg.Message.String())
 	})
 	t.Run("ClosedSender", func(t *testing.T) {
-		bs := newBufferedSender(s, time.Minute, 10)
+		bs, s, err := newBufferedSender(time.Minute, 10)
+		defer bs.cancel()
+		require.NoError(t, err)
+
 		bs.buffer = append(bs.buffer, message.ConvertToComposer(level.Debug, "message"))
 		bs.cancel()
 		bs.closed = true
@@ -98,14 +110,10 @@ func TestFlush(t *testing.T) {
 		_, ok := s.GetMessageSafe()
 		assert.False(t, ok)
 	})
-}
-
-func TestBufferedClose(t *testing.T) {
-	s, err := NewInternalLogger("buffs", LevelInfo{level.Debug, level.Debug})
-	require.NoError(t, err)
-
 	t.Run("EmptyBuffer", func(t *testing.T) {
-		bs := newBufferedSender(s, time.Minute, 10)
+		bs, s, err := newBufferedSender(time.Minute, 10)
+		defer bs.cancel()
+		require.NoError(t, err)
 
 		assert.Nil(t, bs.Close())
 		assert.True(t, bs.closed)
@@ -113,7 +121,10 @@ func TestBufferedClose(t *testing.T) {
 		assert.False(t, ok)
 	})
 	t.Run("NonEmptyBuffer", func(t *testing.T) {
-		bs := newBufferedSender(s, time.Minute, 10)
+		bs, s, err := newBufferedSender(time.Minute, 10)
+		defer bs.cancel()
+		require.NoError(t, err)
+
 		bs.buffer = append(
 			bs.buffer,
 			message.ConvertToComposer(level.Debug, "message1"),
@@ -129,7 +140,9 @@ func TestBufferedClose(t *testing.T) {
 		assert.Equal(t, "message1\nmessage2\nmessage3", msgs.Message.String())
 	})
 	t.Run("NoopWhenClosed", func(t *testing.T) {
-		bs := newBufferedSender(s, time.Minute, 10)
+		bs, _, err := newBufferedSender(time.Minute, 10)
+		defer bs.cancel()
+		require.NoError(t, err)
 
 		assert.NoError(t, bs.Close())
 		assert.True(t, bs.closed)
@@ -157,9 +170,4 @@ func TestIntervalFlush(t *testing.T) {
 		assert.NoError(t, bs.Close())
 		assert.True(t, <-canceled)
 	})
-}
-
-func newBufferedSender(sender Sender, interval time.Duration, size int) *bufferedSender {
-	bs := NewBufferedSender(sender, interval, size)
-	return bs.(*bufferedSender)
 }

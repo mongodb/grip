@@ -30,7 +30,7 @@ func TestBufferedAsyncSend(t *testing.T) {
 			Sender:     s,
 			ctx:        ctx,
 			cancel:     cancel,
-			opts:       BufferedAsyncSenderOptions{FlushInterval: interval},
+			opts:       BufferedAsyncSenderOptions{BufferedSenderOptions: BufferedSenderOptions{FlushInterval: interval}},
 			buffer:     make([]message.Composer, 0, size),
 			needsFlush: make(chan bool, 1),
 			incoming:   make(chan message.Composer, defaultIncomingBufferFactor*size),

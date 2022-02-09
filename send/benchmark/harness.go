@@ -79,7 +79,7 @@ func bufferedSenderCase(ctx context.Context, tm TimerManager, iters int, size in
 	if err != nil {
 		return err
 	}
-	s := send.NewBufferedSender(internal, 5*time.Second, 100000)
+	s, err := send.NewBufferedSender(ctx, internal, send.BufferedSenderOptions{FlushInterval: 5 * time.Second, BufferSize: 100000})
 	if err != nil {
 		return err
 	}
@@ -99,7 +99,11 @@ func bufferedAsyncSenderCase(ctx context.Context, tm TimerManager, iters int, si
 	if err != nil {
 		return err
 	}
-	s, err := send.NewBufferedAsyncSender(ctx, internal, send.BufferedAsyncSenderOptions{FlushInterval: 5 * time.Second, BufferSize: 100000})
+	opts := send.BufferedAsyncSenderOptions{}
+	opts.FlushInterval = 5 * time.Second
+	opts.BufferSize = 100000
+
+	s, err := send.NewBufferedAsyncSender(ctx, internal, opts)
 	if err != nil {
 		return err
 	}

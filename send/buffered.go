@@ -2,13 +2,51 @@ package send
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"time"
 
 	"github.com/mongodb/grip/message"
 )
 
-const minInterval = 5 * time.Second
+const (
+	minFlushInterval     = 5 * time.Second
+	defaultFlushInterval = time.Minute
+	defaultBufferSize    = 100
+)
+
+// BufferedSenderOptions configure the buffered sender.
+type BufferedSenderOptions struct {
+	// FlushInterval is the maximum duration between flushes. The buffer will automatically
+	// flush if it hasn't flushed within the past FlushInterval.
+	// FlushInterval is 1 minute by default. The minimum interval is 5 seconds.
+	// If an interval of less than 5 seconds is specified it is set to 5 seconds.
+	FlushInterval time.Duration
+	// BufferSize is the threshold at which the buffer is flushed.
+	// The size is 100 by default.
+	BufferSize int
+}
+
+func (opts *BufferedSenderOptions) validate() error {
+	if opts.FlushInterval < 0 {
+		return errors.New("FlushInterval can not be negative")
+	}
+	if opts.BufferSize < 0 {
+		return errors.New("BufferSize can not be negative")
+	}
+
+	if opts.FlushInterval == 0 {
+		opts.FlushInterval = defaultFlushInterval
+	} else if opts.FlushInterval < minFlushInterval {
+		opts.FlushInterval = minFlushInterval
+	}
+
+	if opts.BufferSize == 0 {
+		opts.BufferSize = defaultBufferSize
+	}
+
+	return nil
+}
 
 type bufferedSender struct {
 	mu        sync.Mutex
@@ -25,35 +63,25 @@ type bufferedSender struct {
 // Sender sending messages in batches, on a specified buffer size or after an
 // interval has passed.
 //
-// If the interval is 0, the constructor sets an interval of 1 minute, and if
-// it is less than 5 seconds, the constructor sets it to 5 seconds. If the
-// size threshold is 0, then the constructor sets a threshold of 100.
-//
 // This Sender does not own the underlying Sender, so users are responsible for
 // closing the underlying Sender if/when it is appropriate to release its
 // resources.
-func NewBufferedSender(sender Sender, interval time.Duration, size int) Sender {
-	if interval == 0 {
-		interval = time.Minute
-	} else if interval < minInterval {
-		interval = minInterval
+func NewBufferedSender(ctx context.Context, sender Sender, opts BufferedSenderOptions) (Sender, error) {
+	if err := opts.validate(); err != nil {
+		return nil, err
 	}
 
-	if size <= 0 {
-		size = 100
-	}
-
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(ctx)
 	s := &bufferedSender{
 		Sender: sender,
 		cancel: cancel,
 		buffer: []message.Composer{},
-		size:   size,
+		size:   opts.BufferSize,
 	}
 
-	go s.intervalFlush(ctx, interval)
+	go s.intervalFlush(ctx, opts.FlushInterval)
 
-	return s
+	return s, nil
 }
 
 func (s *bufferedSender) Send(msg message.Composer) {

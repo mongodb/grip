@@ -139,15 +139,18 @@ func (s *SenderSuite) SetupTest() {
 
 	bufferedInternal, err := NewNativeLogger("buffered", l)
 	s.Require().NoError(err)
-	s.senders["buffered"] = NewBufferedSender(bufferedInternal, minInterval, 1)
+	s.senders["buffered"], err = NewBufferedSender(context.Background(), bufferedInternal, BufferedSenderOptions{FlushInterval: minFlushInterval, BufferSize: 1})
 	s.Require().NoError(err)
 
 	bufferedAsyncInternal, err := NewNativeLogger("buffered-async", l)
 	s.Require().NoError(err)
+	opts := BufferedAsyncSenderOptions{}
+	opts.FlushInterval = minFlushInterval
+	opts.BufferSize = 1
 	s.senders["buffered-async"], err = NewBufferedAsyncSender(
 		context.Background(),
 		bufferedAsyncInternal,
-		BufferedAsyncSenderOptions{FlushInterval: minInterval, BufferSize: 1},
+		opts,
 	)
 	s.Require().NoError(err)
 

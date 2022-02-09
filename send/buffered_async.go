@@ -11,10 +11,7 @@ import (
 )
 
 const (
-	minBufferedAsyncFlushInterval     = 5 * time.Second
-	defaultBufferedAsyncFlushInterval = time.Minute
-	defaultBufferedAsyncBufferSize    = 100
-	defaultIncomingBufferFactor       = 10
+	defaultIncomingBufferFactor = 10
 )
 
 type bufferedAsyncSender struct {
@@ -66,14 +63,7 @@ func NewBufferedAsyncSender(ctx context.Context, sender Sender, opts BufferedAsy
 
 // BufferedAsyncSenderOptions configure the buffered asynchronous sender.
 type BufferedAsyncSenderOptions struct {
-	// FlushInterval is the maximum duration between flushes. The buffer will automatically
-	// flush if it hasn't flushed within the past FlushInterval.
-	// FlushInterval is 1 minute by default. The minimum interval is 5 seconds.
-	// If an interval of less than 5 seconds is specified it is set to 5 seconds.
-	FlushInterval time.Duration
-	// BufferSize is the threshold at which the buffer is flushed.
-	// The size is 100 by default.
-	BufferSize int
+	BufferedSenderOptions
 	// IncomingBufferFactor is multiplied with BufferSize to determine the number of
 	// messages the sender can hold in waiting. Incoming messages are dropped if they're sent
 	// while the number of messages waiting to be written to the buffer exceeds
@@ -82,24 +72,12 @@ type BufferedAsyncSenderOptions struct {
 }
 
 func (opts *BufferedAsyncSenderOptions) validate() error {
-	if opts.FlushInterval < 0 {
-		return errors.New("FlushInterval can not be negative")
+	if err := opts.BufferedSenderOptions.validate(); err != nil {
+		return err
 	}
-	if opts.BufferSize < 0 {
-		return errors.New("BufferSize can not be negative")
-	}
+
 	if opts.IncomingBufferFactor < 0 {
 		return errors.New("IncomingBufferFactor can not be negative")
-	}
-
-	if opts.FlushInterval == 0 {
-		opts.FlushInterval = defaultBufferedAsyncFlushInterval
-	} else if opts.FlushInterval < minInterval {
-		opts.FlushInterval = minInterval
-	}
-
-	if opts.BufferSize == 0 {
-		opts.BufferSize = defaultBufferedAsyncBufferSize
 	}
 
 	if opts.IncomingBufferFactor == 0 {
