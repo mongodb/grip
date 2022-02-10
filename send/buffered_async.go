@@ -155,7 +155,8 @@ func (s *bufferedAsyncSender) processMessages() {
 }
 
 func (s *bufferedAsyncSender) flushAll() {
-	for len(s.incoming) > 0 {
+	lenIncoming := len(s.incoming)
+	for x := 0; x < lenIncoming; x++ {
 		s.addToBuffer(<-s.incoming)
 	}
 
