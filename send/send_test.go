@@ -139,7 +139,20 @@ func (s *SenderSuite) SetupTest() {
 
 	bufferedInternal, err := NewNativeLogger("buffered", l)
 	s.Require().NoError(err)
-	s.senders["buffered"] = NewBufferedSender(bufferedInternal, minInterval, 1)
+	s.senders["buffered"], err = NewBufferedSender(context.Background(), bufferedInternal, BufferedSenderOptions{FlushInterval: minFlushInterval, BufferSize: 1})
+	s.Require().NoError(err)
+
+	bufferedAsyncInternal, err := NewNativeLogger("buffered-async", l)
+	s.Require().NoError(err)
+	opts := BufferedAsyncSenderOptions{}
+	opts.FlushInterval = minFlushInterval
+	opts.BufferSize = 1
+	s.senders["buffered-async"], err = NewBufferedAsyncSender(
+		context.Background(),
+		bufferedAsyncInternal,
+		opts,
+	)
+	s.Require().NoError(err)
 
 	s.senders["github"], err = NewGithubIssuesLogger("gh", &GithubOptions{})
 	s.Require().NoError(err)
@@ -190,6 +203,8 @@ func (s *SenderSuite) SetupTest() {
 }
 
 func (s *SenderSuite) TearDownTest() {
+	_ = s.senders["buffered-async"].Close()
+
 	if runtime.GOOS == "windows" {
 		_ = s.senders["native-file"].Close()
 		_ = s.senders["callsite-file"].Close()

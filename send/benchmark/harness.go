@@ -48,12 +48,13 @@ func messageCounts() []int {
 
 func senderCases() map[string]benchCase {
 	return map[string]benchCase{
-		"BufferedSender":     bufferedSenderCase,
-		"CallSiteFileLogger": callSiteFileLoggerCase,
-		"FileLogger":         fileLoggerCase,
-		"InMemorySender":     inMemorySenderCase,
-		"JSONFileLoggerCase": jsonFileLoggerCase,
-		"StreamLogger":       streamLoggerCase,
+		"BufferedSender":      bufferedSenderCase,
+		"BufferedAsyncSender": bufferedAsyncSenderCase,
+		"CallSiteFileLogger":  callSiteFileLoggerCase,
+		"FileLogger":          fileLoggerCase,
+		"InMemorySender":      inMemorySenderCase,
+		"JSONFileLoggerCase":  jsonFileLoggerCase,
+		"StreamLogger":        streamLoggerCase,
 	}
 }
 
@@ -78,8 +79,35 @@ func bufferedSenderCase(ctx context.Context, tm TimerManager, iters int, size in
 	if err != nil {
 		return err
 	}
-	minBufferLength := 5 * time.Second
-	s := send.NewBufferedSender(internal, minBufferLength, 100000)
+	s, err := send.NewBufferedSender(ctx, internal, send.BufferedSenderOptions{FlushInterval: 5 * time.Second, BufferSize: 100000})
+	if err != nil {
+		return err
+	}
+
+	defer func(s send.Sender) {
+		if e := s.Close(); e != nil {
+			err = e
+		}
+	}(s)
+
+	msgs := makeMessages(numMsgs, size, defaultLevelInfo().Default)
+	return sendMessages(ctx, tm, iters, s, msgs)
+}
+
+func bufferedAsyncSenderCase(ctx context.Context, tm TimerManager, iters int, size int, numMsgs int) (err error) {
+	internal, err := send.NewInternalLogger("buffered-async", defaultLevelInfo())
+	if err != nil {
+		return err
+	}
+	opts := send.BufferedAsyncSenderOptions{}
+	opts.FlushInterval = 5 * time.Second
+	opts.BufferSize = 100000
+
+	s, err := send.NewBufferedAsyncSender(ctx, internal, opts)
+	if err != nil {
+		return err
+	}
+
 	defer func(s send.Sender) {
 		if e := s.Close(); e != nil {
 			err = e
