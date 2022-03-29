@@ -77,7 +77,7 @@ func (opts *BufferedAsyncSenderOptions) validate() error {
 	}
 
 	if opts.IncomingBufferFactor < 0 {
-		return errors.New("IncomingBufferFactor can not be negative")
+		return errors.New("IncomingBufferFactor cannot be negative")
 	}
 
 	if opts.IncomingBufferFactor == 0 {

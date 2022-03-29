@@ -32,7 +32,7 @@ func BenchmarkAllSenders(b *testing.B) {
 	if outputFileName == "" {
 		fmt.Println(string(evgOutput))
 	} else if err := ioutil.WriteFile(outputFileName, evgOutput, 0644); err != nil {
-		fmt.Fprintf(os.Stderr, "problem writing file '%s': %s", outputFileName, err.Error())
+		fmt.Fprintf(os.Stderr, "writing output file '%s': %s", outputFileName, err.Error())
 		return
 	}
 

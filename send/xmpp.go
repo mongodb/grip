@@ -9,6 +9,7 @@ import (
 
 	xmpp "github.com/mattn/go-xmpp"
 	"github.com/mongodb/grip/message"
+	"github.com/pkg/errors"
 )
 
 type xmppLogger struct {
@@ -176,8 +177,7 @@ func (c *xmppClientImpl) Create(info XMPPConnectionInfo) error {
 		client, err = xmpp.NewClientNoTLS(info.Hostname, info.Username, info.Password, false)
 		if err != nil {
 			errs = append(errs, err.Error())
-			return fmt.Errorf("cannot connect to server '%s', as '%s': %s",
-				info.Hostname, info.Username, strings.Join(errs, "; "))
+			return errors.Errorf("connecting to server '%s', as user '%s': %s", info.Hostname, info.Username, strings.Join(errs, "; "))
 		}
 	}
 

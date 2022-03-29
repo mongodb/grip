@@ -162,7 +162,7 @@ func (c *slackMessage) Annotate(key string, data interface{}) error {
 		return c.Base.Annotate(key, data)
 	}
 	if annotate == nil {
-		return errors.New("Annotate data must not be nil")
+		return errors.New("annotate data must not be nil")
 	}
 	if len(c.raw.Attachments) == slackMaxAttachments {
 		return fmt.Errorf("adding another Slack attachment would exceed maximum number of attachments, %d", slackMaxAttachments)
