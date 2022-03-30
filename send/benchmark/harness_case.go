@@ -52,7 +52,7 @@ func (c *caseDefinition) StopTimer() {
 }
 
 func (c *caseDefinition) roundedRuntime() time.Duration {
-	return roundDurationMS(c.runtime)
+	return c.runtime.Round(time.Millisecond)
 }
 
 func (c *caseDefinition) Run(ctx context.Context) *benchResult {

@@ -56,10 +56,10 @@ func (info SplunkConnectionInfo) Populated() bool {
 
 func (info SplunkConnectionInfo) validateFromEnv() error {
 	if info.ServerURL == "" {
-		return errors.Errorf("environment variable %s not defined, cannot create splunk client", splunkServerURL)
+		return errors.Errorf("environment variable %s not defined", splunkServerURL)
 	}
 	if info.Token == "" {
-		return errors.Errorf("environment variable %s not defined, cannot create splunk client", splunkClientToken)
+		return errors.Errorf("environment variable %s not defined", splunkClientToken)
 	}
 	return nil
 }
@@ -166,7 +166,7 @@ func buildSplunkLogger(name string, client *http.Client, info SplunkConnectionIn
 func MakeSplunkLogger(name string) (Sender, error) {
 	info := GetSplunkConnectionInfo()
 	if err := info.validateFromEnv(); err != nil {
-		return nil, errors.WithStack(err)
+		return nil, errors.Wrap(err, "validating Splunk environment variables")
 	}
 
 	return NewSplunkLogger(name, info, LevelInfo{level.Trace, level.Trace})
@@ -177,7 +177,7 @@ func MakeSplunkLogger(name string) (Sender, error) {
 func MakeSplunkLoggerWithClient(name string, client *http.Client) (Sender, error) {
 	info := GetSplunkConnectionInfo()
 	if err := info.validateFromEnv(); err != nil {
-		return nil, errors.WithStack(err)
+		return nil, errors.Wrap(err, "validating Splunk environment variables")
 	}
 
 	return NewSplunkLoggerWithClient(name, info, LevelInfo{level.Trace, level.Trace}, client)

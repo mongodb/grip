@@ -83,7 +83,7 @@ func NewJiraLogger(ctx context.Context, opts *JiraOptions, l LevelInfo) (Sender,
 		consumerKey:        opts.Oauth1Opts.ConsumerKey,
 	}
 	if err := j.opts.client.Authenticate(ctx, authOpts); err != nil {
-		return nil, fmt.Errorf("jira authentication error: %v", err)
+		return nil, errors.Wrap(err, "authenticating")
 	}
 
 	if err := j.SetLevel(l); err != nil {
@@ -130,17 +130,17 @@ func (j *jiraJournal) Flush(_ context.Context) error { return nil }
 // missing any required fields.
 func (o *JiraOptions) Validate() error {
 	if o == nil {
-		return errors.New("jira options cannot be nil")
+		return errors.New("Jira options cannot be nil")
 	}
 
-	errs := []string{}
+	var errs []string
 
 	if o.Name == "" {
 		errs = append(errs, "no name specified")
 	}
 
 	if o.BaseURL == "" {
-		errs = append(errs, "no baseURL specified")
+		errs = append(errs, "no base URL specified")
 	}
 
 	if (o.BasicAuthOpts.Username == "") == (o.Oauth1Opts.AccessToken == "") {
@@ -284,11 +284,11 @@ func (c *jiraClientImpl) Authenticate(ctx context.Context, opts jiraAuthOpts) er
 		} else {
 			authed, err := c.Client.Authentication.AcquireSessionCookie(opts.username, opts.password)
 			if err != nil {
-				return fmt.Errorf("problem authenticating to jira as '%s' [%s]", opts.username, err.Error())
+				return errors.Wrapf(err, "acquiring Jira session cookies authenticating as user '%s'", opts.username)
 			}
 
 			if !authed {
-				return fmt.Errorf("problem authenticating to jira as '%s'", opts.username)
+				return errors.Errorf("failed to acquire Jira session cookie as user '%s'", opts.username)
 			}
 		}
 		return nil
@@ -316,8 +316,7 @@ func (c *jiraClientImpl) PostIssue(issueFields *jira.IssueFields) (string, error
 		if resp != nil {
 			defer resp.Body.Close()
 			data, _ := ioutil.ReadAll(resp.Body)
-			return "", fmt.Errorf("encountered error logging to jira: %s [%s]",
-				err.Error(), string(data))
+			return "", errors.Wrapf(err, "response '%s'", string(data))
 		}
 
 		return "", err
@@ -347,14 +346,14 @@ type JiraOauthCredentials struct {
 func Oauth1Client(ctx context.Context, credentials JiraOauthCredentials) (*http.Client, error) {
 	keyDERBlock, _ := pem.Decode(credentials.PrivateKey)
 	if keyDERBlock == nil {
-		return nil, errors.New("unable to decode jira private key")
+		return nil, errors.New("unable to decode Jira private key")
 	}
 	if !(keyDERBlock.Type == "PRIVATE KEY" || strings.HasSuffix(keyDERBlock.Type, " PRIVATE KEY")) {
-		return nil, errors.Errorf("malformed key block type: %s", keyDERBlock.Type)
+		return nil, errors.Errorf("malformed key block type '%s'", keyDERBlock.Type)
 	}
 	privateKey, err := x509.ParsePKCS1PrivateKey(keyDERBlock.Bytes)
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to parse jira private key")
+		return nil, errors.Wrap(err, "parsing Jira private key")
 	}
 	oauthConfig := oauth1.Config{
 		ConsumerKey: credentials.ConsumerKey,

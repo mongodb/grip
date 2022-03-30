@@ -8,6 +8,7 @@ import (
 
 	"github.com/mongodb/grip/level"
 	"github.com/mongodb/grip/message"
+	"github.com/pkg/errors"
 )
 
 type jiraCommentJournal struct {
@@ -50,7 +51,7 @@ func NewJiraCommentLogger(ctx context.Context, id string, opts *JiraOptions, l L
 		consumerKey:        opts.Oauth1Opts.ConsumerKey,
 	}
 	if err := j.opts.client.Authenticate(ctx, authOpts); err != nil {
-		return nil, fmt.Errorf("jira authentication error: %v", err)
+		return nil, errors.Wrap(err, "authenticating")
 	}
 
 	if err := j.SetLevel(l); err != nil {

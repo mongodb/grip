@@ -9,6 +9,7 @@ import (
 
 	"github.com/mongodb/grip/level"
 	"github.com/mongodb/grip/message"
+	"github.com/pkg/errors"
 )
 
 type nativeLogger struct {
@@ -41,7 +42,7 @@ func MakeFileLogger(filePath string) (Sender, error) {
 
 	f, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
-		return nil, fmt.Errorf("error opening logging file, %s", err.Error())
+		return nil, errors.Wrapf(err, "opening output file '%s'", filePath)
 	}
 
 	s.level = LevelInfo{level.Trace, level.Trace}

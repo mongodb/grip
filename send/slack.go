@@ -2,12 +2,13 @@ package send
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"os"
 	"strings"
 	"sync"
+
+	"github.com/pkg/errors"
 
 	"github.com/bluele/slack"
 	"github.com/mongodb/grip/level"
@@ -42,7 +43,7 @@ func NewSlackLogger(opts *SlackOptions, token string, l LevelInfo) (Sender, erro
 	}
 
 	if _, err := s.opts.client.AuthTest(); err != nil {
-		return nil, fmt.Errorf("slack authentication error: %v", err)
+		return nil, errors.Wrap(err, "testing authentication")
 	}
 
 	fallback := log.New(os.Stdout, "", log.LstdFlags)

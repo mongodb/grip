@@ -1,11 +1,11 @@
 package send
 
 import (
-	"fmt"
 	"log"
 	"os"
 
 	"github.com/mongodb/grip/level"
+	"github.com/pkg/errors"
 )
 
 // NewPlainLogger returns a configured sender that has no prefix and
@@ -63,7 +63,7 @@ func MakePlainFileLogger(filePath string) (Sender, error) {
 
 	f, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
-		return nil, fmt.Errorf("error opening logging file, %s", err.Error())
+		return nil, errors.Wrapf(err, "opening output file '%s'", filePath)
 	}
 
 	s.level = LevelInfo{level.Trace, level.Trace}

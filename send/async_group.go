@@ -62,8 +62,7 @@ func NewAsyncGroupSender(ctx context.Context, bufferSize int, senders ...Sender)
 
 		for idx, pipe := range s.pipes {
 			if len(pipe) > 0 {
-				errs = append(errs, fmt.Sprintf("buffer for sender #%d has %d items remaining",
-					idx, len(pipe)))
+				errs = append(errs, fmt.Sprintf("buffer for sender #%d has %d items remaining", idx, len(pipe)))
 
 			}
 			close(pipe)

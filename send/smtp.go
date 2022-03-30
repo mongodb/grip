@@ -5,7 +5,6 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -14,6 +13,8 @@ import (
 	"os"
 	"strings"
 	"sync"
+
+	"github.com/pkg/errors"
 
 	"github.com/mongodb/grip/message"
 )
@@ -272,7 +273,7 @@ func (o *SMTPOptions) Validate() error {
 	}
 
 	if len(o.toAddrs) < 1 {
-		errs = append(errs, "no recipient addresses defined.")
+		errs = append(errs, "no recipient addresses defined")
 	}
 
 	// put additional pre-flight checks above this line, as needed.
@@ -306,7 +307,7 @@ func (o *SMTPOptions) sendMail(m message.Composer) error {
 		if len(emailMsg.From) != 0 {
 			fromAddr, err = mail.ParseAddress(emailMsg.From)
 			if err != nil {
-				return fmt.Errorf("invalid from address: %+v", err)
+				return errors.Wrapf(err, "invalid 'from' address '%s'", emailMsg.From)
 			}
 		}
 
@@ -315,7 +316,7 @@ func (o *SMTPOptions) sendMail(m message.Composer) error {
 		for i := range emailMsg.Recipients {
 			toAddrs[i], err = mail.ParseAddress(emailMsg.Recipients[i])
 			if err != nil {
-				return fmt.Errorf("invalid recipient: %+v", err)
+				return errors.Wrapf(err, "invalid recipient '%s'", emailMsg.Recipients[i])
 			}
 		}
 
@@ -325,14 +326,14 @@ func (o *SMTPOptions) sendMail(m message.Composer) error {
 		headers = emailMsg.Headers
 	}
 	if fromAddr == nil {
-		return fmt.Errorf("no from address specified, cannot send mail")
+		return errors.New("no 'from' address specified")
 	}
 	if len(toAddrs) == 0 {
-		return fmt.Errorf("no recipients specified, cannot send mail")
+		return errors.New("no recipients specified")
 	}
 
 	if err := o.client.Mail(fromAddr.Address); err != nil {
-		return fmt.Errorf("error establishing mail sender (%s): %+v", fromAddr, err)
+		return errors.Wrapf(err, "initiating mail transaction from address '%s'", fromAddr.Address)
 	}
 
 	var err error
@@ -342,8 +343,7 @@ func (o *SMTPOptions) sendMail(m message.Composer) error {
 	// Set the recipients
 	for _, target := range toAddrs {
 		if err = o.client.Rcpt(target.Address); err != nil {
-			errs = append(errs,
-				fmt.Sprintf("Error establishing mail recipient (%s): %+v", target.String(), err))
+			errs = append(errs, errors.Wrapf(err, "establishing mail recipient '%s'", target.String()).Error())
 			continue
 		}
 		recipients = append(recipients, target.String())

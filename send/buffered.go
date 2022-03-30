@@ -29,10 +29,10 @@ type BufferedSenderOptions struct {
 
 func (opts *BufferedSenderOptions) validate() error {
 	if opts.FlushInterval < 0 {
-		return errors.New("FlushInterval can not be negative")
+		return errors.New("FlushInterval cannot be negative")
 	}
 	if opts.BufferSize < 0 {
-		return errors.New("BufferSize can not be negative")
+		return errors.New("BufferSize cannot be negative")
 	}
 
 	if opts.FlushInterval == 0 {

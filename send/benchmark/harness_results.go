@@ -89,7 +89,7 @@ func (r *benchResult) totalDuration() time.Duration {
 
 func (r *benchResult) adjustResults(data float64) float64 { return bytesToMB(r.dataSize) / data }
 func (r *benchResult) getThroughput(data float64) float64 { return float64(r.operations) / data }
-func (r *benchResult) roundedRuntime() time.Duration      { return roundDurationMS(r.duration) }
+func (r *benchResult) roundedRuntime() time.Duration      { return r.duration.Round(time.Millisecond) }
 
 func (r *benchResult) String() string {
 	return fmt.Sprintf("name=%s, trials=%d, secs=%s", r.name, r.trials, r.duration)
@@ -124,10 +124,6 @@ type result struct {
 	duration   time.Duration
 	iterations int
 	err        error
-}
-
-func roundDurationMS(d time.Duration) time.Duration {
-	return d / 1e6 * time.Millisecond
 }
 
 func bytesToMB(numBytes int) float64 {

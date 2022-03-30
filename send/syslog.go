@@ -5,6 +5,7 @@ package send
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"log/syslog"
@@ -44,15 +45,13 @@ func MakeSysLogger(network, raddr string) Sender {
 
 		if s.logger != nil {
 			if err := s.logger.Close(); err != nil {
-				s.ErrorHandler()(err, message.NewErrorWrapMessage(level.Error, err,
-					"problem closing syslogger"))
+				s.ErrorHandler()(err, message.NewErrorWrapMessage(level.Error, err, "closing syslogger"))
 			}
 		}
 
 		w, err := syslog.Dial(network, raddr, syslog.LOG_DEBUG, s.Name())
 		if err != nil {
-			s.ErrorHandler()(err, message.NewErrorWrapMessage(level.Error, err,
-				"error restarting syslog [%s] for logger: %s", err.Error(), s.Name()))
+			s.ErrorHandler()(err, message.NewErrorWrapMessage(level.Error, err, "restarting syslog for logger '%s'", s.Name()))
 			return
 		}
 
@@ -111,7 +110,7 @@ func (s *syslogger) sendToSysLog(p level.Priority, message string) error {
 		return s.logger.Debug(message)
 	}
 
-	return fmt.Errorf("encountered error trying to send: {%s}. Possibly, priority related", message)
+	return errors.New("invalid priority")
 }
 
 func (s *syslogger) Flush(_ context.Context) error { return nil }
