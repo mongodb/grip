@@ -12,7 +12,7 @@ require (
 	github.com/mattn/go-xmpp v0.0.0-20161121012536-f4550b539938
 	github.com/montanaflynn/stats v0.0.0-20180911141734-db72e6cae808
 	github.com/pkg/errors v0.9.1
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.1
 	github.com/trivago/tgo v1.0.7
 	golang.org/x/oauth2 v0.0.0-20211005180243-6b3c2da341f1
 )
