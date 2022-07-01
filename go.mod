@@ -12,7 +12,7 @@ require (
 	github.com/mattn/go-xmpp v0.0.0-20161121012536-f4550b539938
 	github.com/montanaflynn/stats v0.0.0-20180911141734-db72e6cae808
 	github.com/pkg/errors v0.9.1
-	github.com/stretchr/testify v1.7.1
+	github.com/stretchr/testify v1.7.5
 	github.com/trivago/tgo v1.0.7
 	golang.org/x/oauth2 v0.0.0-20211005180243-6b3c2da341f1
 )
@@ -21,6 +21,6 @@ require (
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/shirou/gopsutil/v3 v3.22.5
+	github.com/shirou/gopsutil/v3 v3.22.6
 	google.golang.org/appengine v1.6.7 // indirect
 )
