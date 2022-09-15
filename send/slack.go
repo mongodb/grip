@@ -9,8 +9,8 @@ import (
 	"sync"
 
 	"github.com/pkg/errors"
+	"github.com/slack-go/slack"
 
-	"github.com/bluele/slack"
 	"github.com/mongodb/grip/level"
 	"github.com/mongodb/grip/message"
 )
@@ -79,26 +79,37 @@ func (s *slackJournal) Send(m message.Composer) {
 		defer s.Base.mutex.RUnlock()
 
 		var msg string
-		var params *slack.ChatPostMessageOpt
 		channel := s.opts.Channel
+		var attachmentParam slack.MsgOption
 
 		if slackMsg, ok := m.Raw().(*message.Slack); ok {
 			channel = slackMsg.Target
-			msg, params = slackMsg.Msg, &slack.ChatPostMessageOpt{
-				Attachments: slackMsg.Attachments,
-			}
+			msg, attachmentParam = slackMsg.Msg,
+				slack.MsgOptionAttachments(slackMsg.Attachments...)
 
 		} else {
-			msg, params = s.opts.produceMessage(m)
+			msg, attachmentParam = s.opts.produceMessage(m)
 		}
 
-		params.IconUrl = s.opts.IconURL
-		params.Username = s.opts.Username
-		if len(params.Username) != 0 || len(params.IconUrl) != 0 {
-			params.AsUser = false
+		var params []slack.MsgOption
+		if attachmentParam != nil {
+			params = append(params, attachmentParam)
+		}
+		if msg != "" {
+			params = append(params, slack.MsgOptionText(msg, false))
+		}
+		if s.opts.IconURL != "" {
+			params = append(params, slack.MsgOptionIconURL(s.opts.IconURL))
+		}
+		if s.opts.Username != "" {
+			params = append(params, slack.MsgOptionUsername(s.opts.Username))
+		}
+		if len(s.opts.Username) != 0 || len(s.opts.IconURL) != 0 {
+			params = append(params, slack.MsgOptionAsUser(true))
 		}
 
-		if err := s.opts.client.ChatPostMessage(channel, msg, params); err != nil {
+		_, _, err := s.opts.client.PostMessage(channel, params...)
+		if err != nil {
 			s.ErrorHandler()(err, message.NewFormattedMessage(m.Priority(),
 				"%s\n", msg))
 		}
@@ -199,7 +210,7 @@ func (o *SlackOptions) Validate() error {
 	return nil
 }
 
-func (o *SlackOptions) produceMessage(m message.Composer) (string, *slack.ChatPostMessageOpt) {
+func (o *SlackOptions) produceMessage(m message.Composer) (string, slack.MsgOption) {
 	var msg string
 
 	o.mutex.RLock()
@@ -213,7 +224,7 @@ func (o *SlackOptions) produceMessage(m message.Composer) (string, *slack.ChatPo
 		if o.Name != "" {
 			fallbacks = append(fallbacks, fmt.Sprintf("journal=%s", o.Name))
 			attachment.Fields = append(attachment.Fields,
-				&slack.AttachmentField{
+				slack.AttachmentField{
 					Title: "Journal",
 					Value: o.Name,
 					Short: true,
@@ -224,7 +235,7 @@ func (o *SlackOptions) produceMessage(m message.Composer) (string, *slack.ChatPo
 		if o.Hostname != "!" && o.Hostname != "" {
 			fallbacks = append(fallbacks, fmt.Sprintf("host=%s", o.Hostname))
 			attachment.Fields = append(attachment.Fields,
-				&slack.AttachmentField{
+				slack.AttachmentField{
 					Title: "Host",
 					Value: o.Hostname,
 					Short: true,
@@ -233,7 +244,7 @@ func (o *SlackOptions) produceMessage(m message.Composer) (string, *slack.ChatPo
 
 		fallbacks = append(fallbacks, fmt.Sprintf("priority=%s", p))
 		attachment.Fields = append(attachment.Fields,
-			&slack.AttachmentField{
+			slack.AttachmentField{
 				Title: "priority",
 				Value: p.String(),
 				Short: true,
@@ -251,7 +262,7 @@ func (o *SlackOptions) produceMessage(m message.Composer) (string, *slack.ChatPo
 				fallbacks = append(fallbacks, fmt.Sprintf("%s=%v", k, v))
 
 				attachment.Fields = append(attachment.Fields,
-					&slack.AttachmentField{
+					slack.AttachmentField{
 						Title: k,
 						Value: fmt.Sprintf("%v", v),
 						Short: true,
@@ -278,9 +289,7 @@ func (o *SlackOptions) produceMessage(m message.Composer) (string, *slack.ChatPo
 
 	}
 
-	return msg, &slack.ChatPostMessageOpt{
-		Attachments: []*slack.Attachment{&attachment},
-	}
+	return msg, slack.MsgOptionAttachments(attachment)
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -291,14 +300,14 @@ func (o *SlackOptions) produceMessage(m message.Composer) (string, *slack.ChatPo
 
 type slackClient interface {
 	Create(string)
-	AuthTest() (*slack.AuthTestApiResponse, error)
-	ChatPostMessage(string, string, *slack.ChatPostMessageOpt) error
+	AuthTest() (*slack.AuthTestResponse, error)
+	PostMessage(channelID string, options ...slack.MsgOption) (string, string, error)
 }
 
 type slackClientImpl struct {
-	*slack.Slack
+	*slack.Client
 }
 
 func (c *slackClientImpl) Create(token string) {
-	c.Slack = slack.New(token)
+	c.Client = slack.New(token)
 }

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/bluele/slack"
 	"github.com/mongodb/grip/level"
+	"github.com/slack-go/slack"
 )
 
 const (
@@ -18,23 +18,23 @@ const (
 
 // Slack is a message to a Slack channel or user
 type Slack struct {
-	Target      string              `bson:"target" json:"target" yaml:"target"`
-	Msg         string              `bson:"msg" json:"msg" yaml:"msg"`
-	Attachments []*slack.Attachment `bson:"attachments" json:"attachments" yaml:"attachments"`
+	Target      string             `bson:"target" json:"target" yaml:"target"`
+	Msg         string             `bson:"msg" json:"msg" yaml:"msg"`
+	Attachments []slack.Attachment `bson:"attachments" json:"attachments" yaml:"attachments"`
 }
 
 // SlackAttachment is a single attachment to a slack message.
-// This type is the same as bluele/slack.Attachment
+// This type contains fields found in slack-go/slack.Attachment
 type SlackAttachment struct {
 	Color    string `bson:"color,omitempty" json:"color,omitempty" yaml:"color,omitempty"`
-	Fallback string `bson:"fallback" json:"fallback" yaml:"fallback"`
+	Fallback string `bson:"fallback,omitempty" json:"fallback,omitempty" yaml:"fallback,omitempty"`
 
 	AuthorName string `bson:"author_name,omitempty" json:"author_name,omitempty" yaml:"author_name,omitempty"`
 	AuthorIcon string `bson:"author_icon,omitempty" json:"author_icon,omitempty" yaml:"author_icon,omitempty"`
 
 	Title     string `bson:"title,omitempty" json:"title,omitempty" yaml:"title,omitempty"`
 	TitleLink string `bson:"title_link,omitempty" json:"title_link,omitempty" yaml:"title_link,omitempty"`
-	Text      string `bson:"text" json:"text" yaml:"text"`
+	Text      string `bson:"text,omitempty" json:"text,omitempty" yaml:"text,omitempty"`
 
 	Fields     []*SlackAttachmentField `bson:"fields,omitempty" json:"fields,omitempty" yaml:"fields,omitempty"`
 	MarkdownIn []string                `bson:"mrkdwn_in,omitempty" json:"mrkdwn_in,omitempty" yaml:"mrkdwn_in,omitempty"`
@@ -57,10 +57,10 @@ func (s *SlackAttachment) convert() *slack.Attachment {
 			slackField.Set(gripField)
 
 		} else {
-			at.Fields = make([]*slack.AttachmentField, 0, len(s.Fields))
+			at.Fields = make([]slack.AttachmentField, 0, len(s.Fields))
 
 			for i := range s.Fields {
-				at.Fields = append(at.Fields, s.Fields[i].convert())
+				at.Fields = append(at.Fields, *s.Fields[i].convert())
 			}
 		}
 	}
@@ -69,7 +69,7 @@ func (s *SlackAttachment) convert() *slack.Attachment {
 }
 
 // SlackAttachmentField is one of the optional fields that can be attached
-// to a slack message. This type is the same as bluele/slack.AttachmentField
+// to a slack message. This type is the same as slack-go/slack.AttachmentField
 type SlackAttachmentField struct {
 	Title string `bson:"title" json:"title" yaml:"title"`
 	Value string `bson:"value" json:"value" yaml:"value"`
@@ -115,11 +115,11 @@ func MakeSlackMessage(target string, msg string, attachments []SlackAttachment) 
 		},
 	}
 	if len(attachments) != 0 {
-		s.raw.Attachments = make([]*slack.Attachment, 0, len(attachments))
+		s.raw.Attachments = make([]slack.Attachment, 0, len(attachments))
 
 		for i := range attachments {
 			at := attachments[i].convert()
-			s.raw.Attachments = append(s.raw.Attachments, at)
+			s.raw.Attachments = append(s.raw.Attachments, *at)
 		}
 	}
 
@@ -168,7 +168,7 @@ func (c *slackMessage) Annotate(key string, data interface{}) error {
 		return fmt.Errorf("adding another Slack attachment would exceed maximum number of attachments, %d", slackMaxAttachments)
 	}
 
-	c.raw.Attachments = append(c.raw.Attachments, annotate.convert())
+	c.raw.Attachments = append(c.raw.Attachments, *annotate.convert())
 
 	return nil
 }
