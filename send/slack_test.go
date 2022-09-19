@@ -115,12 +115,12 @@ func (s *SlackSuite) TestFieldShouldIncludIsAlwaysTrueWhenFieldSetIsNile() {
 	}
 }
 
-func (s *SlackSuite) TestProduceMessage() {
+func (s *SlackSuite) TestProduceAttachment() {
 	opts := &SlackOptions{}
 	s.False(opts.Fields)
 	s.False(opts.BasicMetadata)
 
-	msg, attachment := opts.produceMessage(message.NewString("foo"))
+	msg, attachment := opts.produceAttachment(message.NewString("foo"))
 	s.NotNil(attachment)
 	s.Equal("foo", msg)
 
