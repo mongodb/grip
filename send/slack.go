@@ -88,7 +88,7 @@ func (s *slackJournal) Send(m message.Composer) {
 				slack.MsgOptionAttachments(slackMsg.Attachments...)
 
 		} else {
-			msg, attachmentParam = s.opts.produceMessage(m)
+			msg, attachmentParam = s.opts.produceAttachment(m)
 		}
 
 		var params []slack.MsgOption
@@ -210,7 +210,7 @@ func (o *SlackOptions) Validate() error {
 	return nil
 }
 
-func (o *SlackOptions) produceMessage(m message.Composer) (string, slack.MsgOption) {
+func (o *SlackOptions) produceAttachment(m message.Composer) (string, slack.MsgOption) {
 	var msg string
 
 	o.mutex.RLock()
