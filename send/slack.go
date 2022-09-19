@@ -301,7 +301,7 @@ func (o *SlackOptions) produceMessage(m message.Composer) (string, slack.MsgOpti
 type slackClient interface {
 	Create(string)
 	AuthTest() (*slack.AuthTestResponse, error)
-	PostMessage(channelID string, options ...slack.MsgOption) (string, string, error)
+	PostMessage(channelID string, options ...slack.MsgOption) (respChannel string, timestamp string, err error)
 }
 
 type slackClientImpl struct {
