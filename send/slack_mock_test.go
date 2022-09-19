@@ -3,7 +3,7 @@ package send
 import (
 	"errors"
 
-	"github.com/bluele/slack"
+	"github.com/slack-go/slack"
 )
 
 // implements the slackClient interface for use in tests.
@@ -12,25 +12,24 @@ type slackClientMock struct {
 	failSendingMessage bool
 	numSent            int
 	lastTarget         string
-	lastMsg            *slack.ChatPostMessageOpt
+	lastMsgOptions     *[]slack.MsgOption
 }
 
 func (c *slackClientMock) Create(_ string) {}
-func (c *slackClientMock) AuthTest() (*slack.AuthTestApiResponse, error) {
+func (c *slackClientMock) AuthTest() (*slack.AuthTestResponse, error) {
 	if c.failAuthTest {
 		return nil, errors.New("mock failed auth test")
 	}
 	return nil, nil
 }
 
-func (c *slackClientMock) ChatPostMessage(target, _ string, msg *slack.ChatPostMessageOpt) error {
+func (c *slackClientMock) PostMessage(channelID string, options ...slack.MsgOption) (string, string, error) {
 	if c.failSendingMessage {
-		return errors.New("mock failed auth test")
+		return "", "", errors.New("mock failed auth test")
 	}
 
 	c.numSent++
-	c.lastTarget = target
-	c.lastMsg = msg
-
-	return nil
+	c.lastTarget = channelID
+	c.lastMsgOptions = &options
+	return "", "", nil
 }

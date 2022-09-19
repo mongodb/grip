@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/bluele/slack"
+	"github.com/slack-go/slack"
 	"github.com/stretchr/testify/assert"
 )
 
