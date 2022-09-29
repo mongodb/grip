@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/mongodb/grip/message"
+	"github.com/slack-go/slack"
 )
 
 type asyncGroupSender struct {
@@ -115,4 +116,8 @@ func (s *asyncGroupSender) Flush(ctx context.Context) error {
 	}
 
 	return lastErr
+}
+
+func (s *asyncGroupSender) GetSlackUser(email string) (*slack.User, error) {
+	panic("not implemented")
 }
