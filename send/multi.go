@@ -8,6 +8,7 @@ import (
 
 	"github.com/mongodb/grip/level"
 	"github.com/mongodb/grip/message"
+	"github.com/slack-go/slack"
 )
 
 type multiSender struct {
@@ -156,4 +157,8 @@ func (s *multiSender) Flush(ctx context.Context) error {
 	}
 
 	return lastErr
+}
+
+func (s *multiSender) GetSlackUser(email string) (*slack.User, error) {
+	panic("not implemented")
 }
