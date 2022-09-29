@@ -116,15 +116,6 @@ func (s *slackJournal) Send(m message.Composer) {
 	}
 }
 
-func GetSlackUser(opts *SlackOptions, token string, email string) (*slack.User, error) {
-	opts.client.Create(token)
-	user, err := opts.client.GetUserByEmail(email)
-	if err != nil {
-		return nil, errors.Wrapf(err, "retrieving slack user with email %s", email)
-	}
-	return user, nil
-}
-
 func (s *slackJournal) Flush(_ context.Context) error { return nil }
 
 // SlackOptions configures the behavior for constructing messages sent
@@ -156,6 +147,16 @@ type SlackOptions struct {
 
 	client slackClient
 	mutex  sync.RWMutex
+}
+
+// GetSlackUser returns the slack user associated with an email address
+func (o *SlackOptions) GetSlackUser(token string, email string) (*slack.User, error) {
+	o.client.Create(token)
+	user, err := o.client.GetUserByEmail(email)
+	if err != nil {
+		return nil, errors.Wrapf(err, "retrieving slack user with email %s", email)
+	}
+	return user, nil
 }
 
 func (o *SlackOptions) fieldSetShouldInclude(name string) bool {

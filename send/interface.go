@@ -11,7 +11,6 @@ import (
 
 	"github.com/mongodb/grip/level"
 	"github.com/mongodb/grip/message"
-	"github.com/slack-go/slack"
 )
 
 // The Sender interface describes how the Journaler type's method in primary
@@ -35,9 +34,6 @@ type Sender interface {
 	// system. If the Sender is not buffered, this function should noop and
 	// return nil.
 	Flush(context.Context) error
-
-	// GetSlackUser returns the slack user associated with an email address
-	GetSlackUser(email string) (*slack.User, error)
 
 	// SetLevel allows you to modify the level configuration. Returns an
 	// error if you specify impossible values.
