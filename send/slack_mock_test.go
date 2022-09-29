@@ -9,6 +9,7 @@ import (
 // implements the slackClient interface for use in tests.
 type slackClientMock struct {
 	failAuthTest       bool
+	failedGettingUser  bool
 	failSendingMessage bool
 	numSent            int
 	lastTarget         string
@@ -32,4 +33,10 @@ func (c *slackClientMock) PostMessage(channelID string, options ...slack.MsgOpti
 	c.lastTarget = channelID
 	c.lastMsgOptions = &options
 	return "", "", nil
+}
+func (c *slackClientMock) GetUserByEmail(email string) (*slack.User, error) {
+	if c.failedGettingUser {
+		return nil, errors.New("mock failed getting user")
+	}
+	return nil, nil
 }

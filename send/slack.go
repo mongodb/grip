@@ -116,6 +116,14 @@ func (s *slackJournal) Send(m message.Composer) {
 	}
 }
 
+func (s *slackJournal) GetSlackUser(email string) (*slack.User, error) {
+	user, err := s.opts.client.GetUserByEmail(email)
+	if err != nil {
+		return nil, errors.Wrapf(err, "retrieving slack user with email %s", email)
+	}
+	return user, nil
+}
+
 func (s *slackJournal) Flush(_ context.Context) error { return nil }
 
 // SlackOptions configures the behavior for constructing messages sent
@@ -302,6 +310,7 @@ type slackClient interface {
 	Create(string)
 	AuthTest() (*slack.AuthTestResponse, error)
 	PostMessage(channelID string, options ...slack.MsgOption) (respChannel string, timestamp string, err error)
+	GetUserByEmail(email string) (*slack.User, error)
 }
 
 type slackClientImpl struct {
