@@ -116,8 +116,9 @@ func (s *slackJournal) Send(m message.Composer) {
 	}
 }
 
-func (s *slackJournal) GetSlackUser(email string) (*slack.User, error) {
-	user, err := s.opts.client.GetUserByEmail(email)
+func GetSlackUser(opts *SlackOptions, token string, email string) (*slack.User, error) {
+	opts.client.Create(token)
+	user, err := opts.client.GetUserByEmail(email)
 	if err != nil {
 		return nil, errors.Wrapf(err, "retrieving slack user with email %s", email)
 	}
