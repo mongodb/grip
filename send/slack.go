@@ -149,6 +149,16 @@ type SlackOptions struct {
 	mutex  sync.RWMutex
 }
 
+// GetSlackUser returns the slack user associated with an email address
+func (o *SlackOptions) GetSlackUser(token string, email string) (*slack.User, error) {
+	o.client.Create(token)
+	user, err := o.client.GetUserByEmail(email)
+	if err != nil {
+		return nil, errors.Wrapf(err, "retrieving slack user with email %s", email)
+	}
+	return user, nil
+}
+
 func (o *SlackOptions) fieldSetShouldInclude(name string) bool {
 	if name == "time" || name == "metadata" {
 		return false
@@ -302,6 +312,7 @@ type slackClient interface {
 	Create(string)
 	AuthTest() (*slack.AuthTestResponse, error)
 	PostMessage(channelID string, options ...slack.MsgOption) (respChannel string, timestamp string, err error)
+	GetUserByEmail(email string) (*slack.User, error)
 }
 
 type slackClientImpl struct {
