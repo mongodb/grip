@@ -20,7 +20,7 @@ require (
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/shirou/gopsutil/v3 v3.22.8
+	github.com/shirou/gopsutil/v3 v3.22.9
 	github.com/slack-go/slack v0.11.3
 	google.golang.org/appengine v1.6.7 // indirect
 )
