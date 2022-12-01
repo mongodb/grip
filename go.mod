@@ -21,6 +21,6 @@ require (
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/shirou/gopsutil/v3 v3.22.10
-	github.com/slack-go/slack v0.11.3
+	github.com/slack-go/slack v0.11.4
 	google.golang.org/appengine v1.6.7 // indirect
 )
