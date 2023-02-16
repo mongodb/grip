@@ -7,8 +7,13 @@ import (
 	"log"
 	"os"
 
+	"github.com/evergreen-ci/utility"
 	"github.com/google/go-github/github"
 	"github.com/mongodb/grip/message"
+)
+
+var (
+	githubRetryTimes = 5
 )
 
 type githubStatusMessageLogger struct {
@@ -61,7 +66,15 @@ func (s *githubStatusMessageLogger) Send(m message.Composer) {
 			return
 		}
 
-		_, _, err := s.gh.CreateStatus(context.TODO(), owner, repo, ref, status)
+		err := utility.Retry(
+			context.TODO(),
+			func() (bool, error) {
+				_, _, err := s.gh.CreateStatus(context.TODO(), owner, repo, ref, status)
+				if err != nil {
+					return true, err
+				}
+				return false, nil
+			}, utility.RetryOptions{MaxAttempts: githubRetryTimes})
 		if err != nil {
 			s.ErrorHandler()(err, m)
 		}
