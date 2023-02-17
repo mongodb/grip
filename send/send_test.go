@@ -344,7 +344,7 @@ func (s *SenderSuite) TestGithubStatusLogger() {
 		"https://example.com/hi", "description")
 
 	s.NoError(sender.SetErrorHandler(func(err error, c message.Composer) {
-		s.Equal("failed to create status", err.Error())
+		s.Contains(err.Error(), "failed to create status")
 	}))
 	sender.Send(c)
 	s.Equal(0, client.numSent)

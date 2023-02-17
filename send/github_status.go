@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/evergreen-ci/utility"
 	"github.com/google/go-github/github"
@@ -13,7 +14,8 @@ import (
 )
 
 var (
-	githubRetryTimes = 5
+	numGithubAttempts   = 3
+	githubRetryMinDelay = time.Second
 )
 
 type githubStatusMessageLogger struct {
@@ -74,7 +76,10 @@ func (s *githubStatusMessageLogger) Send(m message.Composer) {
 					return true, err
 				}
 				return false, nil
-			}, utility.RetryOptions{MaxAttempts: githubRetryTimes})
+			}, utility.RetryOptions{
+				MaxAttempts: numGithubAttempts,
+				MinDelay:    githubRetryMinDelay,
+			})
 		if err != nil {
 			s.ErrorHandler()(err, m)
 		}
