@@ -13,7 +13,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.1
 	github.com/trivago/tgo v1.0.7
-	golang.org/x/oauth2 v0.0.0-20211005180243-6b3c2da341f1
+	golang.org/x/oauth2 v0.5.0
 )
 
 require (
@@ -25,6 +25,4 @@ require (
 	// feature. This should not be upgraded until the completion of EVG-18584.
 	github.com/shirou/gopsutil/v3 v3.22.3
 	github.com/slack-go/slack v0.12.1
-	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
-	google.golang.org/appengine v1.6.7 // indirect
 )
