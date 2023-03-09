@@ -68,7 +68,7 @@ func (s *githubCommentLogger) Send(m message.Composer) {
 		defer cancel()
 		if _, resp, err := s.gh.CreateComment(ctx, s.opts.Account, s.opts.Repo, s.issue, comment); err != nil {
 			s.ErrorHandler()(errors.Wrap(err, "sending GitHub CreateComment API request"), m)
-		} else if resp.Response.StatusCode != http.StatusOK {
+		} else if resp.Response.StatusCode >= http.StatusBadRequest {
 			s.ErrorHandler()(errors.Errorf("received HTTP status '%d' from the Github CreateComment API", resp.Response.StatusCode), m)
 		}
 	}
