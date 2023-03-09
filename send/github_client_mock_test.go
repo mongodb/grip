@@ -4,18 +4,20 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 
 	"github.com/google/go-github/github"
 )
 
 type githubClientMock struct {
-	failSend bool
-	numSent  int
+	failSend       bool
+	httpStatusCode int
+	numSent        int
 
 	lastRepo string
 }
 
-func (g *githubClientMock) Init(_ context.Context, _ string) {}
+func (g *githubClientMock) Init(_ string) {}
 
 func (g *githubClientMock) Create(_ context.Context, _ string, _ string, _ *github.IssueRequest) (*github.Issue, *github.Response, error) {
 	if g.failSend {
@@ -23,7 +25,7 @@ func (g *githubClientMock) Create(_ context.Context, _ string, _ string, _ *gith
 	}
 
 	g.numSent++
-	return nil, nil, nil
+	return nil, g.createResponse(), nil
 }
 func (g *githubClientMock) CreateComment(_ context.Context, _ string, _ string, _ int, _ *github.IssueComment) (*github.IssueComment, *github.Response, error) {
 	if g.failSend {
@@ -31,7 +33,7 @@ func (g *githubClientMock) CreateComment(_ context.Context, _ string, _ string, 
 	}
 
 	g.numSent++
-	return nil, nil, nil
+	return nil, g.createResponse(), nil
 }
 
 func (g *githubClientMock) CreateStatus(_ context.Context, repo, owner, ref string, _ *github.RepoStatus) (*github.RepoStatus, *github.Response, error) {
@@ -41,5 +43,18 @@ func (g *githubClientMock) CreateStatus(_ context.Context, repo, owner, ref stri
 
 	g.numSent++
 	g.lastRepo = fmt.Sprintf("%s/%s@%s", repo, owner, ref)
-	return nil, nil, nil
+	return nil, g.createResponse(), nil
+}
+
+func (g *githubClientMock) createResponse() *github.Response {
+	statusCode := g.httpStatusCode
+	if statusCode <= 0 {
+		statusCode = http.StatusOK
+	}
+
+	return &github.Response{
+		Response: &http.Response{
+			StatusCode: statusCode,
+		},
+	}
 }
