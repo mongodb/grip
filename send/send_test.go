@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math/rand"
+	"net/http"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -334,72 +335,232 @@ func TestBaseConstructor(t *testing.T) {
 	assert.True(sink.HasMessage())
 }
 
+func (s *SenderSuite) TestGithubIssuesLogger() {
+	sender := s.senders["gh-mocked"].(*githubLogger)
+	client := sender.gh.(*githubClientMock)
+
+	for _, test := range []struct {
+		name    string
+		setup   func()
+		m       message.Composer
+		eh      ErrorHandler
+		numSent int
+	}{
+		{
+			name:  "FailedSend",
+			setup: func() { client.failSend = true },
+			m:     message.NewString("hi"),
+			eh: func(err error, _ message.Composer) {
+				s.Contains(err.Error(), "failed to create issue")
+			},
+		},
+		{
+			name: "Non200StatusCode",
+			setup: func() {
+				client.failSend = false
+				client.httpStatusCode = http.StatusInternalServerError
+			},
+			m: message.NewString("hi"),
+			eh: func(err error, _ message.Composer) {
+				s.Contains(err.Error(), "recieved HTTP status")
+			},
+			numSent: 1,
+		},
+		{
+			name: "SuccessfulSend",
+			setup: func() {
+				client.failSend = false
+				client.httpStatusCode = http.StatusOK
+			},
+			m: message.NewString("hi"),
+			eh: func(err error, m message.Composer) {
+				s.Fail("Got error, but shouldn't have: %s for composer: %s", err.Error(), m.String())
+			},
+			numSent: 1,
+		},
+		{
+			name: "InvalidMessage",
+			setup: func() {
+				client.failSend = false
+				client.httpStatusCode = http.StatusOK
+			},
+			m: message.NewString(""),
+			eh: func(err error, m message.Composer) {
+				s.Fail("Got error, but shouldn't have: %s for composer: %s", err.Error(), m.String())
+			},
+		},
+	} {
+		s.Run(test.name, func() {
+			if test.setup != nil {
+				test.setup()
+			}
+			s.Require().NoError(sender.SetErrorHandler(test.eh))
+			prevNumSent := client.numSent
+
+			sender.Send(test.m)
+			s.Equal(prevNumSent+test.numSent, client.numSent)
+		})
+	}
+}
+
 func (s *SenderSuite) TestGithubStatusLogger() {
 	sender := s.senders["gh-status-mocked"].(*githubStatusMessageLogger)
 	client := sender.gh.(*githubClientMock)
 
-	// failed send test
-	client.failSend = true
-	c := message.NewGithubStatusMessage(level.Info, "example", message.GithubStatePending,
-		"https://example.com/hi", "description")
+	for _, test := range []struct {
+		name     string
+		setup    func()
+		m        message.Composer
+		eh       ErrorHandler
+		numSent  int
+		lastRepo string
+	}{
+		{
+			name:  "FailedSend",
+			setup: func() { client.failSend = true },
+			m:     message.NewGithubStatusMessage(level.Info, "example", message.GithubStatePending, "https://example.com/hi", "description"),
+			eh: func(err error, _ message.Composer) {
+				s.Contains(err.Error(), "failed to create status")
+			},
+		},
+		{
+			name: "Non200StatusCode",
+			setup: func() {
+				client.failSend = false
+				client.httpStatusCode = http.StatusInternalServerError
+			},
+			m: message.NewGithubStatusMessage(level.Info, "example", message.GithubStatePending, "https://example.com/hi", "description"),
+			eh: func(err error, _ message.Composer) {
+				s.Contains(err.Error(), "recieved HTTP status")
+			},
+			numSent: 1,
+		},
+		{
+			name: "SuccessfulSend",
+			setup: func() {
+				client.failSend = false
+				client.httpStatusCode = http.StatusOK
+			},
+			m: message.NewGithubStatusMessage(level.Info, "example", message.GithubStatePending, "https://example.com/hi", "description"),
+			eh: func(err error, m message.Composer) {
+				s.Fail("Got error, but shouldn't have: %s for composer: %s", err.Error(), m.String())
+			},
+			numSent: 1,
+		},
+		{
+			name: "SuccessfulSendWithRepoConstructor",
+			setup: func() {
+				client.failSend = false
+				client.httpStatusCode = http.StatusOK
+			},
+			m: message.NewGithubStatusMessageWithRepo(level.Info, message.GithubStatus{
+				Owner:       "somewhere",
+				Repo:        "over",
+				Ref:         "therainbow",
+				Context:     "example",
+				State:       message.GithubStatePending,
+				URL:         "https://example.com/hi",
+				Description: "description",
+			}),
+			eh: func(err error, m message.Composer) {
+				s.Fail("Got error, but shouldn't have: %s for composer: %s", err.Error(), m.String())
+			},
+			numSent:  1,
+			lastRepo: "somewhere/over@therainbow",
+		},
+		{
+			name: "InvalidMessage",
+			setup: func() {
+				client.failSend = false
+				client.httpStatusCode = http.StatusOK
+			},
 
-	s.NoError(sender.SetErrorHandler(func(err error, c message.Composer) {
-		s.Contains(err.Error(), "failed to create status")
-	}))
-	sender.Send(c)
-	s.Equal(0, client.numSent)
+			m: message.NewGithubStatusMessage(level.Info, "", message.GithubStatePending, "https://example.com/hi", "description"),
+			eh: func(err error, m message.Composer) {
+				s.Fail("Got error, but shouldn't have: %s for composer: %s", err.Error(), m.String())
+			},
+		},
+	} {
+		s.Run(test.name, func() {
+			if test.setup != nil {
+				test.setup()
+			}
+			s.Require().NoError(sender.SetErrorHandler(test.eh))
+			prevNumSent := client.numSent
 
-	// successful send test
-	client.failSend = false
-	s.NoError(sender.SetErrorHandler(func(err error, c message.Composer) {
-		s.T().Errorf("Got error, but shouldn't have: %s for composer: %s", err.Error(), c.String())
-	}))
-	sender.Send(c)
-	s.Equal(1, client.numSent)
-
-	// WithRepo constructor should override sender's defaults
-	p := message.GithubStatus{
-		Owner:       "somewhere",
-		Repo:        "over",
-		Ref:         "therainbow",
-		Context:     "example",
-		State:       message.GithubStatePending,
-		URL:         "https://example.com/hi",
-		Description: "description",
+			sender.Send(test.m)
+			s.Equal(prevNumSent+test.numSent, client.numSent)
+			if test.lastRepo != "" {
+				s.Equal(test.lastRepo, client.lastRepo)
+			}
+		})
 	}
-	c = message.NewGithubStatusMessageWithRepo(level.Info, p)
-	s.True(c.Loggable())
-	sender.Send(c)
-	s.Equal(2, client.numSent)
-	s.Equal("somewhere/over@therainbow", client.lastRepo)
-
-	// don't send invalid messages
-	c = message.NewGithubStatusMessage(level.Info, "", message.GithubStatePending,
-		"https://example.com/hi", "description")
-	s.False(c.Loggable())
-	sender.Send(c)
-	s.Equal(2, client.numSent)
 }
 
 func (s *SenderSuite) TestGithubCommentLogger() {
 	sender := s.senders["gh-comment-mocked"].(*githubCommentLogger)
 	client := sender.gh.(*githubClientMock)
 
-	// failed send test
-	client.failSend = true
-	c := message.NewString("hi")
+	for _, test := range []struct {
+		name    string
+		setup   func()
+		m       message.Composer
+		eh      ErrorHandler
+		numSent int
+	}{
+		{
+			name:  "FailedSend",
+			setup: func() { client.failSend = true },
+			m:     message.NewString("hi"),
+			eh: func(err error, _ message.Composer) {
+				s.Contains(err.Error(), "failed to create comment")
+			},
+		},
+		{
+			name: "Non200StatusCode",
+			setup: func() {
+				client.failSend = false
+				client.httpStatusCode = http.StatusInternalServerError
+			},
+			m: message.NewString("hi"),
+			eh: func(err error, _ message.Composer) {
+				s.Contains(err.Error(), "recieved HTTP status")
+			},
+			numSent: 1,
+		},
+		{
+			name: "SuccessfulSend",
+			setup: func() {
+				client.failSend = false
+				client.httpStatusCode = http.StatusOK
+			},
+			m: message.NewString("hi"),
+			eh: func(err error, m message.Composer) {
+				s.Fail("Got error, but shouldn't have: %s for composer: %s", err.Error(), m.String())
+			},
+			numSent: 1,
+		},
+		{
+			name: "InvalidMessage",
+			setup: func() {
+				client.failSend = false
+				client.httpStatusCode = http.StatusOK
+			},
+			m: message.NewString(""),
+			eh: func(err error, m message.Composer) {
+				s.Fail("Got error, but shouldn't have: %s for composer: %s", err.Error(), m.String())
+			},
+		},
+	} {
+		s.Run(test.name, func() {
+			if test.setup != nil {
+				test.setup()
+			}
+			s.Require().NoError(sender.SetErrorHandler(test.eh))
+			prevNumSent := client.numSent
 
-	s.NoError(sender.SetErrorHandler(func(err error, c message.Composer) {
-		s.Equal("failed to create comment", err.Error())
-	}))
-	sender.Send(c)
-	s.Equal(0, client.numSent)
-
-	// successful send test
-	client.failSend = false
-	s.NoError(sender.SetErrorHandler(func(err error, c message.Composer) {
-		s.T().Errorf("Got error, but shouldn't have: %s for composer: %s", err.Error(), c.String())
-	}))
-	sender.Send(c)
-	s.Equal(1, client.numSent)
+			sender.Send(test.m)
+			s.Equal(prevNumSent+test.numSent, client.numSent)
+		})
+	}
 }
