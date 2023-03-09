@@ -17,8 +17,7 @@ func ErrorHandlerFromLogger(l *log.Logger) ErrorHandler {
 			return
 		}
 
-		l.Println("logging error:", err.Error())
-		l.Println(m.String())
+		l.Println("logging error:", err.Error(), "\n", m.String())
 	}
 }
 

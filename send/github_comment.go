@@ -4,10 +4,13 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
+	"time"
 
 	"github.com/google/go-github/github"
 	"github.com/mongodb/grip/message"
+	"github.com/pkg/errors"
 )
 
 type githubCommentLogger struct {
@@ -32,9 +35,7 @@ func NewGithubCommentLogger(name string, issueID int, opts *GithubOptions) (Send
 		gh:    &githubClientImpl{},
 	}
 
-	ctx := context.TODO()
-
-	s.gh.Init(ctx, opts.Token)
+	s.gh.Init(opts.Token)
 
 	fallback := log.New(os.Stdout, "", log.LstdFlags)
 	if err := s.SetErrorHandler(ErrorHandlerFromLogger(fallback)); err != nil {
@@ -63,10 +64,12 @@ func (s *githubCommentLogger) Send(m message.Composer) {
 
 		comment := &github.IssueComment{Body: &text}
 
-		ctx := context.TODO()
-		_, _, err = s.gh.CreateComment(ctx, s.opts.Account, s.opts.Repo, s.issue, comment)
-		if err != nil {
-			s.ErrorHandler()(err, m)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+		defer cancel()
+		if _, resp, err := s.gh.CreateComment(ctx, s.opts.Account, s.opts.Repo, s.issue, comment); err != nil {
+			s.ErrorHandler()(errors.Wrap(err, "sending GitHub CreateComment API request"), m)
+		} else if resp.Response.StatusCode != http.StatusOK {
+			s.ErrorHandler()(errors.Errorf("received HTTP status '%d' from the Github CreateComment API", resp.Response.StatusCode), m)
 		}
 	}
 }

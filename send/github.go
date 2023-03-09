@@ -4,11 +4,14 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
+	"time"
 
+	"github.com/evergreen-ci/utility"
 	"github.com/google/go-github/github"
 	"github.com/mongodb/grip/message"
-	"golang.org/x/oauth2"
+	"github.com/pkg/errors"
 )
 
 type githubLogger struct {
@@ -36,8 +39,7 @@ func NewGithubIssuesLogger(name string, opts *GithubOptions) (Sender, error) {
 		gh:   &githubClientImpl{},
 	}
 
-	ctx := context.TODO()
-	s.gh.Init(ctx, opts.Token)
+	s.gh.Init(opts.Token)
 
 	fallback := log.New(os.Stdout, "", log.LstdFlags)
 	if err := s.SetErrorHandler(ErrorHandlerFromLogger(fallback)); err != nil {
@@ -69,9 +71,12 @@ func (s *githubLogger) Send(m message.Composer) {
 			Body:  &text,
 		}
 
-		ctx := context.TODO()
-		if _, _, err := s.gh.Create(ctx, s.opts.Account, s.opts.Repo, issue); err != nil {
-			s.ErrorHandler()(err, m)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+		defer cancel()
+		if _, resp, err := s.gh.Create(ctx, s.opts.Account, s.opts.Repo, issue); err != nil {
+			s.ErrorHandler()(errors.Wrap(err, "sending GitHub Create API request"), m)
+		} else if resp.Response.StatusCode != http.StatusOK {
+			s.ErrorHandler()(errors.Errorf("received HTTP status '%d' from the Github Create API", resp.Response.StatusCode), m)
 		}
 	}
 }
@@ -85,7 +90,7 @@ func (s *githubLogger) Flush(_ context.Context) error { return nil }
 //////////////////////////////////////////////////////////////////////////
 
 type githubClient interface {
-	Init(context.Context, string)
+	Init(string)
 	// Issues
 	Create(context.Context, string, string, *github.IssueRequest) (*github.Issue, *github.Response, error)
 	CreateComment(context.Context, string, string, int, *github.IssueComment) (*github.IssueComment, *github.Response, error)
@@ -99,13 +104,8 @@ type githubClientImpl struct {
 	repos *github.RepositoriesService
 }
 
-func (c *githubClientImpl) Init(ctx context.Context, token string) {
-	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
-
-	tc := oauth2.NewClient(ctx, ts)
-
-	client := github.NewClient(tc)
-
+func (c *githubClientImpl) Init(token string) {
+	client := github.NewClient(utility.GetOauth2DefaultHTTPRetryableClient(token))
 	c.IssuesService = client.Issues
 	c.repos = client.Repositories
 }

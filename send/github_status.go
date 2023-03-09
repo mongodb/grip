@@ -2,15 +2,15 @@ package send
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
-	"github.com/evergreen-ci/utility"
 	"github.com/google/go-github/github"
 	"github.com/mongodb/grip/message"
+	"github.com/pkg/errors"
 )
 
 var (
@@ -68,20 +68,12 @@ func (s *githubStatusMessageLogger) Send(m message.Composer) {
 			return
 		}
 
-		err := utility.Retry(
-			context.TODO(),
-			func() (bool, error) {
-				_, _, err := s.gh.CreateStatus(context.TODO(), owner, repo, ref, status)
-				if err != nil {
-					return true, err
-				}
-				return false, nil
-			}, utility.RetryOptions{
-				MaxAttempts: numGithubAttempts,
-				MinDelay:    githubRetryMinDelay,
-			})
-		if err != nil {
-			s.ErrorHandler()(err, m)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+		defer cancel()
+		if _, resp, err := s.gh.CreateStatus(ctx, owner, repo, ref, status); err != nil {
+			s.ErrorHandler()(errors.Wrap(err, "sending GitHub CreateStatus API request"), m)
+		} else if resp.Response.StatusCode != http.StatusOK {
+			s.ErrorHandler()(errors.Errorf("received HTTP status '%d' from the GitHub CreateStatus API", resp.Response.StatusCode), m)
 		}
 	}
 }
@@ -97,8 +89,7 @@ func NewGithubStatusLogger(name string, opts *GithubOptions, ref string) (Sender
 		ref:  ref,
 	}
 
-	ctx := context.TODO()
-	s.gh.Init(ctx, opts.Token)
+	s.gh.Init(opts.Token)
 
 	fallback := log.New(os.Stdout, "", log.LstdFlags)
 	if err := s.SetErrorHandler(ErrorHandlerFromLogger(fallback)); err != nil {
