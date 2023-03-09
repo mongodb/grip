@@ -362,7 +362,7 @@ func (s *SenderSuite) TestGithubIssuesLogger() {
 			},
 			m: message.NewString("hi"),
 			eh: func(err error, _ message.Composer) {
-				s.Contains(err.Error(), "recieved HTTP status")
+				s.Contains(err.Error(), "received HTTP status")
 			},
 			numSent: 1,
 		},
@@ -431,7 +431,7 @@ func (s *SenderSuite) TestGithubStatusLogger() {
 			},
 			m: message.NewGithubStatusMessage(level.Info, "example", message.GithubStatePending, "https://example.com/hi", "description"),
 			eh: func(err error, _ message.Composer) {
-				s.Contains(err.Error(), "recieved HTTP status")
+				s.Contains(err.Error(), "received HTTP status")
 			},
 			numSent: 1,
 		},
@@ -524,7 +524,7 @@ func (s *SenderSuite) TestGithubCommentLogger() {
 			},
 			m: message.NewString("hi"),
 			eh: func(err error, _ message.Composer) {
-				s.Contains(err.Error(), "recieved HTTP status")
+				s.Contains(err.Error(), "received HTTP status")
 			},
 			numSent: 1,
 		},

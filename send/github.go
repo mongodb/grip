@@ -76,7 +76,7 @@ func (s *githubLogger) Send(m message.Composer) {
 		if _, resp, err := s.gh.Create(ctx, s.opts.Account, s.opts.Repo, issue); err != nil {
 			s.ErrorHandler()(errors.Wrap(err, "sending GitHub Create API request"), m)
 		} else if resp.Response.StatusCode != http.StatusOK {
-			s.ErrorHandler()(errors.Errorf("recieved HTTP status '%d' from the Github Create API", resp.Response.StatusCode), m)
+			s.ErrorHandler()(errors.Errorf("received HTTP status '%d' from the Github Create API", resp.Response.StatusCode), m)
 		}
 	}
 }
