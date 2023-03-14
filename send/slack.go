@@ -78,16 +78,16 @@ func (s *slackJournal) Send(m message.Composer) {
 		s.Base.mutex.RLock()
 		defer s.Base.mutex.RUnlock()
 
-		var msg string
-		channel := s.opts.Channel
-		var attachmentParam slack.MsgOption
-
+		var (
+			channel, msg    string
+			attachmentParam slack.MsgOption
+		)
 		if slackMsg, ok := m.Raw().(*message.Slack); ok {
 			channel = slackMsg.Target
-			msg, attachmentParam = slackMsg.Msg,
-				slack.MsgOptionAttachments(slackMsg.Attachments...)
-
+			msg = slackMsg.Msg
+			attachmentParam = slack.MsgOptionAttachments(slackMsg.Attachments...)
 		} else {
+			channel = s.opts.Channel
 			msg, attachmentParam = s.opts.produceAttachment(m)
 		}
 
@@ -109,10 +109,7 @@ func (s *slackJournal) Send(m message.Composer) {
 		}
 
 		_, _, err := s.opts.client.PostMessage(channel, params...)
-		if err != nil {
-			s.ErrorHandler()(err, message.NewFormattedMessage(m.Priority(),
-				"%s\n", msg))
-		}
+		s.ErrorHandler()(err, message.NewFormattedMessage(m.Priority(), "%s\n", msg))
 	}
 }
 

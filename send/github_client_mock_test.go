@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
+	"strings"
 
 	"github.com/google/go-github/github"
 )
@@ -55,6 +57,7 @@ func (g *githubClientMock) createResponse() *github.Response {
 	return &github.Response{
 		Response: &http.Response{
 			StatusCode: statusCode,
+			Body:       io.NopCloser(strings.NewReader("body")),
 		},
 	}
 }
