@@ -25,8 +25,19 @@ func TestHandleHTTPResponseError(t *testing.T) {
 			name: "100StatusCode",
 			resp: &http.Response{
 				StatusCode: http.StatusContinue,
-				Body:       io.NopCloser(strings.NewReader("body")),
+				Body:       io.NopCloser(strings.NewReader("continue")),
 			},
+			hasErr:   true,
+			contains: "continue",
+		},
+		{
+			name: "103StatusCode",
+			resp: &http.Response{
+				StatusCode: http.StatusEarlyHints,
+				Body:       io.NopCloser(strings.NewReader("hints")),
+			},
+			hasErr:   true,
+			contains: "hints",
 		},
 		{
 			name: "200StatusCode",
@@ -36,11 +47,20 @@ func TestHandleHTTPResponseError(t *testing.T) {
 			},
 		},
 		{
-			name: "308StatusCode",
+			name: "226StatusCode",
 			resp: &http.Response{
-				StatusCode: http.StatusPermanentRedirect,
+				StatusCode: http.StatusIMUsed,
 				Body:       io.NopCloser(strings.NewReader("body")),
 			},
+		},
+		{
+			name: "300StatusCode",
+			resp: &http.Response{
+				StatusCode: http.StatusMultipleChoices,
+				Body:       io.NopCloser(strings.NewReader("lot's of choices")),
+			},
+			hasErr:   true,
+			contains: "lot's of choices",
 		},
 		{
 			name: "400StatusCode",
@@ -50,15 +70,6 @@ func TestHandleHTTPResponseError(t *testing.T) {
 			},
 			hasErr:   true,
 			contains: "invalid request",
-		},
-		{
-			name: "500StatusCode",
-			resp: &http.Response{
-				StatusCode: http.StatusInternalServerError,
-				Body:       io.NopCloser(strings.NewReader("internal error")),
-			},
-			hasErr:   true,
-			contains: "internal error",
 		},
 		{
 			name: "511StatusCode",

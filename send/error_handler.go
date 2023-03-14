@@ -41,7 +41,7 @@ func handleHTTPResponseError(resp *http.Response) error {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode < http.StatusBadRequest {
+	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 		return nil
 	}
 
