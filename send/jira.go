@@ -5,7 +5,6 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -117,7 +116,7 @@ func (j *jiraJournal) Send(m message.Composer) {
 
 		issueKey, err := j.opts.client.PostIssue(issueFields)
 		if err != nil {
-			j.errHandler(err, message.NewFormattedMessage(m.Priority(), m.String()))
+			j.ErrorHandler()(err, message.NewFormattedMessage(m.Priority(), m.String()))
 			return
 		}
 		populateKey(m, issueKey)
@@ -313,13 +312,10 @@ func (c *jiraClientImpl) PostIssue(issueFields *jira.IssueFields) (string, error
 	i := jira.Issue{Fields: issueFields}
 	issue, resp, err := c.Client.Issue.Create(&i)
 	if err != nil {
-		if resp != nil {
-			defer resp.Body.Close()
-			data, _ := ioutil.ReadAll(resp.Body)
-			return "", errors.Wrapf(err, "response '%s'", string(data))
-		}
-
-		return "", err
+		return "", errors.Wrap(err, "sending JIRA create issue request")
+	}
+	if err = handleHTTPResponseError(resp.Response); err != nil {
+		return "", errors.Wrap(err, "creating new JIRA issue")
 	}
 	if issue == nil {
 		return "", errors.New("no issue returned from Jira")
@@ -330,8 +326,15 @@ func (c *jiraClientImpl) PostIssue(issueFields *jira.IssueFields) (string, error
 
 // todo: allow more parameters than just body?
 func (c *jiraClientImpl) PostComment(issueID string, commentToPost string) error {
-	_, _, err := c.Client.Issue.AddComment(issueID, &jira.Comment{Body: commentToPost})
-	return err
+	_, resp, err := c.Client.Issue.AddComment(issueID, &jira.Comment{Body: commentToPost})
+	if err != nil {
+		return errors.Wrap(err, "sending JIRA add comment to issue request")
+	}
+	if err = handleHTTPResponseError(resp.Response); err != nil {
+		return errors.Wrap(err, "adding comment to JIRA issue")
+	}
+
+	return nil
 }
 
 type JiraOauthCredentials struct {
