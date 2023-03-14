@@ -49,5 +49,5 @@ func handleHTTPResponseError(resp *http.Response) error {
 	if err != nil {
 		return errors.Wrapf(err, "received HTTP status '%d' but failed to read response body", resp.StatusCode)
 	}
-	return errors.Wrapf(err, "received HTTP status '%d' with response '%s'", resp.StatusCode, string(data))
+	return errors.Errorf("received HTTP status '%d' with response '%s'", resp.StatusCode, string(data))
 }
