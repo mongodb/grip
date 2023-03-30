@@ -3,7 +3,9 @@ package send
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -69,12 +71,24 @@ func (s *githubStatusMessageLogger) Send(m message.Composer) {
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 		defer cancel()
-		if _, resp, err := s.gh.CreateStatus(ctx, owner, repo, ref, status); err != nil {
+		_, resp, err := s.gh.CreateStatus(ctx, owner, repo, ref, status)
+		if err != nil {
 			s.ErrorHandler()(errors.Wrap(err, "sending GitHub create status request"), m)
 		} else if err = handleHTTPResponseError(resp.Response); err != nil {
 			s.ErrorHandler()(errors.Wrap(err, "creating GitHub status"), m)
 		}
+		err = printResponseError(resp.Response)
+		s.ErrorHandler()(err, m)
 	}
+}
+
+func printResponseError(resp *http.Response) error {
+	defer resp.Body.Close()
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return errors.Wrapf(err, "received HTTP status '%d' but failed to read response body", resp.StatusCode)
+	}
+	return errors.Errorf("printing github response for EVG-19268 '%s'", string(data))
 }
 
 func (s *githubStatusMessageLogger) Flush(_ context.Context) error { return nil }
