@@ -77,8 +77,10 @@ func (s *githubStatusMessageLogger) Send(m message.Composer) {
 		} else if err = handleHTTPResponseError(resp.Response); err != nil {
 			s.ErrorHandler()(errors.Wrap(err, "creating GitHub status"), m)
 		}
-		err = printResponseError(resp.Response)
-		s.ErrorHandler()(err, m)
+		if resp.Response != nil {
+			err = printResponseError(resp.Response)
+			s.ErrorHandler()(err, m)
+		}
 	}
 }
 
