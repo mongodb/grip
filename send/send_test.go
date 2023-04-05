@@ -431,7 +431,7 @@ func (s *SenderSuite) TestGithubStatusLogger() {
 			},
 			m: message.NewGithubStatusMessage(level.Info, "example", message.GithubStatePending, "https://example.com/hi", "description"),
 			eh: func(err error, _ message.Composer) {
-				s.Contains(err.Error(), "received HTTP status")
+				s.Error(err)
 			},
 			numSent: 1,
 		},
@@ -443,7 +443,7 @@ func (s *SenderSuite) TestGithubStatusLogger() {
 			},
 			m: message.NewGithubStatusMessage(level.Info, "example", message.GithubStatePending, "https://example.com/hi", "description"),
 			eh: func(err error, m message.Composer) {
-				s.Fail("Got error, but shouldn't have: %s for composer: %s", err.Error(), m.String())
+				s.Contains(err.Error(), "X-Github-Request-Id")
 			},
 			numSent: 1,
 		},
@@ -463,7 +463,7 @@ func (s *SenderSuite) TestGithubStatusLogger() {
 				Description: "description",
 			}),
 			eh: func(err error, m message.Composer) {
-				s.Fail("Got error, but shouldn't have: %s for composer: %s", err.Error(), m.String())
+				s.Contains(err.Error(), "X-Github-Request-Id")
 			},
 			numSent:  1,
 			lastRepo: "somewhere/over@therainbow",

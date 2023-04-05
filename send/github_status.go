@@ -70,7 +70,9 @@ func (s *githubStatusMessageLogger) Send(m message.Composer) {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 		defer cancel()
 		_, resp, err := s.gh.CreateStatus(ctx, owner, repo, ref, status)
-		s.ErrorHandler()(errors.New("X-Github-Request-Id "+resp.Header.Get("X-Github-Request-Id")), m)
+		if resp != nil && resp.Response != nil {
+			s.ErrorHandler()(errors.New("X-Github-Request-Id "+resp.Header.Get("X-Github-Request-Id")), m)
+		}
 		if err != nil {
 			s.ErrorHandler()(errors.Wrap(err, "sending GitHub create status request"), m)
 		} else if err = handleHTTPResponseError(resp.Response); err != nil {
