@@ -23,7 +23,7 @@ require (
 	// TODO (EVG-18584): gopsutil cannot be upgraded any further because the newer releases rely on a go1.17-only
 	// feature. This should not be upgraded until the completion of EVG-18584.
 	github.com/shirou/gopsutil/v3 v3.22.3
-	github.com/slack-go/slack v0.12.1
+	github.com/slack-go/slack v0.12.2
 	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 )
