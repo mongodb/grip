@@ -318,8 +318,9 @@ func (c *jiraClientImpl) PostIssue(issueFields *jira.IssueFields) (string, error
 			data, err := io.ReadAll(resp.Body)
 			if err != nil {
 				msg = fmt.Sprintf("error reading body: %s", err)
+			} else {
+				msg = string(data)
 			}
-			msg = string(data)
 		}
 
 		return "", errors.Wrapf(err, "sending JIRA create issue request (%s)", msg)
