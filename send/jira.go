@@ -5,12 +5,13 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
 	"strings"
 
-	jira "github.com/andygrunwald/go-jira"
+	"github.com/andygrunwald/go-jira"
 	"github.com/dghubble/oauth1"
 	"github.com/mongodb/grip/level"
 	"github.com/mongodb/grip/message"
@@ -312,7 +313,17 @@ func (c *jiraClientImpl) PostIssue(issueFields *jira.IssueFields) (string, error
 	i := jira.Issue{Fields: issueFields}
 	issue, resp, err := c.Client.Issue.Create(&i)
 	if err != nil {
-		return "", errors.Wrap(err, "sending JIRA create issue request")
+		msg := "resp is nil"
+		if resp != nil {
+			data, err := io.ReadAll(resp.Body)
+			if err != nil {
+				msg = fmt.Sprintf("error reading body: %s", err)
+			} else {
+				msg = string(data)
+			}
+		}
+
+		return "", errors.Wrapf(err, "sending JIRA create issue request (%s)", msg)
 	}
 	if err = handleHTTPResponseError(resp.Response); err != nil {
 		return "", errors.Wrap(err, "creating new JIRA issue")
