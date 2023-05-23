@@ -283,8 +283,11 @@ func (o *SMTPOptions) Validate() error {
 	return nil
 }
 
-/* Connects an SMTP server (usually localhost:25 in prod) and uses that to
-   send an email with the body encoded in base64. */
+/*
+Connects an SMTP server (usually localhost:25 in prod) and uses that to
+
+	send an email with the body encoded in base64.
+*/
 func (o *SMTPOptions) sendMail(m message.Composer) error {
 	o.mutex.Lock()
 	defer o.mutex.Unlock()

@@ -3,14 +3,14 @@ Basic Logging
 
 Loging helpers exist for the following levels:
 
-   Emergency + (fatal/panic)
-   Alert + (fatal/panic)
-   Critical + (fatal/panic)
-   Error + (fatal/panic)
-   Warning
-   Notice
-   Info
-   Debug
+	Emergency + (fatal/panic)
+	Alert + (fatal/panic)
+	Critical + (fatal/panic)
+	Error + (fatal/panic)
+	Warning
+	Notice
+	Info
+	Debug
 
 These methods accept both strings (message content,) or types that
 implement the message.MessageComposer interface. Composer types make
@@ -22,7 +22,7 @@ All levels also have additional methods with `ln` and `f` appended to
 the end of the method name which allow Println() and Printf() style
 functionality. You must pass printf/println-style arguments to these methods.
 
-Conditional Logging
+# Conditional Logging
 
 The Conditional logging methods take two arguments, a Boolean, and a
 message argument. Messages can be strings, objects that implement the

@@ -131,47 +131,35 @@ tasks:
 #           Buildvariants             #
 #######################################
 buildvariants:
-  - name: race-detector
-    display_name: Race Detector (Arch Linux)
-    expansions:
-      GOROOT: /opt/golang/go1.16
-      RACE_DETECTOR: true
-    run_on:
-      - archlinux-new-small
-      - archlinux-new-large
-    tasks: [ ".test" ]
-
   - name: lint
     display_name: Lint
     expansions:
-      GOROOT: /opt/golang/go1.16
+      GOROOT: /opt/golang/go1.20
     run_on:
-      - archlinux-new-small
-      - archlinux-new-large
+      - ubuntu2204-small
     tasks: [ ".report" ]
 
   - name: ubuntu
-    display_name: Ubuntu 18.04
+    display_name: Ubuntu 22.04
     expansions:
-      GOROOT: /opt/golang/go1.16
+      GOROOT: /opt/golang/go1.20
+      RACE_DETECTOR: true
     run_on:
-      - ubuntu1804-small
-      - ubuntu1804-large
+      - ubuntu2204-small
     tasks: [ ".test" ]
 
   - name: macos
     display_name: macOS
     expansions:
-      GOROOT: /opt/golang/go1.16
+      GOROOT: /opt/golang/go1.20
     run_on:
-      - macos-1014
+      - macos-1100-arm64
     tasks: [ ".test" ]
 
   - name: windows
     display_name: Windows
     run_on:
-      - windows-64-vs2019-large
-      - windows-64-vs2017-large
+      - windows-vsCurrent-small
     expansions:
-      GOROOT: C:/golang/go1.16
+      GOROOT: C:/golang/go1.20
     tasks: [ ".test" ]

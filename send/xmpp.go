@@ -37,9 +37,9 @@ const (
 // GetXMPPConnectionInfo builds an XMPPConnectionInfo structure
 // reading default values from the following environment variables:
 //
-//    GRIP_XMPP_HOSTNAME
-//    GRIP_XMPP_USERNAME
-//    GRIP_XMPP_PASSWORD
+//	GRIP_XMPP_HOSTNAME
+//	GRIP_XMPP_USERNAME
+//	GRIP_XMPP_PASSWORD
 func GetXMPPConnectionInfo() XMPPConnectionInfo {
 	return XMPPConnectionInfo{
 		Hostname: os.Getenv(xmppHostEnvVar),
@@ -65,9 +65,9 @@ func NewXMPPLogger(name, target string, info XMPPConnectionInfo, l LevelInfo) (S
 // MakeXMPP constructs an XMPP logging backend that reads the
 // hostname, username, and password from environment variables:
 //
-//    - GRIP_XMPP_HOSTNAME
-//    - GRIP_XMPP_USERNAME
-//    - GRIP_XMPP_PASSWORD
+//   - GRIP_XMPP_HOSTNAME
+//   - GRIP_XMPP_USERNAME
+//   - GRIP_XMPP_PASSWORD
 //
 // The instance is otherwise unconquered. Call SetName or inject it
 // into a Journaler instance using SetSender before using.
@@ -85,9 +85,9 @@ func MakeXMPP(target string) (Sender, error) {
 // NewXMPP constructs an XMPP logging backend that reads the
 // hostname, username, and password from environment variables:
 //
-//    - GRIP_XMPP_HOSTNAME
-//    - GRIP_XMPP_USERNAME
-//    - GRIP_XMPP_PASSWORD
+//   - GRIP_XMPP_HOSTNAME
+//   - GRIP_XMPP_USERNAME
+//   - GRIP_XMPP_PASSWORD
 //
 // Otherwise, the semantics of NewXMPPDefault are the same as NewXMPPLogger.
 func NewXMPP(name, target string, l LevelInfo) (Sender, error) {
