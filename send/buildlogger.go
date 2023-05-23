@@ -116,11 +116,11 @@ func (c *BuildloggerConfig) SetCredentials(username, password string) {
 // buildlogger terminology. Then, set set the CreateTest attribute,
 // and generate additional per-test senders. For example:
 //
-//    conf := GetBuildloggerConfig()
-//    global := MakeBuildlogger("<name>-global", conf)
-//    // ... use global
-//    conf.CreateTest = true
-//    testOne := MakeBuildlogger("<name>-testOne", conf)
+//	conf := GetBuildloggerConfig()
+//	global := MakeBuildlogger("<name>-global", conf)
+//	// ... use global
+//	conf.CreateTest = true
+//	testOne := MakeBuildlogger("<name>-testOne", conf)
 func GetBuildloggerConfig() (*BuildloggerConfig, error) {
 	conf := &BuildloggerConfig{
 		URL:     os.Getenv("BULDLOGGER_URL"),

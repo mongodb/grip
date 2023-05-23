@@ -39,10 +39,10 @@ func (l *Logger) Logf(level Level, messageFmt string, args ...interface{}) (*Log
 // Log and return a formatted error string.
 // Example:i
 //
-// if whatIsExpected != whatIsReturned {
-//     return slogger.Errorf(slogger.WARN, "Unexpected return value. Expected: %v Received: %v",
-//         whatIsExpected, whatIsReturned)
-// }
+//	if whatIsExpected != whatIsReturned {
+//	    return slogger.Errorf(slogger.WARN, "Unexpected return value. Expected: %v Received: %v",
+//	        whatIsExpected, whatIsReturned)
+//	}
 func (l *Logger) Errorf(level Level, messageFmt string, args ...interface{}) error {
 	m := message.NewFormattedMessage(level.Priority(), messageFmt, args...)
 	log := newPrefixedLog(l.Name, m)

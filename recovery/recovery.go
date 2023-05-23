@@ -46,8 +46,7 @@ func LogStackTraceAndExit(opDetails ...string) {
 //
 // Use in a common defer statement, such as:
 //
-//    defer recovery.LogStackTraceAndContinue("operation")
-//
+//	defer recovery.LogStackTraceAndContinue("operation")
 func LogStackTraceAndContinue(opDetails ...string) {
 	if p := recover(); p != nil {
 		logAndContinue(p, logging.MakeGrip(grip.GetSender()), message.MakeFields(getMessage(opDetails)))
@@ -62,13 +61,12 @@ func LogStackTraceAndContinue(opDetails ...string) {
 //
 // You must construct a recovery function as in the following example:
 //
-//     defer func() { err = recovery.HandlePanicWithError(recover(),  err, "op") }()
+//	defer func() { err = recovery.HandlePanicWithError(recover(),  err, "op") }()
 //
 // This defer statement must occur in a function that declares a
 // default error return value as in:
 //
-//     func operation() (err error) {}
-//
+//	func operation() (err error) {}
 func HandlePanicWithError(p interface{}, err error, opDetails ...string) error {
 	catcher := grip.NewSimpleCatcher()
 	catcher.Add(err)

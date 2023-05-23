@@ -2,7 +2,7 @@
 package message defines the Composer interface and a handful of
 implementations which represent the structure for messages produced by grip.
 
-Message Composers
+# Message Composers
 
 The Composer interface provides a common way to define messages, with
 two main goals:

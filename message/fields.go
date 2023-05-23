@@ -24,7 +24,7 @@ type fieldMessage struct {
 // used for attaching structured metadata to a build request. For
 // example:
 //
-//     message.Fields{"key0", <value>, "key1", <value>}
+//	message.Fields{"key0", <value>, "key1", <value>}
 type Fields map[string]interface{}
 
 // NewFieldsMessage creates a fully configured Composer instance that

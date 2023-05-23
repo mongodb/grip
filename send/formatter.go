@@ -38,7 +38,7 @@ func MakeJSONFormatter() MessageFormatter {
 // MakeDefaultFormatter returns a MessageFormatter that will produce a
 // message in the following format:
 //
-//     [p=<level>]: <message>
+//	[p=<level>]: <message>
 //
 // It can never error.
 func MakeDefaultFormatter() MessageFormatter {
@@ -58,7 +58,7 @@ func MakePlainFormatter() MessageFormatter {
 // MakeCallSiteFormatter returns a MessageFormater that formats
 // messages with the following format:
 //
-//     [p=<levvel>] [<fileName>:<lineNumber>]: <message>
+//	[p=<levvel>] [<fileName>:<lineNumber>]: <message>
 //
 // It can never error.
 func MakeCallSiteFormatter(depth int) MessageFormatter {
@@ -69,10 +69,10 @@ func MakeCallSiteFormatter(depth int) MessageFormatter {
 	}
 }
 
-//MakeXMPPFormatter returns a MessageFormatter that will produce
+// MakeXMPPFormatter returns a MessageFormatter that will produce
 // messages in the following format, used primarily by the xmpp logger:
 //
-//     [<name>] (p=<priority>) <message>
+//	[<name>] (p=<priority>) <message>
 //
 // It can never error.
 func MakeXMPPFormatter(name string) MessageFormatter {

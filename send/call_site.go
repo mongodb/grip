@@ -20,10 +20,10 @@ indirection.
 
 Create a call site logger with one of the following constructors:
 
-   NewCallSiteConsoleLogger(<name>, <depth>, <LevelInfo>)
-   MakeCallSiteConsoleLogger(<depth>)
-   NewCallSiteFileLogger(<name>, <fileName>, <depth>, <LevelInfo>)
-   MakeCallSiteFileLogger(<fileName>, <depth>)
+	NewCallSiteConsoleLogger(<name>, <depth>, <LevelInfo>)
+	MakeCallSiteConsoleLogger(<depth>)
+	NewCallSiteFileLogger(<name>, <fileName>, <depth>, <LevelInfo>)
+	MakeCallSiteFileLogger(<fileName>, <depth>)
 */
 package send
 
