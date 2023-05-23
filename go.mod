@@ -3,7 +3,7 @@ module github.com/mongodb/grip
 go 1.20
 
 require (
-	github.com/andygrunwald/go-jira v1.14.0
+	github.com/andygrunwald/go-jira v1.16.0
 	github.com/coreos/go-systemd v0.0.0-20191104093116-d3cd4ed1dbcf
 	github.com/dghubble/oauth1 v0.7.2
 	github.com/fuyufjh/splunk-hec-go v0.3.4-0.20190414090710-10df423a9f36
@@ -41,7 +41,6 @@ require (
 require (
 	github.com/evergreen-ci/utility v0.0.0-20230216205613-b8156d58f1e5
 	github.com/google/go-cmp v0.5.9 // indirect
-	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	// TODO (EVG-18584): gopsutil cannot be upgraded any further because the newer releases rely on a go1.17-only
 	// feature. This should not be upgraded until the completion of EVG-18584.
