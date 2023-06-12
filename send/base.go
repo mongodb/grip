@@ -6,7 +6,12 @@ import (
 
 	"github.com/mongodb/grip/message"
 	"github.com/pkg/errors"
+	"go.opentelemetry.io/otel"
 )
+
+const packageName = "github.com/mongodb/grip/send"
+
+var tracer = otel.GetTracerProvider().Tracer(packageName)
 
 // Base provides most of the functionality of the Sender interface,
 // except for the Send method, to facilitate writing novel Sender

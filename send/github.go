@@ -8,9 +8,19 @@ import (
 	"time"
 
 	"github.com/evergreen-ci/utility"
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v53/github"
 	"github.com/mongodb/grip/message"
 	"github.com/pkg/errors"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
+)
+
+const (
+	endpointAttribute = "grip.github.endpoint"
+	ownerAttribute    = "grip.github.owner"
+	repoAttribute     = "grip.github.repo"
+	refAttribute      = "grip.github.ref"
 )
 
 type githubLogger struct {
@@ -72,10 +82,20 @@ func (s *githubLogger) Send(m message.Composer) {
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 		defer cancel()
+
+		ctx, span := tracer.Start(ctx, "CreateIssue", trace.WithAttributes(
+			attribute.String(endpointAttribute, "CreateIssue"),
+			attribute.String(ownerAttribute, s.opts.Account),
+			attribute.String(repoAttribute, s.opts.Repo),
+		))
+		defer span.End()
+
 		if _, resp, err := s.gh.Create(ctx, s.opts.Account, s.opts.Repo, issue); err != nil {
 			s.ErrorHandler()(errors.Wrap(err, "sending GitHub create issue request"), m)
+			span.SetStatus(codes.Error, "creating issue")
 		} else if err = handleHTTPResponseError(resp.Response); err != nil {
 			s.ErrorHandler()(errors.Wrap(err, "creating GitHub issue"), m)
+			span.SetStatus(codes.Error, "creating issue")
 		}
 	}
 }
