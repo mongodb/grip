@@ -28,6 +28,7 @@ const (
 	ownerAttribute    = "grip.github.owner"
 	repoAttribute     = "grip.github.repo"
 	refAttribute      = "grip.github.ref"
+	retriesAttribute  = "grip.github.retries"
 )
 
 type githubLogger struct {
@@ -149,6 +150,8 @@ func (c *githubClientImpl) Init(token string) {
 
 func githubShouldRetry() utility.HTTPRetryFunction {
 	return func(index int, req *http.Request, resp *http.Response, err error) bool {
+		trace.SpanFromContext(req.Context()).SetAttributes(attribute.Int(retriesAttribute, index))
+
 		if err != nil {
 			return utility.IsTemporaryError(err)
 		}
