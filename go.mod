@@ -52,7 +52,7 @@ require (
 )
 
 require (
-	github.com/evergreen-ci/utility v0.0.0-20230519193518-4d91d64f59fb
+	github.com/evergreen-ci/utility v0.0.0-20230613214910-daa83783f97c
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/shirou/gopsutil/v3 v3.23.5
