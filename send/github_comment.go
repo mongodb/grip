@@ -7,9 +7,12 @@ import (
 	"os"
 	"time"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v53/github"
 	"github.com/mongodb/grip/message"
 	"github.com/pkg/errors"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type githubCommentLogger struct {
@@ -65,10 +68,24 @@ func (s *githubCommentLogger) Send(m message.Composer) {
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 		defer cancel()
+
+		ctx, span := tracer.Start(ctx, "CreateComment", trace.WithAttributes(
+			attribute.String(githubEndpointAttribute, "CreateComment"),
+			attribute.String(githubOwnerAttribute, s.opts.Account),
+			attribute.String(githubRepoAttribute, s.opts.Repo),
+		))
+		defer span.End()
+
 		if _, resp, err := s.gh.CreateComment(ctx, s.opts.Account, s.opts.Repo, s.issue, comment); err != nil {
 			s.ErrorHandler()(errors.Wrap(err, "sending GitHub create comment request"), m)
+
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "sending comment")
 		} else if err = handleHTTPResponseError(resp.Response); err != nil {
 			s.ErrorHandler()(errors.Wrap(err, "creating GitHub comment"), m)
+
+			span.RecordError(err)
+			span.SetStatus(codes.Error, "sending comment")
 		}
 	}
 }

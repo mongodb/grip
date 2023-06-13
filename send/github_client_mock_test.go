@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v53/github"
 )
 
 type githubClientMock struct {
