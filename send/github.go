@@ -24,11 +24,11 @@ const (
 )
 
 const (
-	endpointAttribute = "grip.github.endpoint"
-	ownerAttribute    = "grip.github.owner"
-	repoAttribute     = "grip.github.repo"
-	refAttribute      = "grip.github.ref"
-	retriesAttribute  = "grip.github.retries"
+	githubEndpointAttribute = "grip.github.endpoint"
+	githubOwnerAttribute    = "grip.github.owner"
+	githubRepoAttribute     = "grip.github.repo"
+	githubRefAttribute      = "grip.github.ref"
+	githubRetriesAttribute  = "grip.github.retries"
 )
 
 type githubLogger struct {
@@ -92,17 +92,21 @@ func (s *githubLogger) Send(m message.Composer) {
 		defer cancel()
 
 		ctx, span := tracer.Start(ctx, "CreateIssue", trace.WithAttributes(
-			attribute.String(endpointAttribute, "CreateIssue"),
-			attribute.String(ownerAttribute, s.opts.Account),
-			attribute.String(repoAttribute, s.opts.Repo),
+			attribute.String(githubEndpointAttribute, "CreateIssue"),
+			attribute.String(githubOwnerAttribute, s.opts.Account),
+			attribute.String(githubRepoAttribute, s.opts.Repo),
 		))
 		defer span.End()
 
 		if _, resp, err := s.gh.Create(ctx, s.opts.Account, s.opts.Repo, issue); err != nil {
 			s.ErrorHandler()(errors.Wrap(err, "sending GitHub create issue request"), m)
+
+			span.RecordError(err)
 			span.SetStatus(codes.Error, "creating issue")
 		} else if err = handleHTTPResponseError(resp.Response); err != nil {
 			s.ErrorHandler()(errors.Wrap(err, "creating GitHub issue"), m)
+
+			span.RecordError(err)
 			span.SetStatus(codes.Error, "creating issue")
 		}
 	}
@@ -150,7 +154,7 @@ func (c *githubClientImpl) Init(token string) {
 
 func githubShouldRetry() utility.HTTPRetryFunction {
 	return func(index int, req *http.Request, resp *http.Response, err error) bool {
-		trace.SpanFromContext(req.Context()).SetAttributes(attribute.Int(retriesAttribute, index))
+		trace.SpanFromContext(req.Context()).SetAttributes(attribute.Int(githubRetriesAttribute, index))
 
 		if err != nil {
 			return utility.IsTemporaryError(err)

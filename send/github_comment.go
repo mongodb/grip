@@ -70,17 +70,21 @@ func (s *githubCommentLogger) Send(m message.Composer) {
 		defer cancel()
 
 		ctx, span := tracer.Start(ctx, "CreateComment", trace.WithAttributes(
-			attribute.String(endpointAttribute, "CreateComment"),
-			attribute.String(ownerAttribute, s.opts.Account),
-			attribute.String(repoAttribute, s.opts.Repo),
+			attribute.String(githubEndpointAttribute, "CreateComment"),
+			attribute.String(githubOwnerAttribute, s.opts.Account),
+			attribute.String(githubRepoAttribute, s.opts.Repo),
 		))
 		defer span.End()
 
 		if _, resp, err := s.gh.CreateComment(ctx, s.opts.Account, s.opts.Repo, s.issue, comment); err != nil {
 			s.ErrorHandler()(errors.Wrap(err, "sending GitHub create comment request"), m)
+
+			span.RecordError(err)
 			span.SetStatus(codes.Error, "sending comment")
 		} else if err = handleHTTPResponseError(resp.Response); err != nil {
 			s.ErrorHandler()(errors.Wrap(err, "creating GitHub comment"), m)
+
+			span.RecordError(err)
 			span.SetStatus(codes.Error, "sending comment")
 		}
 	}

@@ -69,19 +69,22 @@ func (s *githubStatusMessageLogger) Send(m message.Composer) {
 		defer cancel()
 
 		ctx, span := tracer.Start(ctx, "CreateStatus", trace.WithAttributes(
-			attribute.String(endpointAttribute, "CreateStatus"),
-			attribute.String(ownerAttribute, owner),
-			attribute.String(repoAttribute, repo),
-			attribute.String(refAttribute, ref),
+			attribute.String(githubEndpointAttribute, "CreateStatus"),
+			attribute.String(githubOwnerAttribute, owner),
+			attribute.String(githubRepoAttribute, repo),
+			attribute.String(githubRefAttribute, ref),
 		))
 		defer span.End()
 
 		if _, resp, err := s.gh.CreateStatus(ctx, owner, repo, ref, status); err != nil {
 			s.ErrorHandler()(errors.Wrap(err, "sending GitHub create status request"), m)
+
 			span.RecordError(err)
 			span.SetStatus(codes.Error, "sending status")
 		} else if err = handleHTTPResponseError(resp.Response); err != nil {
 			s.ErrorHandler()(errors.Wrap(err, "creating GitHub status"), m)
+
+			span.RecordError(err)
 			span.SetStatus(codes.Error, "sending status")
 		}
 	}
