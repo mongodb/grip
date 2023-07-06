@@ -41,7 +41,7 @@ func (o *SESOptions) validate() error {
 type sesSender struct {
 	options SESOptions
 	ctx     context.Context
-	Base
+	*Base
 }
 
 // NewSESLogger returns a Sender implementation backed by SES.
@@ -50,6 +50,7 @@ func NewSESLogger(ctx context.Context, options SESOptions, l LevelInfo) (Sender,
 		return nil, errors.Wrap(err, "invalid options")
 	}
 	sender := &sesSender{
+		Base:    NewBase(options.Name),
 		ctx:     ctx,
 		options: options,
 	}
@@ -88,7 +89,7 @@ func (s *sesSender) sendRawEmail(ctx context.Context, emailMsg *message.Email) e
 	if err != nil {
 		return errors.Wrap(err, "parsing From address")
 	}
-	fromAddr.Name = s.name
+	fromAddr.Name = s.Name()
 
 	if len(emailMsg.Recipients) == 0 {
 		return errors.New("no recipients specified")
