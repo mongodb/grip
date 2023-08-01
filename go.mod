@@ -13,7 +13,7 @@ require (
 	github.com/mattn/go-xmpp v0.0.0-20210723025538-3871461df959
 	github.com/montanaflynn/stats v0.0.0-20180911141734-db72e6cae808
 	github.com/pkg/errors v0.9.1
-	github.com/stretchr/testify v1.8.3
+	github.com/stretchr/testify v1.8.4
 	github.com/trivago/tgo v1.0.7
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.42.0
 	go.opentelemetry.io/otel v1.16.0
@@ -61,8 +61,8 @@ require (
 	github.com/evergreen-ci/utility v0.0.0-20230613214910-daa83783f97c
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/shirou/gopsutil/v3 v3.23.5
+	github.com/shirou/gopsutil/v3 v3.23.7
 	github.com/slack-go/slack v0.12.1
-	golang.org/x/sys v0.8.0 // indirect
+	golang.org/x/sys v0.10.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 )
