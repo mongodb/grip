@@ -49,7 +49,7 @@ type GithubOptions struct {
 	MinDelay    time.Duration
 }
 
-func (o *GithubOptions) Validate() {
+func (o *GithubOptions) populate() {
 	if o.MaxAttempts <= 0 {
 		o.MaxAttempts = numGithubAttempts
 	}
@@ -67,7 +67,7 @@ func (o *GithubOptions) Validate() {
 // NewGithubIssuesLogger builds a sender implementation that creates a
 // new issue in a Github Project for each log message.
 func NewGithubIssuesLogger(name string, opts *GithubOptions) (Sender, error) {
-	opts.Validate()
+	opts.populate()
 	s := &githubLogger{
 		Base: NewBase(name),
 		opts: opts,

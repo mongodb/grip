@@ -30,7 +30,7 @@ type githubCommentLogger struct {
 // Specify the credentials to use the GitHub via the GithubOptions
 // structure, and the issue number as an argument to the constructor.
 func NewGithubCommentLogger(name string, issueID int, opts *GithubOptions) (Sender, error) {
-	opts.Validate()
+	opts.populate()
 	s := &githubCommentLogger{
 		Base:  NewBase(name),
 		opts:  opts,

@@ -95,7 +95,7 @@ func (s *githubStatusMessageLogger) Flush(_ context.Context) error { return nil 
 // NewGithubStatusLogger returns a Sender to send payloads to the Github Status
 // API. Statuses will be attached to the given ref.
 func NewGithubStatusLogger(name string, opts *GithubOptions, ref string) (Sender, error) {
-	opts.Validate()
+	opts.populate()
 	s := &githubStatusMessageLogger{
 		Base: NewBase(name),
 		gh:   &githubClientImpl{},
