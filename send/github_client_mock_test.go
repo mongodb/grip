@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/google/go-github/v53/github"
 )
@@ -19,7 +20,7 @@ type githubClientMock struct {
 	lastRepo string
 }
 
-func (g *githubClientMock) Init(_ string) {}
+func (g *githubClientMock) Init(_ string, _ int, _ time.Duration) {}
 
 func (g *githubClientMock) Create(_ context.Context, _ string, _ string, _ *github.IssueRequest) (*github.Issue, *github.Response, error) {
 	if g.failSend {

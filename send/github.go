@@ -42,21 +42,39 @@ type githubLogger struct {
 // repository, used in the GithubIssuesLogger and the
 // GithubCommentLogger Sender implementations.
 type GithubOptions struct {
-	Account string
-	Repo    string
-	Token   string
+	Account     string
+	Repo        string
+	Token       string
+	MaxAttempts int
+	MinDelay    time.Duration
+}
+
+func (o *GithubOptions) populate() {
+	if o.MaxAttempts <= 0 {
+		o.MaxAttempts = numGithubAttempts
+	}
+
+	if o.MinDelay <= 0 {
+		o.MinDelay = githubRetryMinDelay
+	}
+
+	const floor = 100 * time.Millisecond
+	if o.MinDelay < floor {
+		o.MinDelay = floor
+	}
 }
 
 // NewGithubIssuesLogger builds a sender implementation that creates a
 // new issue in a Github Project for each log message.
 func NewGithubIssuesLogger(name string, opts *GithubOptions) (Sender, error) {
+	opts.populate()
 	s := &githubLogger{
 		Base: NewBase(name),
 		opts: opts,
 		gh:   &githubClientImpl{},
 	}
 
-	s.gh.Init(opts.Token)
+	s.gh.Init(opts.Token, opts.MaxAttempts, opts.MinDelay)
 
 	fallback := log.New(os.Stdout, "", log.LstdFlags)
 	if err := s.SetErrorHandler(ErrorHandlerFromLogger(fallback)); err != nil {
@@ -121,7 +139,7 @@ func (s *githubLogger) Flush(_ context.Context) error { return nil }
 //////////////////////////////////////////////////////////////////////////
 
 type githubClient interface {
-	Init(string)
+	Init(token string, maxAttempts int, minDelay time.Duration)
 	// Issues
 	Create(context.Context, string, string, *github.IssueRequest) (*github.Issue, *github.Response, error)
 	CreateComment(context.Context, string, string, int, *github.IssueComment) (*github.IssueComment, *github.Response, error)
@@ -135,7 +153,7 @@ type githubClientImpl struct {
 	repos *github.RepositoriesService
 }
 
-func (c *githubClientImpl) Init(token string) {
+func (c *githubClientImpl) Init(token string, maxAttempts int, minDelay time.Duration) {
 	client := utility.GetHTTPClient()
 	client.Transport = otelhttp.NewTransport(client.Transport)
 
@@ -143,8 +161,8 @@ func (c *githubClientImpl) Init(token string) {
 		token,
 		githubShouldRetry(),
 		utility.RetryHTTPDelay(utility.RetryOptions{
-			MaxAttempts: numGithubAttempts,
-			MinDelay:    githubRetryMinDelay,
+			MaxAttempts: maxAttempts,
+			MinDelay:    minDelay,
 		}),
 		client)
 	githubClient := github.NewClient(client)
