@@ -23,15 +23,20 @@ func (s *ComposerBaseSuite) TestCollectWorksWithUnsetPids() {
 	s.Equal("", s.base.Hostname)
 	s.base.Pid = 0
 	s.NoError(s.base.Collect())
-	s.NotEqual("", s.base.Hostname)
-
+	s.NotZero(s.base.Hostname)
+	s.NotZero(s.base.Pid)
+	s.NotZero(s.base.Process)
+	s.NotZero(s.base.Time)
 }
 
 func (s *ComposerBaseSuite) TestCollectNoopsIfPidIsSet() {
 	s.Equal("", s.base.Hostname)
 	s.base.Pid = 1
 	s.NoError(s.base.Collect())
-	s.Equal("", s.base.Hostname)
+	s.NotZero(s.base.Pid)
+	s.Zero(s.base.Hostname)
+	s.Zero(s.base.Process)
+	s.Zero(s.base.Time)
 }
 
 func (s *ComposerBaseSuite) TestAnnotateAddsFields() {

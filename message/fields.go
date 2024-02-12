@@ -39,7 +39,8 @@ func NewFieldsMessage(p level.Priority, message string, f Fields) Composer {
 	return m
 }
 
-// NewFields constructs a full configured fields Composer.
+// NewFields constructs a full configured fields Composer with basic logging
+// metadata.
 func NewFields(p level.Priority, f Fields) Composer {
 	m := MakeFields(f)
 	_ = m.SetPriority(p)
@@ -48,16 +49,33 @@ func NewFields(p level.Priority, f Fields) Composer {
 }
 
 // MakeFieldsMessage constructs a fields Composer from a message string and
-// Fields object, without specifying the priority of the message.
+// Fields object, without specifying the priority of the message. This includes
+// basic logging metadata.
 func MakeFieldsMessage(message string, f Fields) Composer {
 	m := &fieldMessage{message: message, fields: f}
 	m.setup()
+	return m
+}
 
+// MakeComplexFields returns a structured Composer that attaches extended
+// logging metadata.
+func MakeComplexFields(f Fields) Composer {
+	m := &fieldMessage{fields: f}
+	m.Collect()
+	m.setup()
+	return m
+}
+
+// NewComplexFields returns a structured Composer that attaches extended logging
+// metadata and allows callers to configure the message's log level.
+func NewComplexFields(p level.Priority, f Fields) Composer {
+	m := MakeComplexFields(f)
+	_ = m.SetPriority(p)
 	return m
 }
 
 // MakeSimpleFields returns a structured Composer that does
-// not attach basic logging metadata.
+// not attach any logging metadata.
 func MakeSimpleFields(f Fields) Composer {
 	m := &fieldMessage{fields: f, skipMetadata: true}
 	m.setup()
@@ -65,7 +83,7 @@ func MakeSimpleFields(f Fields) Composer {
 }
 
 // NewSimpleFields returns a structured Composer that does not
-// attach basic logging metadata and allows callers to configure the
+// attach any logging metadata and allows callers to configure the
 // messages' log level.
 func NewSimpleFields(p level.Priority, f Fields) Composer {
 	m := MakeSimpleFields(f)
@@ -74,7 +92,7 @@ func NewSimpleFields(p level.Priority, f Fields) Composer {
 }
 
 // MakeSimpleFieldsMessage returns a structured Composer that does not attach
-// basic logging metadata, but allows callers to specify the message
+// any logging metadata, but allows callers to specify the message
 // (the "message" field) as a string.
 func MakeSimpleFieldsMessage(msg string, f Fields) Composer {
 	m := &fieldMessage{
@@ -88,7 +106,7 @@ func MakeSimpleFieldsMessage(msg string, f Fields) Composer {
 }
 
 // NewSimpleFieldsMessage returns a structured Composer that does not attach
-// basic logging metadata, but allows callers to specify the message
+// any logging metadata, but allows callers to specify the message
 // (the "message" field) as well as the message's log-level.
 func NewSimpleFieldsMessage(p level.Priority, msg string, f Fields) Composer {
 	m := MakeSimpleFieldsMessage(msg, f)
@@ -110,8 +128,6 @@ func (m *fieldMessage) setup() {
 	if m.skipMetadata {
 		return
 	}
-
-	_ = m.Collect()
 
 	if b, ok := m.fields["metadata"]; !ok {
 		m.fields["metadata"] = &m.Base
