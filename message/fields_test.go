@@ -24,7 +24,7 @@ func TestFieldsLevelMutability(t *testing.T) {
 	assert.Equal(level.Info, r["metadata"].(*Base).Level)
 }
 
-func TestComplexFields(t *testing.T) {
+func TestFields(t *testing.T) {
 	t.Run("NewFieldsMessageCollectsBasicMetadata", func(t *testing.T) {
 		m := Fields{"message": "hello world"}
 		c := NewFields(level.Error, m)
@@ -40,9 +40,9 @@ func TestComplexFields(t *testing.T) {
 		assert.Zero(t, base.Process)
 		assert.Zero(t, base.Time)
 	})
-	t.Run("NewComplexFieldsCollectsExtendedMetadata", func(t *testing.T) {
+	t.Run("NewExtendedFieldsCollectsExtendedMetadata", func(t *testing.T) {
 		m := Fields{"message": "hello world"}
-		c := NewComplexFields(level.Error, m)
+		c := NewExtendedFields(level.Error, m)
 		r, ok := c.Raw().(Fields)
 		require.True(t, ok)
 		assert.Equal(t, level.Error, c.Priority())

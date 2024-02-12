@@ -13,10 +13,11 @@ import (
 const FieldsMsgName = "message"
 
 type fieldMessage struct {
-	message      string
-	fields       Fields
-	cachedOutput string
-	skipMetadata bool
+	message                 string
+	fields                  Fields
+	cachedOutput            string
+	includeMetadata         bool
+	includeExtendedMetadata bool
 	Base
 }
 
@@ -27,10 +28,9 @@ type fieldMessage struct {
 //	message.Fields{"key0", <value>, "key1", <value>}
 type Fields map[string]interface{}
 
-// NewFieldsMessage creates a fully configured Composer instance that
-// will attach some additional structured data. This constructor
-// allows you to include a string message as well as Fields
-// object.
+// NewFieldsMessage creates a fully configured Composer instance that will
+// attach basic metadata. This constructor allows you to include a string
+// message as well as Fields object.
 func NewFieldsMessage(p level.Priority, message string, f Fields) Composer {
 	m := MakeFieldsMessage(message, f)
 
@@ -39,8 +39,7 @@ func NewFieldsMessage(p level.Priority, message string, f Fields) Composer {
 	return m
 }
 
-// NewFields constructs a full configured fields Composer with basic logging
-// metadata.
+// NewFields constructs a full configured fields Composer with basic metadata.
 func NewFields(p level.Priority, f Fields) Composer {
 	m := MakeFields(f)
 	_ = m.SetPriority(p)
@@ -50,34 +49,63 @@ func NewFields(p level.Priority, f Fields) Composer {
 
 // MakeFieldsMessage constructs a fields Composer from a message string and
 // Fields object, without specifying the priority of the message. This includes
-// basic logging metadata.
+// basic metadata.
 func MakeFieldsMessage(message string, f Fields) Composer {
-	m := &fieldMessage{message: message, fields: f}
+	m := &fieldMessage{
+		message:         message,
+		fields:          f,
+		includeMetadata: true,
+	}
 	m.setup()
 	return m
 }
 
-// MakeComplexFields returns a structured Composer that attaches extended
-// logging metadata.
-func MakeComplexFields(f Fields) Composer {
-	m := &fieldMessage{fields: f}
-	m.Collect()
-	m.setup()
-	return m
-}
-
-// NewComplexFields returns a structured Composer that attaches extended logging
-// metadata and allows callers to configure the message's log level.
-func NewComplexFields(p level.Priority, f Fields) Composer {
-	m := MakeComplexFields(f)
+// NewExtendedFieldsMessage is the same as NewFieldsMessage, but also collects
+// extended logging metadata.
+func NewExtendedFieldsMessage(p level.Priority, message string, f Fields) Composer {
+	m := MakeExtendedFieldsMessage(message, f)
 	_ = m.SetPriority(p)
+	return m
+}
+
+// MakeExtendedFields is the same as MakeFields but also collects extended
+// logging metadata.
+func MakeExtendedFields(f Fields) Composer {
+	m := &fieldMessage{
+		fields:                  f,
+		includeMetadata:         true,
+		includeExtendedMetadata: true,
+	}
+	m.setup()
+	return m
+}
+
+// NewExtendedFields is the same as NewFields but also collects extended logging
+// metadata.
+func NewExtendedFields(p level.Priority, f Fields) Composer {
+	m := MakeExtendedFields(f)
+	_ = m.SetPriority(p)
+	return m
+}
+
+// MakeExtendedFieldsMessage is the same as MakeFieldsMessage but also collects
+// extended logging metadata.
+func MakeExtendedFieldsMessage(msg string, f Fields) Composer {
+	m := &fieldMessage{
+		message:                 msg,
+		fields:                  f,
+		includeMetadata:         true,
+		includeExtendedMetadata: true,
+	}
+
+	m.setup()
 	return m
 }
 
 // MakeSimpleFields returns a structured Composer that does
 // not attach any logging metadata.
 func MakeSimpleFields(f Fields) Composer {
-	m := &fieldMessage{fields: f, skipMetadata: true}
+	m := &fieldMessage{fields: f}
 	m.setup()
 	return m
 }
@@ -96,9 +124,8 @@ func NewSimpleFields(p level.Priority, f Fields) Composer {
 // (the "message" field) as a string.
 func MakeSimpleFieldsMessage(msg string, f Fields) Composer {
 	m := &fieldMessage{
-		message:      msg,
-		fields:       f,
-		skipMetadata: true,
+		message: msg,
+		fields:  f,
 	}
 
 	m.setup()
@@ -125,8 +152,11 @@ func (m *fieldMessage) setup() {
 		m.fields[FieldsMsgName] = m.message
 	}
 
-	if m.skipMetadata {
+	if !m.includeMetadata {
 		return
+	}
+	if m.includeExtendedMetadata {
+		_ = m.Collect()
 	}
 
 	if b, ok := m.fields["metadata"]; !ok {
@@ -138,7 +168,7 @@ func (m *fieldMessage) setup() {
 
 // MakeFields creates a composer interface from *just* a Fields instance.
 func MakeFields(f Fields) Composer {
-	m := &fieldMessage{fields: f}
+	m := &fieldMessage{fields: f, includeMetadata: true}
 	m.setup()
 	return m
 }
