@@ -38,7 +38,7 @@ func TestFields(t *testing.T) {
 		assert.Zero(t, base.Hostname)
 		assert.Zero(t, base.Pid)
 		assert.Zero(t, base.Process)
-		assert.Zero(t, base.Time)
+		assert.NotZero(t, base.Time)
 	})
 	t.Run("NewExtendedFieldsCollectsExtendedMetadata", func(t *testing.T) {
 		m := Fields{"message": "hello world"}

@@ -27,9 +27,19 @@ func (b *Base) IsZero() bool {
 	return b == nil || b.Level == level.Invalid && b.Hostname == "" && b.Time.IsZero() && b.Process == "" && b.Pid == 0 && b.Context == nil
 }
 
-// Collect records the time, process name, and hostname. Useful for logging
-// extended information.
-func (b *Base) Collect() error {
+// Collect records the message time. If includeExtended is true, it also
+// includes, the process ID, process name, and hostname. Useful for logging
+// extended metadata information.
+func (b *Base) Collect(includeExtended bool) error {
+	if !b.Time.IsZero() {
+		return nil
+	}
+	b.Time = time.Now()
+
+	if !includeExtended {
+		return nil
+	}
+
 	if b.Pid > 0 {
 		return nil
 	}
@@ -40,7 +50,6 @@ func (b *Base) Collect() error {
 		return err
 	}
 
-	b.Time = time.Now()
 	b.Process = os.Args[0]
 	b.Pid = os.Getpid()
 

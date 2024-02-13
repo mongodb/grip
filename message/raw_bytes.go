@@ -54,9 +54,7 @@ func (s *bytesMessage) Loggable() bool {
 }
 
 func (s *bytesMessage) Raw() interface{} {
-	if s.includeExtendedMetadata {
-		_ = s.Collect()
-	}
+	_ = s.Collect(s.includeExtendedMetadata)
 	return struct {
 		Metadata *Base  `bson:"metadata" json:"metadata" yaml:"metadata"`
 		Message  string `bson:"message" json:"message" yaml:"message"`

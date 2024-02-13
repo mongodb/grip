@@ -19,24 +19,36 @@ func (s *ComposerBaseSuite) SetupTest() {
 	s.base = &Base{}
 }
 
-func (s *ComposerBaseSuite) TestCollectWorksWithUnsetPids() {
+func (s *ComposerBaseSuite) TestCollectWithBasicMetadataOnly() {
+	s.NoError(s.base.Collect(false))
+	originalTime := s.base.Time
+	s.NotZero(s.base.Time)
+	s.Zero(s.base.Hostname)
+	s.Zero(s.base.Process)
+	s.Zero(s.base.Pid)
+
+	s.NoError(s.base.Collect(false))
+	s.Equal(originalTime, s.base.Time, "time should not change when collecing basic metadata multiple times")
+}
+
+func (s *ComposerBaseSuite) TestCollectWithExtendedMetadata() {
 	s.Equal("", s.base.Hostname)
-	s.base.Pid = 0
-	s.NoError(s.base.Collect())
+	s.NoError(s.base.Collect(true))
 	s.NotZero(s.base.Hostname)
 	s.NotZero(s.base.Pid)
 	s.NotZero(s.base.Process)
 	s.NotZero(s.base.Time)
 }
 
-func (s *ComposerBaseSuite) TestCollectNoopsIfPidIsSet() {
-	s.Equal("", s.base.Hostname)
+func (s *ComposerBaseSuite) TestCollectExtendedNoopsIfExtendedMetadataAlreadySet() {
 	s.base.Pid = 1
-	s.NoError(s.base.Collect())
-	s.NotZero(s.base.Pid)
-	s.Zero(s.base.Hostname)
-	s.Zero(s.base.Process)
-	s.Zero(s.base.Time)
+	s.base.Hostname = "hostname"
+	s.base.Process = "process"
+	s.NoError(s.base.Collect(true))
+	s.NotZero(s.base.Time)
+	s.Equal(1, s.base.Pid)
+	s.Equal("hostname", s.base.Hostname)
+	s.Equal("process", s.base.Process)
 }
 
 func (s *ComposerBaseSuite) TestAnnotateAddsFields() {

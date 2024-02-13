@@ -155,9 +155,7 @@ func (m *fieldMessage) setup() {
 	if !m.includeMetadata {
 		return
 	}
-	if m.includeExtendedMetadata {
-		_ = m.Collect()
-	}
+	_ = m.Collect(m.includeExtendedMetadata)
 
 	if b, ok := m.fields["metadata"]; !ok {
 		m.fields["metadata"] = &m.Base

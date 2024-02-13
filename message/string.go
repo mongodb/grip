@@ -55,8 +55,6 @@ func (s *stringMessage) Loggable() bool {
 }
 
 func (s *stringMessage) Raw() interface{} {
-	if s.includeExtendedMetadata {
-		_ = s.Collect()
-	}
+	_ = s.Collect(s.includeExtendedMetadata)
 	return s
 }

@@ -175,7 +175,7 @@ func (p *ProcessInfo) Loggable() bool { return p.loggable }
 
 // Raw always returns the ProcessInfo object, however it will call the
 // Collect method of the base operation first.
-func (p *ProcessInfo) Raw() interface{} { _ = p.Collect(); return p }
+func (p *ProcessInfo) Raw() interface{} { _ = p.Collect(true); return p }
 
 // String returns a string representation of the message, lazily
 // rendering the message, and caching it privately.

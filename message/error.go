@@ -77,9 +77,7 @@ func (e *errorMessage) Loggable() bool {
 }
 
 func (e *errorMessage) Raw() interface{} {
-	if e.includeExtendedMetadata {
-		_ = e.Collect()
-	}
+	_ = e.Collect(e.includeExtendedMetadata)
 	_ = e.String()
 
 	extended := fmt.Sprintf("%+v", e.err)
