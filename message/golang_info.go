@@ -261,7 +261,7 @@ func NewGoStatsRates(p level.Priority, msg string) Composer {
 	return s
 }
 
-func (s *GoRuntimeInfo) doCollect() { _ = s.Collect() }
+func (s *GoRuntimeInfo) doCollect() { _ = s.Collect(true) }
 
 func (s *GoRuntimeInfo) build() {
 	goStatsCache.Lock()

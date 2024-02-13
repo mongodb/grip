@@ -71,7 +71,7 @@ func (l *lineMessenger) String() string {
 }
 
 func (l *lineMessenger) Raw() interface{} {
-	_ = l.Collect()
+	_ = l.Collect(true)
 	_ = l.String()
 
 	return l

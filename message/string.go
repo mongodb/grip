@@ -6,32 +6,42 @@ type stringMessage struct {
 	Message string `bson:"message" json:"message" yaml:"message"`
 	Base    `bson:"metadata" json:"metadata" yaml:"metadata"`
 
-	skipMetadata bool
+	includeExtendedMetadata bool
 }
 
 // NewDefaultMessage provides a Composer interface around a single
-// string, which are always logable unless the string is empty.
+// string, which are always loggable unless the string is empty.
 func NewDefaultMessage(p level.Priority, message string) Composer {
-	m := &stringMessage{Message: message}
+	m := &stringMessage{
+		Message: message,
+	}
 	_ = m.SetPriority(p)
 	return m
 }
 
 // NewString provides a basic message consisting of a single line.
 func NewString(m string) Composer {
-	return &stringMessage{Message: m}
+	return &stringMessage{
+		Message: m,
+	}
 }
 
-// NewSimpleString produces a string message that does not attach
-// process metadata.
-func NewSimpleString(m string) Composer {
-	return &stringMessage{Message: m, skipMetadata: true}
+// NewExtendedString is the same as NewString, but also collects extended
+// logging metadata.
+func NewExtendedString(m string) Composer {
+	return &stringMessage{
+		Message:                 m,
+		includeExtendedMetadata: true,
+	}
 }
 
-// NewSimpleStringMessage produces a string message with a priority
-// that does not attach process metadata.
-func NewSimpleStringMessage(p level.Priority, message string) Composer {
-	m := &stringMessage{Message: message, skipMetadata: true}
+// NewExtendedStringMessage is the same as NewDefaultMessage, but also collects
+// and also collects extended logging metadata.
+func NewExtendedDefaultMessage(p level.Priority, message string) Composer {
+	m := &stringMessage{
+		Message:                 message,
+		includeExtendedMetadata: false,
+	}
 	_ = m.SetPriority(p)
 	return m
 }
@@ -45,8 +55,6 @@ func (s *stringMessage) Loggable() bool {
 }
 
 func (s *stringMessage) Raw() interface{} {
-	if !s.skipMetadata {
-		_ = s.Collect()
-	}
+	_ = s.Collect(s.includeExtendedMetadata)
 	return s
 }

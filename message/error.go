@@ -14,10 +14,11 @@ import (
 )
 
 type errorMessage struct {
-	err        error
-	ErrorValue string `bson:"error" json:"error" yaml:"error"`
-	Extended   string `bson:"extended,omitempty" json:"extended,omitempty" yaml:"extended,omitempty"`
-	Base       `bson:"metadata" json:"metadata" yaml:"metadata"`
+	ErrorValue              string `bson:"error" json:"error" yaml:"error"`
+	Extended                string `bson:"extended,omitempty" json:"extended,omitempty" yaml:"extended,omitempty"`
+	Base                    `bson:"metadata" json:"metadata" yaml:"metadata"`
+	err                     error
+	includeExtendedMetadata bool
 }
 
 // NewErrorMessage takes an error object and returns an ErrorComposer instance
@@ -30,7 +31,6 @@ func NewErrorMessage(p level.Priority, err error) ErrorComposer {
 	m := &errorMessage{
 		err: err,
 	}
-
 	_ = m.SetPriority(p)
 	return m
 }
@@ -39,7 +39,29 @@ func NewErrorMessage(p level.Priority, err error) ErrorComposer {
 // without the requirement to specify priority, which you may wish to
 // specify directly.
 func NewError(err error) ErrorComposer {
-	return &errorMessage{err: err}
+	return &errorMessage{
+		err: err,
+	}
+}
+
+// NewExtendedErrorMessage is like NewErrorMessage, but also collects extended
+// logging metadata.
+func NewExtendedErrorMessage(p level.Priority, err error) ErrorComposer {
+	m := &errorMessage{
+		err:                     err,
+		includeExtendedMetadata: true,
+	}
+	_ = m.SetPriority(p)
+	return m
+}
+
+// NewExtendedError is like NewError, but also collects extended logging
+// metadata.
+func NewExtendedError(err error) ErrorComposer {
+	return &errorMessage{
+		err:                     err,
+		includeExtendedMetadata: true,
+	}
 }
 
 func (e *errorMessage) String() string {
@@ -55,7 +77,7 @@ func (e *errorMessage) Loggable() bool {
 }
 
 func (e *errorMessage) Raw() interface{} {
-	_ = e.Collect()
+	_ = e.Collect(e.includeExtendedMetadata)
 	_ = e.String()
 
 	extended := fmt.Sprintf("%+v", e.err)

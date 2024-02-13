@@ -132,7 +132,7 @@ func (s *bufferedAsyncSender) Close() error {
 func (s *bufferedAsyncSender) processMessages() {
 	defer func() {
 		if r := recover(); r != nil {
-			s.ErrorHandler()(errors.New("panic in processMessages loop"), message.NewSimpleString(""))
+			s.ErrorHandler()(errors.New("panic in processMessages loop"), message.NewString(""))
 		}
 	}()
 

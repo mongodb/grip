@@ -6,13 +6,13 @@ package message
 import "github.com/mongodb/grip/level"
 
 type bytesMessage struct {
-	data         []byte
-	skipMetadata bool
+	data                    []byte
+	includeExtendedMetadata bool
 	Base
 }
 
 // NewBytesMessage provides a Composer interface around a byte slice,
-// which are always logable unless the string is empty.
+// which are always loggable unless the string is empty.
 func NewBytesMessage(p level.Priority, b []byte) Composer {
 	m := &bytesMessage{data: b}
 	_ = m.SetPriority(p)
@@ -24,19 +24,25 @@ func NewBytes(b []byte) Composer {
 	return &bytesMessage{data: b}
 }
 
-// NewSimpleBytes produces a bytes-wrapping message but does not
-// collect metadata.
-func NewSimpleBytes(b []byte) Composer {
-	return &bytesMessage{data: b, skipMetadata: true}
-}
-
-// NewSimpleBytesMessage produces a bytes-wrapping message with the
-// specified priority but does not collect metadata.
-func NewSimpleBytesMessage(p level.Priority, b []byte) Composer {
-	m := &bytesMessage{data: b, skipMetadata: true}
+// NewExtendedBytesMessage is the same as NewBytesMessage but also collects
+// extended logging metadata.
+func NewExtendedBytesMessage(p level.Priority, b []byte) Composer {
+	m := &bytesMessage{
+		data:                    b,
+		includeExtendedMetadata: true,
+	}
 	_ = m.SetPriority(p)
 
 	return m
+}
+
+// NewExtendedBytes is the same as NewBytes but also collects extended logging
+// metadata.
+func NewExtendedBytes(b []byte) Composer {
+	return &bytesMessage{
+		data:                    b,
+		includeExtendedMetadata: true,
+	}
 }
 
 func (s *bytesMessage) String() string {
@@ -48,9 +54,7 @@ func (s *bytesMessage) Loggable() bool {
 }
 
 func (s *bytesMessage) Raw() interface{} {
-	if !s.skipMetadata {
-		_ = s.Collect()
-	}
+	_ = s.Collect(s.includeExtendedMetadata)
 	return struct {
 		Metadata *Base  `bson:"metadata" json:"metadata" yaml:"metadata"`
 		Message  string `bson:"message" json:"message" yaml:"message"`

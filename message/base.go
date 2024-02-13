@@ -8,7 +8,7 @@ import (
 	"github.com/mongodb/grip/level"
 )
 
-// Base provides a simple embedable implementation of some common
+// Base provides a simple embeddable implementation of some common
 // aspects of a message.Composer. Additionally the Collect() method
 // collects some simple metadata, that may be useful for some more
 // structured logging applications.
@@ -27,9 +27,19 @@ func (b *Base) IsZero() bool {
 	return b == nil || b.Level == level.Invalid && b.Hostname == "" && b.Time.IsZero() && b.Process == "" && b.Pid == 0 && b.Context == nil
 }
 
-// Collect records the time, process name, and hostname. Useful in the
-// context of a Raw() method.
-func (b *Base) Collect() error {
+// Collect records the message time. If includeExtended is true, it also
+// includes, the process ID, process name, and hostname. Useful for logging
+// extended metadata information.
+func (b *Base) Collect(includeExtended bool) error {
+	if !b.Time.IsZero() {
+		return nil
+	}
+	b.Time = time.Now()
+
+	if !includeExtended {
+		return nil
+	}
+
 	if b.Pid > 0 {
 		return nil
 	}
@@ -40,7 +50,6 @@ func (b *Base) Collect() error {
 		return err
 	}
 
-	b.Time = time.Now()
 	b.Process = os.Args[0]
 	b.Pid = os.Getpid()
 
