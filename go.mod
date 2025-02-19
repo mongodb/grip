@@ -1,6 +1,6 @@
 module github.com/mongodb/grip
 
-go 1.20
+go 1.24
 
 require (
 	github.com/andygrunwald/go-jira v1.14.0

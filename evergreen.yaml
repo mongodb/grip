@@ -134,7 +134,7 @@ buildvariants:
   - name: lint
     display_name: Lint
     expansions:
-      GOROOT: /opt/golang/go1.20
+      GOROOT: /opt/golang/go1.24
     run_on:
       - ubuntu2204-small
     tasks: [ ".report" ]
@@ -142,7 +142,7 @@ buildvariants:
   - name: ubuntu
     display_name: Ubuntu 22.04
     expansions:
-      GOROOT: /opt/golang/go1.20
+      GOROOT: /opt/golang/go1.24
       RACE_DETECTOR: true
     run_on:
       - ubuntu2204-small
@@ -151,7 +151,7 @@ buildvariants:
   - name: macos
     display_name: macOS
     expansions:
-      GOROOT: /opt/golang/go1.20
+      GOROOT: /opt/golang/go1.24
     run_on:
       - macos-1100-arm64
     tasks: [ ".test" ]
@@ -161,5 +161,5 @@ buildvariants:
     run_on:
       - windows-vsCurrent-small
     expansions:
-      GOROOT: C:/golang/go1.20
+      GOROOT: C:/golang/go1.24
     tasks: [ ".test" ]
