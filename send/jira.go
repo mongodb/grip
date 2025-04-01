@@ -288,7 +288,13 @@ func (c *jiraClientImpl) CreateClient(client *http.Client, baseURL string) error
 }
 
 func (c *jiraClientImpl) Authenticate(ctx context.Context, opts jiraAuthOpts) error {
-	if opts.username != "" {
+	if opts.personalAccessToken != "" {
+		httpClient, err := personalAccessTokenClient(opts.personalAccessToken)
+		if err != nil {
+			return errors.Wrap(err, "creating HTTP client for Jira personal access token auth")
+		}
+		return c.CreateClient(httpClient, c.baseURL)
+	} else if opts.username != "" {
 		if opts.addBasicAuthHeader {
 			c.Client.Authentication.SetBasicAuth(opts.username, opts.password)
 
@@ -313,12 +319,6 @@ func (c *jiraClientImpl) Authenticate(ctx context.Context, opts jiraAuthOpts) er
 		httpClient, err := Oauth1Client(ctx, credentials)
 		if err != nil {
 			return err
-		}
-		return c.CreateClient(httpClient, c.baseURL)
-	} else if opts.personalAccessToken != "" {
-		httpClient, err := personalAccessTokenClient(opts.personalAccessToken)
-		if err != nil {
-			return errors.Wrap(err, "creating HTTP client for Jira personal access token auth")
 		}
 		return c.CreateClient(httpClient, c.baseURL)
 	}
