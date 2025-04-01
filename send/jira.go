@@ -53,6 +53,7 @@ type JiraOauth1 struct {
 
 // JiraPersonalAccessTokenAuth represents options for Jira personal access token (PAT) auth.
 type JiraPersonalAccessTokenAuth struct {
+	// Token is the personal access token.
 	Token string
 }
 
