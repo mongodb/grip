@@ -29,12 +29,13 @@ type jiraJournal struct {
 
 // JiraOptions include configurations for the JIRA client
 type JiraOptions struct {
-	Name          string // Name of the journaler
-	BaseURL       string // URL of the JIRA instance
-	BasicAuthOpts JiraBasicAuth
-	Oauth1Opts    JiraOauth1
-	HTTPClient    *http.Client
-	client        jiraClient
+	Name                    string // Name of the journaler
+	BaseURL                 string // URL of the JIRA instance
+	BasicAuthOpts           JiraBasicAuth
+	Oauth1Opts              JiraOauth1
+	PersonalAccessTokenOpts JiraPersonalAccessTokenAuth
+	HTTPClient              *http.Client
+	client                  jiraClient
 }
 
 type JiraBasicAuth struct {
@@ -48,6 +49,12 @@ type JiraOauth1 struct {
 	AccessToken string
 	TokenSecret string
 	ConsumerKey string
+}
+
+// JiraPersonalAccessTokenAuth represents options for Jira personal access token (PAT) auth.
+type JiraPersonalAccessTokenAuth struct {
+	// Token is the personal access token.
+	Token string
 }
 
 // MakeJiraLogger is the same as NewJiraLogger but uses a warning
@@ -74,13 +81,14 @@ func NewJiraLogger(ctx context.Context, opts *JiraOptions, l LevelInfo) (Sender,
 	}
 
 	authOpts := jiraAuthOpts{
-		username:           opts.BasicAuthOpts.Username,
-		password:           opts.BasicAuthOpts.Password,
-		addBasicAuthHeader: opts.BasicAuthOpts.UseBasicAuth,
-		accessToken:        opts.Oauth1Opts.AccessToken,
-		tokenSecret:        opts.Oauth1Opts.TokenSecret,
-		privateKey:         opts.Oauth1Opts.PrivateKey,
-		consumerKey:        opts.Oauth1Opts.ConsumerKey,
+		username:            opts.BasicAuthOpts.Username,
+		password:            opts.BasicAuthOpts.Password,
+		addBasicAuthHeader:  opts.BasicAuthOpts.UseBasicAuth,
+		accessToken:         opts.Oauth1Opts.AccessToken,
+		tokenSecret:         opts.Oauth1Opts.TokenSecret,
+		privateKey:          opts.Oauth1Opts.PrivateKey,
+		consumerKey:         opts.Oauth1Opts.ConsumerKey,
+		personalAccessToken: opts.PersonalAccessTokenOpts.Token,
 	}
 	if err := j.opts.client.Authenticate(ctx, authOpts); err != nil {
 		return nil, errors.Wrap(err, "authenticating")
@@ -262,6 +270,9 @@ type jiraAuthOpts struct {
 	accessToken string
 	tokenSecret string
 	consumerKey string
+
+	// Jira peronsl access token (PAT) auth
+	personalAccessToken string
 }
 
 type jiraClientImpl struct {
@@ -277,7 +288,13 @@ func (c *jiraClientImpl) CreateClient(client *http.Client, baseURL string) error
 }
 
 func (c *jiraClientImpl) Authenticate(ctx context.Context, opts jiraAuthOpts) error {
-	if opts.username != "" {
+	if opts.personalAccessToken != "" {
+		httpClient, err := personalAccessTokenClient(opts.personalAccessToken)
+		if err != nil {
+			return errors.Wrap(err, "creating HTTP client for Jira personal access token auth")
+		}
+		return c.CreateClient(httpClient, c.baseURL)
+	} else if opts.username != "" {
 		if opts.addBasicAuthHeader {
 			c.Client.Authentication.SetBasicAuth(opts.username, opts.password)
 
@@ -378,4 +395,15 @@ func Oauth1Client(ctx context.Context, credentials JiraOauthCredentials) (*http.
 	}
 	oauthToken := oauth1.NewToken(credentials.AccessToken, credentials.TokenSecret)
 	return oauthConfig.Client(ctx, oauthToken), nil
+}
+
+func personalAccessTokenClient(token string) (*http.Client, error) {
+	if token == "" {
+		return nil, errors.New("Jira personal access token cannot be empty")
+	}
+
+	transport := jira.BearerAuthTransport{
+		Token: token,
+	}
+	return transport.Client(), nil
 }

@@ -42,13 +42,14 @@ func NewJiraCommentLogger(ctx context.Context, id string, opts *JiraOptions, l L
 	}
 
 	authOpts := jiraAuthOpts{
-		username:           opts.BasicAuthOpts.Username,
-		password:           opts.BasicAuthOpts.Password,
-		addBasicAuthHeader: opts.BasicAuthOpts.UseBasicAuth,
-		accessToken:        opts.Oauth1Opts.AccessToken,
-		tokenSecret:        opts.Oauth1Opts.TokenSecret,
-		privateKey:         opts.Oauth1Opts.PrivateKey,
-		consumerKey:        opts.Oauth1Opts.ConsumerKey,
+		username:            opts.BasicAuthOpts.Username,
+		password:            opts.BasicAuthOpts.Password,
+		addBasicAuthHeader:  opts.BasicAuthOpts.UseBasicAuth,
+		accessToken:         opts.Oauth1Opts.AccessToken,
+		tokenSecret:         opts.Oauth1Opts.TokenSecret,
+		privateKey:          opts.Oauth1Opts.PrivateKey,
+		consumerKey:         opts.Oauth1Opts.ConsumerKey,
+		personalAccessToken: opts.PersonalAccessTokenOpts.Token,
 	}
 	if err := j.opts.client.Authenticate(ctx, authOpts); err != nil {
 		return nil, errors.Wrap(err, "authenticating")
