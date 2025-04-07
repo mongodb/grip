@@ -141,6 +141,13 @@ func (o *JiraOptions) Validate() error {
 		return errors.New("Jira options cannot be nil")
 	}
 
+	basicAuthPopulated := o.BasicAuthOpts.Username != ""
+	oauth1Populated := o.Oauth1Opts.AccessToken != ""
+	personalAccessTokenPopulated := o.PersonalAccessTokenOpts.Token != ""
+	if !basicAuthPopulated && !oauth1Populated && !personalAccessTokenPopulated {
+		return errors.New("must specify at least one method of authentication")
+	}
+
 	var errs []string
 
 	if o.Name == "" {
@@ -149,10 +156,6 @@ func (o *JiraOptions) Validate() error {
 
 	if o.BaseURL == "" {
 		errs = append(errs, "no base URL specified")
-	}
-
-	if (o.BasicAuthOpts.Username == "") == (o.Oauth1Opts.AccessToken == "") {
-		return errors.New("must specify exactly 1 method of authentication")
 	}
 
 	if o.client == nil {
