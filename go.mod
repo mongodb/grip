@@ -10,7 +10,7 @@ require (
 	github.com/dghubble/oauth1 v0.7.2
 	github.com/fuyufjh/splunk-hec-go v0.3.4-0.20190414090710-10df423a9f36
 	github.com/google/go-github/v53 v53.0.0
-	github.com/mattn/go-xmpp v0.0.0-20210723025538-3871461df959
+	github.com/mattn/go-xmpp v0.0.1
 	github.com/montanaflynn/stats v0.0.0-20180911141734-db72e6cae808
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.3
