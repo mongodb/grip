@@ -62,7 +62,7 @@ require (
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/shirou/gopsutil/v3 v3.23.5
-	github.com/slack-go/slack v0.12.1
+	github.com/slack-go/slack v0.12.3
 	golang.org/x/sys v0.8.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 )
