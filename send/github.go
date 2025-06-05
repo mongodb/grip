@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/evergreen-ci/utility"
@@ -175,6 +176,12 @@ func githubShouldRetry() utility.HTTPRetryFunction {
 		trace.SpanFromContext(req.Context()).SetAttributes(attribute.Int(githubRetriesAttribute, index))
 
 		if err != nil {
+			if strings.Contains(err.Error(), "connection reset by peer") {
+				// This has happened in the past when GitHub was having an
+				// outage, so it's worth retrying.
+				return true
+			}
+
 			return utility.IsTemporaryError(err)
 		}
 
