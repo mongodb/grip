@@ -25,9 +25,8 @@ func (j *JiraSuite) SetupTest() {
 	j.opts = &JiraOptions{
 		Name:    "bot",
 		BaseURL: "url",
-		BasicAuthOpts: JiraBasicAuth{
-			Username: "username",
-			Password: "password",
+		PersonalAccessTokenOpts: JiraPersonalAccessTokenAuth{
+			Token: "token",
 		},
 		client: &jiraClientMock{},
 	}
