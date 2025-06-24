@@ -30,7 +30,7 @@ type splunkLogger struct {
 // to a splunk server to send log messsages.
 type SplunkConnectionInfo struct {
 	ServerURL string `bson:"url" json:"url" yaml:"url"`
-	Token     string `bson:"token" json:"token" yaml:"token"`
+	Token     string `bson:"token" json:"token" yaml:"token" secret:"true"`
 	Channel   string `bson:"channel" json:"channel" yaml:"channel"`
 }
 
