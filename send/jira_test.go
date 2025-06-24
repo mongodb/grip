@@ -71,7 +71,7 @@ func (j *JiraSuite) TestConstructorErrorsWithInvalidConfigs() {
 
 	sender, err = NewJiraLogger(j.T().Context(), opts, LevelInfo{level.Trace, level.Info})
 	j.Nil(sender)
-	j.EqualError(err, "must specify at least one method of authentication")
+	j.EqualError(err, "must specify personal access token for Jira authentication")
 }
 
 func (j *JiraSuite) TestSendMethod() {
