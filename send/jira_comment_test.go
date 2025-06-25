@@ -21,9 +21,8 @@ func TestJiraCommentSuite(t *testing.T) {
 func (j *JiraCommentSuite) SetupTest() {
 	j.opts = &JiraOptions{
 		BaseURL: "url",
-		BasicAuthOpts: JiraBasicAuth{
-			Username: "username",
-			Password: "password",
+		PersonalAccessTokenOpts: JiraPersonalAccessTokenAuth{
+			Token: "token",
 		},
 		client: &jiraClientMock{},
 		Name:   "1234",

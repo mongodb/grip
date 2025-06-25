@@ -31,24 +31,9 @@ type jiraJournal struct {
 type JiraOptions struct {
 	Name                    string // Name of the journaler
 	BaseURL                 string // URL of the JIRA instance
-	BasicAuthOpts           JiraBasicAuth
-	Oauth1Opts              JiraOauth1
 	PersonalAccessTokenOpts JiraPersonalAccessTokenAuth
 	HTTPClient              *http.Client
 	client                  jiraClient
-}
-
-type JiraBasicAuth struct {
-	UseBasicAuth bool
-	Username     string
-	Password     string
-}
-
-type JiraOauth1 struct {
-	PrivateKey  []byte
-	AccessToken string
-	TokenSecret string
-	ConsumerKey string
 }
 
 // JiraPersonalAccessTokenAuth represents options for Jira personal access token (PAT) auth.
@@ -81,13 +66,6 @@ func NewJiraLogger(ctx context.Context, opts *JiraOptions, l LevelInfo) (Sender,
 	}
 
 	authOpts := jiraAuthOpts{
-		username:            opts.BasicAuthOpts.Username,
-		password:            opts.BasicAuthOpts.Password,
-		addBasicAuthHeader:  opts.BasicAuthOpts.UseBasicAuth,
-		accessToken:         opts.Oauth1Opts.AccessToken,
-		tokenSecret:         opts.Oauth1Opts.TokenSecret,
-		privateKey:          opts.Oauth1Opts.PrivateKey,
-		consumerKey:         opts.Oauth1Opts.ConsumerKey,
 		personalAccessToken: opts.PersonalAccessTokenOpts.Token,
 	}
 	if err := j.opts.client.Authenticate(ctx, authOpts); err != nil {
@@ -141,11 +119,8 @@ func (o *JiraOptions) Validate() error {
 		return errors.New("Jira options cannot be nil")
 	}
 
-	basicAuthPopulated := o.BasicAuthOpts.Username != ""
-	oauth1Populated := o.Oauth1Opts.AccessToken != ""
-	personalAccessTokenPopulated := o.PersonalAccessTokenOpts.Token != ""
-	if !basicAuthPopulated && !oauth1Populated && !personalAccessTokenPopulated {
-		return errors.New("must specify at least one method of authentication")
+	if o.PersonalAccessTokenOpts.Token == "" {
+		return errors.New("must specify personal access token for Jira authentication")
 	}
 
 	var errs []string
@@ -263,17 +238,6 @@ type jiraClient interface {
 }
 
 type jiraAuthOpts struct {
-	// basic or password auth
-	username           string
-	password           string
-	addBasicAuthHeader bool
-
-	// oauth 1.0
-	privateKey  []byte
-	accessToken string
-	tokenSecret string
-	consumerKey string
-
 	// Jira peronsl access token (PAT) auth
 	personalAccessToken string
 }
@@ -297,36 +261,9 @@ func (c *jiraClientImpl) Authenticate(ctx context.Context, opts jiraAuthOpts) er
 			return errors.Wrap(err, "creating HTTP client for Jira personal access token auth")
 		}
 		return c.CreateClient(httpClient, c.baseURL)
-	} else if opts.username != "" {
-		if opts.addBasicAuthHeader {
-			c.Client.Authentication.SetBasicAuth(opts.username, opts.password)
-
-		} else {
-			authed, err := c.Client.Authentication.AcquireSessionCookie(opts.username, opts.password)
-			if err != nil {
-				return errors.Wrapf(err, "acquiring Jira session cookies authenticating as user '%s'", opts.username)
-			}
-
-			if !authed {
-				return errors.Errorf("failed to acquire Jira session cookie as user '%s'", opts.username)
-			}
-		}
-		return nil
-	} else if opts.accessToken != "" {
-		credentials := JiraOauthCredentials{
-			PrivateKey:  opts.privateKey,
-			AccessToken: opts.accessToken,
-			TokenSecret: opts.tokenSecret,
-			ConsumerKey: opts.consumerKey,
-		}
-		httpClient, err := Oauth1Client(ctx, credentials)
-		if err != nil {
-			return err
-		}
-		return c.CreateClient(httpClient, c.baseURL)
 	}
 
-	return errors.New("no authentication method specified")
+	return errors.New("no authentication credentials provided for Jira client")
 }
 
 func (c *jiraClientImpl) PostIssue(issueFields *jira.IssueFields) (string, error) {

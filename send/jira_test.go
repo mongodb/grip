@@ -25,9 +25,8 @@ func (j *JiraSuite) SetupTest() {
 	j.opts = &JiraOptions{
 		Name:    "bot",
 		BaseURL: "url",
-		BasicAuthOpts: JiraBasicAuth{
-			Username: "username",
-			Password: "password",
+		PersonalAccessTokenOpts: JiraPersonalAccessTokenAuth{
+			Token: "token",
 		},
 		client: &jiraClientMock{},
 	}
@@ -72,7 +71,7 @@ func (j *JiraSuite) TestConstructorErrorsWithInvalidConfigs() {
 
 	sender, err = NewJiraLogger(j.T().Context(), opts, LevelInfo{level.Trace, level.Info})
 	j.Nil(sender)
-	j.EqualError(err, "must specify at least one method of authentication")
+	j.EqualError(err, "must specify personal access token for Jira authentication")
 }
 
 func (j *JiraSuite) TestSendMethod() {
