@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/evergreen-ci/utility"
-	"github.com/google/go-github/v53/github"
+	"github.com/google/go-github/v79/github"
 	"github.com/mongodb/grip/message"
 	"github.com/pkg/errors"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
@@ -146,7 +146,7 @@ type githubClient interface {
 	CreateComment(context.Context, string, string, int, *github.IssueComment) (*github.IssueComment, *github.Response, error)
 
 	// Status API
-	CreateStatus(ctx context.Context, owner, repo, ref string, status *github.RepoStatus) (*github.RepoStatus, *github.Response, error)
+	CreateStatus(ctx context.Context, owner, repo, ref string, status github.RepoStatus) (*github.RepoStatus, *github.Response, error)
 }
 
 type githubClientImpl struct {
@@ -197,6 +197,6 @@ func githubShouldRetry() utility.HTTPRetryFunction {
 	}
 }
 
-func (c *githubClientImpl) CreateStatus(ctx context.Context, owner, repo, ref string, status *github.RepoStatus) (*github.RepoStatus, *github.Response, error) {
+func (c *githubClientImpl) CreateStatus(ctx context.Context, owner, repo, ref string, status github.RepoStatus) (*github.RepoStatus, *github.Response, error) {
 	return c.repos.CreateStatus(ctx, owner, repo, ref, status)
 }

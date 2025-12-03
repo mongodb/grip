@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/go-github/v53/github"
+	"github.com/google/go-github/v79/github"
 )
 
 type githubClientMock struct {
@@ -39,7 +39,7 @@ func (g *githubClientMock) CreateComment(_ context.Context, _ string, _ string, 
 	return nil, g.createResponse(), nil
 }
 
-func (g *githubClientMock) CreateStatus(_ context.Context, repo, owner, ref string, _ *github.RepoStatus) (*github.RepoStatus, *github.Response, error) {
+func (g *githubClientMock) CreateStatus(_ context.Context, repo, owner, ref string, _ github.RepoStatus) (*github.RepoStatus, *github.Response, error) {
 	if g.failSend {
 		return nil, nil, errors.New("failed to create status")
 	}

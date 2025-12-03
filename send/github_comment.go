@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/google/go-github/v53/github"
+	"github.com/google/go-github/v79/github"
 	"github.com/mongodb/grip/message"
 	"github.com/pkg/errors"
 	"go.opentelemetry.io/otel/attribute"
