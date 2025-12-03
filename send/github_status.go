@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/google/go-github/v53/github"
+	"github.com/google/go-github/v79/github"
 	"github.com/mongodb/grip/message"
 	"github.com/pkg/errors"
 	"go.opentelemetry.io/otel/attribute"
@@ -76,7 +76,7 @@ func (s *githubStatusMessageLogger) Send(m message.Composer) {
 		))
 		defer span.End()
 
-		if _, resp, err := s.gh.CreateStatus(ctx, owner, repo, ref, status); err != nil {
+		if _, resp, err := s.gh.CreateStatus(ctx, owner, repo, ref, *status); err != nil {
 			s.ErrorHandler()(errors.Wrap(err, "sending GitHub create status request"), m)
 
 			span.RecordError(err)
