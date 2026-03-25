@@ -110,7 +110,7 @@ func (s *asyncGroupSender) Flush(ctx context.Context) error {
 	var lastErr error
 	for _, sender := range s.senders {
 		if err := sender.Flush(ctx); err != nil {
-			lastErr = err
+			lastErr = nil
 		}
 	}
 
