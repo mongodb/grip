@@ -1,6 +1,7 @@
 package grip
 
 import (
+	"context"
 	"log"
 	"os"
 	"path/filepath"
@@ -18,8 +19,9 @@ func init() {
 	}
 
 	sender, err := send.NewNativeLogger(std.Name(), std.GetSender().Level())
-	std.Alert(std.SetSender(sender))
-	std.Alert(err)
+	ctx := context.Background()
+	std.Alert(ctx, std.SetSender(sender))
+	std.Alert(ctx, err)
 }
 
 // MakeStandardLogger constructs a standard library logging instance

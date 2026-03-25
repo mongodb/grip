@@ -44,7 +44,7 @@ func NewAsyncGroupSender(ctx context.Context, bufferSize int, senders ...Sender)
 					if m == nil {
 						continue
 					}
-					sender.Send(m)
+					sender.Send(ctx, m)
 				}
 			}
 		}(p, senders[i])
@@ -95,7 +95,7 @@ func (s *asyncGroupSender) SetLevel(l LevelInfo) error {
 	return nil
 }
 
-func (s *asyncGroupSender) Send(m message.Composer) {
+func (s *asyncGroupSender) Send(ctx context.Context, m message.Composer) {
 	bl := s.Base.Level()
 	if bl.Valid() && !bl.ShouldLog(m) {
 		return

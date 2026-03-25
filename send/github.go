@@ -93,11 +93,11 @@ func NewGithubIssuesLogger(name string, opts *GithubOptions) (Sender, error) {
 	return s, nil
 }
 
-func (s *githubLogger) Send(m message.Composer) {
+func (s *githubLogger) Send(ctx context.Context, m message.Composer) {
 	if s.Level().ShouldLog(m) {
 		text, err := s.formatter(m)
 		if err != nil {
-			s.ErrorHandler()(err, m)
+			s.ErrorHandler()(ctx, err, m)
 			return
 		}
 
@@ -107,7 +107,7 @@ func (s *githubLogger) Send(m message.Composer) {
 			Body:  &text,
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+		ctx, cancel := context.WithTimeout(ctx, time.Minute)
 		defer cancel()
 
 		ctx, span := tracer.Start(ctx, "CreateIssue", trace.WithAttributes(
@@ -118,12 +118,12 @@ func (s *githubLogger) Send(m message.Composer) {
 		defer span.End()
 
 		if _, resp, err := s.gh.Create(ctx, s.opts.Account, s.opts.Repo, issue); err != nil {
-			s.ErrorHandler()(errors.Wrap(err, "sending GitHub create issue request"), m)
+			s.ErrorHandler()(ctx, errors.Wrap(err, "sending GitHub create issue request"), m)
 
 			span.RecordError(err)
 			span.SetStatus(codes.Error, "creating issue")
 		} else if err = handleHTTPResponseError(resp.Response); err != nil {
-			s.ErrorHandler()(errors.Wrap(err, "creating GitHub issue"), m)
+			s.ErrorHandler()(ctx, errors.Wrap(err, "creating GitHub issue"), m)
 
 			span.RecordError(err)
 			span.SetStatus(codes.Error, "creating issue")

@@ -95,7 +95,7 @@ func (s *AppenderSenderSuite) TestBasicNoopSendTest() {
 	s.True(size == 0)
 	for i := -10; i <= 110; i += 5 {
 		m := message.NewDefaultMessage(level.Priority(i), "hello world! "+randomString(10, s.rand))
-		s.sender.Send(m)
+		s.sender.Send(s.T().Context(), m)
 		size = s.buffer.Len()
 	}
 	s.True(size > 0)

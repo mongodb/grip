@@ -84,7 +84,7 @@ func NewBufferedSender(ctx context.Context, sender Sender, opts BufferedSenderOp
 	return s, nil
 }
 
-func (s *bufferedSender) Send(msg message.Composer) {
+func (s *bufferedSender) Send(ctx context.Context, msg message.Composer) {
 	if !s.Level().ShouldLog(msg) {
 		return
 	}
@@ -98,16 +98,16 @@ func (s *bufferedSender) Send(msg message.Composer) {
 
 	s.buffer = append(s.buffer, msg)
 	if len(s.buffer) >= s.size {
-		s.flush()
+		s.flush(ctx)
 	}
 }
 
-func (s *bufferedSender) Flush(_ context.Context) error {
+func (s *bufferedSender) Flush(ctx context.Context) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	if !s.closed {
-		s.flush()
+		s.flush(ctx)
 	}
 
 	return nil
@@ -125,7 +125,7 @@ func (s *bufferedSender) Close() error {
 
 	s.cancel()
 	if len(s.buffer) > 0 {
-		s.flush()
+		s.flush(context.Background())
 	}
 	s.closed = true
 
@@ -143,7 +143,7 @@ func (s *bufferedSender) intervalFlush(ctx context.Context, interval time.Durati
 		case <-timer.C:
 			s.mu.Lock()
 			if len(s.buffer) > 0 && time.Since(s.lastFlush) >= interval {
-				s.flush()
+				s.flush(ctx)
 			}
 			s.mu.Unlock()
 			_ = timer.Reset(interval)
@@ -151,11 +151,11 @@ func (s *bufferedSender) intervalFlush(ctx context.Context, interval time.Durati
 	}
 }
 
-func (s *bufferedSender) flush() {
+func (s *bufferedSender) flush(ctx context.Context) {
 	if len(s.buffer) == 1 {
-		s.Sender.Send(s.buffer[0])
+		s.Sender.Send(ctx, s.buffer[0])
 	} else {
-		s.Sender.Send(message.NewGroupComposer(s.buffer))
+		s.Sender.Send(ctx, message.NewGroupComposer(s.buffer))
 	}
 
 	s.buffer = []message.Composer{}

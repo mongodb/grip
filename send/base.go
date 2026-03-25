@@ -1,6 +1,7 @@
 package send
 
 import (
+	"context"
 	"fmt"
 	"sync"
 
@@ -34,7 +35,7 @@ func NewBase(n string) *Base {
 		name:       n,
 		reset:      func() {},
 		closer:     func() error { return nil },
-		errHandler: func(error, message.Composer) {},
+		errHandler: func(context.Context, error, message.Composer) {},
 	}
 }
 
@@ -128,7 +129,7 @@ func (b *Base) SetErrorHandler(eh ErrorHandler) error {
 // ErrorHandler returns an error handling functioncalls the error handler, and is a wrapper around the
 // embedded ErrorHandler function.
 func (b *Base) ErrorHandler() ErrorHandler {
-	return func(err error, m message.Composer) {
+	return func(ctx context.Context, err error, m message.Composer) {
 		if err == nil {
 			return
 		}
@@ -136,7 +137,7 @@ func (b *Base) ErrorHandler() ErrorHandler {
 		b.mutex.RLock()
 		defer b.mutex.RUnlock()
 
-		b.errHandler(err, m)
+		b.errHandler(ctx, err, m)
 	}
 }
 

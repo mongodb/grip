@@ -48,7 +48,7 @@ func MakeStreamLogger(ws WriteStringer) Sender {
 	return s
 }
 
-func (s *streamLogger) Send(m message.Composer) {
+func (s *streamLogger) Send(ctx context.Context, m message.Composer) {
 	if s.Level().ShouldLog(m) {
 		msg := m.String()
 
@@ -57,7 +57,7 @@ func (s *streamLogger) Send(m message.Composer) {
 		}
 
 		if _, err := s.fobj.WriteString(msg); err != nil {
-			s.ErrorHandler()(err, m)
+			s.ErrorHandler()(ctx, err, m)
 		}
 	}
 }

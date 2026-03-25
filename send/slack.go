@@ -73,7 +73,7 @@ func MakeSlackLogger(opts *SlackOptions) (Sender, error) {
 	return NewSlackLogger(opts, token, LevelInfo{level.Trace, level.Trace})
 }
 
-func (s *slackJournal) Send(m message.Composer) {
+func (s *slackJournal) Send(ctx context.Context, m message.Composer) {
 	if s.Level().ShouldLog(m) {
 		s.Base.mutex.RLock()
 		defer s.Base.mutex.RUnlock()
@@ -109,7 +109,7 @@ func (s *slackJournal) Send(m message.Composer) {
 		}
 
 		_, _, err := s.opts.client.PostMessage(channel, params...)
-		s.ErrorHandler()(err, message.NewFormattedMessage(m.Priority(), "%s\n", msg))
+		s.ErrorHandler()(ctx, err, message.NewFormattedMessage(m.Priority(), "%s\n", msg))
 	}
 }
 

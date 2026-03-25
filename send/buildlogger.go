@@ -222,13 +222,13 @@ func MakeBuildlogger(name string, conf *BuildloggerConfig) (Sender, error) {
 
 		out, err := b.doPost(data)
 		if err != nil {
-			b.conf.Local.Send(message.NewErrorMessage(level.Error, err))
+			b.conf.Local.Send(context.Background(), message.NewErrorMessage(level.Error, err))
 			return nil, err
 		}
 
 		b.conf.buildID = out.ID
 
-		b.conf.Local.Send(message.NewLineMessage(level.Notice,
+		b.conf.Local.Send(context.Background(), message.NewLineMessage(level.Notice,
 			"Writing logs to buildlogger global log at:",
 			b.conf.GetGlobalLogURL()))
 	}
@@ -246,13 +246,13 @@ func MakeBuildlogger(name string, conf *BuildloggerConfig) (Sender, error) {
 
 		out, err := b.doPost(data)
 		if err != nil {
-			b.conf.Local.Send(message.NewErrorMessage(level.Error, err))
+			b.conf.Local.Send(context.Background(), message.NewErrorMessage(level.Error, err))
 			return nil, err
 		}
 
 		b.conf.testID = out.ID
 
-		b.conf.Local.Send(message.NewLineMessage(level.Notice,
+		b.conf.Local.Send(context.Background(), message.NewLineMessage(level.Notice,
 			"Writing logs to buildlogger test log at:",
 			b.conf.GetTestLogURL()))
 	}
@@ -260,7 +260,7 @@ func MakeBuildlogger(name string, conf *BuildloggerConfig) (Sender, error) {
 	return b, nil
 }
 
-func (b *buildlogger) Send(m message.Composer) {
+func (b *buildlogger) Send(ctx context.Context, m message.Composer) {
 	if b.Level().ShouldLog(m) {
 		req := [][]interface{}{
 			{float64(time.Now().Unix()), m.String()},
@@ -268,12 +268,12 @@ func (b *buildlogger) Send(m message.Composer) {
 
 		out, err := json.Marshal(req)
 		if err != nil {
-			b.conf.Local.Send(message.NewErrorMessage(level.Error, err))
+			b.conf.Local.Send(ctx, message.NewErrorMessage(level.Error, err))
 			return
 		}
 
 		if err := b.postLines(bytes.NewBuffer(out)); err != nil {
-			b.ErrorHandler()(err, message.NewBytesMessage(b.level.Default, out))
+			b.ErrorHandler()(ctx, err, message.NewBytesMessage(b.level.Default, out))
 		}
 	}
 }

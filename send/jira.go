@@ -91,7 +91,7 @@ func NewJiraLogger(ctx context.Context, opts *JiraOptions, l LevelInfo) (Sender,
 }
 
 // Send post issues via jiraJournal with information in the message.Composer
-func (j *jiraJournal) Send(m message.Composer) {
+func (j *jiraJournal) Send(ctx context.Context, m message.Composer) {
 	if j.Level().ShouldLog(m) {
 		issueFields := getFields(m)
 		if len(issueFields.Summary) > 254 {
@@ -103,7 +103,7 @@ func (j *jiraJournal) Send(m message.Composer) {
 
 		issueKey, err := j.opts.client.PostIssue(issueFields)
 		if err != nil {
-			j.ErrorHandler()(err, message.NewFormattedMessage(m.Priority(), m.String()))
+			j.ErrorHandler()(ctx, err, message.NewFormattedMessage(m.Priority(), m.String()))
 			return
 		}
 		populateKey(m, issueKey)

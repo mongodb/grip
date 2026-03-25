@@ -1,6 +1,7 @@
 package grip
 
 import (
+	"context"
 	"os"
 
 	"github.com/mongodb/grip/send"
@@ -23,7 +24,7 @@ func (s *GripSuite) TestSenderGetterReturnsExpectedJournaler() {
 	s.NoError(grip.SetSender(sender))
 	s.NoError(err)
 
-	defer func() { std.Error(os.Remove("foo")) }()
+	defer func() { std.Error(context.Background(), os.Remove("foo")) }()
 
 	s.Equal(grip.Name(), "sender_swap")
 	s.NotEqual(grip.GetSender(), ns)

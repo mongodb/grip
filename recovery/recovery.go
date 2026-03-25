@@ -15,6 +15,7 @@
 package recovery
 
 import (
+	"context"
 	"os"
 	"strings"
 
@@ -182,7 +183,7 @@ func logAndContinue(p interface{}, logger grip.Journaler, msg message.Composer) 
 	_ = msg.Annotate("stack", message.NewStack(3, "").Raw().(message.StackTrace).Frames)
 	_ = msg.Annotate(message.FieldsMsgName, "hit panic; recovering")
 
-	logger.Alert(msg)
+	logger.Alert(context.Background(), msg)
 }
 
 func logAndExit(p interface{}, logger grip.Journaler, msg message.Composer) {
@@ -191,10 +192,11 @@ func logAndExit(p interface{}, logger grip.Journaler, msg message.Composer) {
 	_ = msg.Annotate(message.FieldsMsgName, "hit panic; exiting")
 
 	// check this env var so that we can avoid exiting in the test.
+	ctx := context.Background()
 	if os.Getenv(killOverrideVarName) == "" {
-		logger.EmergencyFatal(msg)
+		logger.EmergencyFatal(ctx, msg)
 	} else {
-		logger.Emergency(msg)
+		logger.Emergency(ctx, msg)
 	}
 }
 
@@ -207,5 +209,5 @@ func handleWithError(p error, err error, logger grip.Journaler, msg message.Comp
 		_ = msg.Annotate("error", err.Error())
 	}
 
-	logger.Alert(msg)
+	logger.Alert(context.Background(), msg)
 }

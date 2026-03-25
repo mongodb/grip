@@ -63,7 +63,7 @@ func NewSESLogger(ctx context.Context, options SESOptions, l LevelInfo) (Sender,
 func (s *sesSender) Flush(_ context.Context) error { return nil }
 
 // Send sends the email over SES.
-func (s *sesSender) Send(m message.Composer) {
+func (s *sesSender) Send(ctx context.Context, m message.Composer) {
 	ctx, cancel := context.WithCancel(s.ctx)
 	defer cancel()
 
@@ -73,11 +73,11 @@ func (s *sesSender) Send(m message.Composer) {
 
 	emailMsg, ok := m.Raw().(*message.Email)
 	if !ok {
-		s.ErrorHandler()(errors.Errorf("expecting *message.Email, got %T", m), m)
+		s.ErrorHandler()(ctx, errors.Errorf("expecting *message.Email, got %T", m), m)
 		return
 	}
 
-	s.ErrorHandler()(errors.Wrap(s.sendRawEmail(ctx, emailMsg), "sending email"), m)
+	s.ErrorHandler()(ctx, errors.Wrap(s.sendRawEmail(ctx, emailMsg), "sending email"), m)
 }
 
 func (s *sesSender) sendRawEmail(ctx context.Context, emailMsg *message.Email) error {

@@ -14,7 +14,7 @@ import (
 )
 
 func TestBufferedSend(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	ctx, cancel := context.WithTimeout(t.Context(), time.Minute)
 	defer cancel()
 
 	newBufferedSender := func(interval time.Duration, size int) (*bufferedSender, *InternalSender, error) {
@@ -32,7 +32,7 @@ func TestBufferedSend(t *testing.T) {
 		defer bs.cancel()
 		require.NoError(t, err)
 
-		bs.Send(message.ConvertToComposer(level.Trace, fmt.Sprintf("should not send")))
+		bs.Send(t.Context(), message.ConvertToComposer(level.Trace, fmt.Sprintf("should not send")))
 		assert.Empty(t, bs.buffer)
 		_, ok := s.GetMessageSafe()
 		assert.False(t, ok)
@@ -44,7 +44,7 @@ func TestBufferedSend(t *testing.T) {
 
 		for i := 0; i < 12; i++ {
 			require.Len(t, bs.buffer, i%10)
-			bs.Send(message.ConvertToComposer(level.Debug, fmt.Sprintf("message %d", i+1)))
+			bs.Send(t.Context(), message.ConvertToComposer(level.Debug, fmt.Sprintf("message %d", i+1)))
 		}
 		assert.Len(t, bs.buffer, 2)
 		msg, ok := s.GetMessageSafe()
@@ -60,7 +60,7 @@ func TestBufferedSend(t *testing.T) {
 		defer bs.cancel()
 		require.NoError(t, err)
 
-		bs.Send(message.ConvertToComposer(level.Debug, "should flush"))
+		bs.Send(t.Context(), message.ConvertToComposer(level.Debug, "should flush"))
 		time.Sleep(6 * time.Second)
 		bs.mu.Lock()
 		assert.True(t, time.Since(bs.lastFlush) <= 2*time.Second)
@@ -75,7 +75,7 @@ func TestBufferedSend(t *testing.T) {
 		require.NoError(t, err)
 
 		bs.closed = true
-		bs.Send(message.ConvertToComposer(level.Debug, "should not send"))
+		bs.Send(t.Context(), message.ConvertToComposer(level.Debug, "should not send"))
 		assert.Empty(t, bs.buffer)
 		_, ok := s.GetMessageSafe()
 		assert.False(t, ok)
@@ -85,9 +85,9 @@ func TestBufferedSend(t *testing.T) {
 		defer bs.cancel()
 		require.NoError(t, err)
 
-		bs.Send(message.ConvertToComposer(level.Debug, "message"))
+		bs.Send(t.Context(), message.ConvertToComposer(level.Debug, "message"))
 		assert.Len(t, bs.buffer, 1)
-		require.NoError(t, bs.Flush(context.TODO()))
+		require.NoError(t, bs.Flush(t.Context()))
 		bs.mu.Lock()
 		assert.True(t, time.Since(bs.lastFlush) <= time.Second)
 		bs.mu.Unlock()
@@ -105,7 +105,7 @@ func TestBufferedSend(t *testing.T) {
 		bs.cancel()
 		bs.closed = true
 
-		assert.NoError(t, bs.Flush(context.TODO()))
+		assert.NoError(t, bs.Flush(t.Context()))
 		assert.Len(t, bs.buffer, 1)
 		_, ok := s.GetMessageSafe()
 		assert.False(t, ok)
@@ -155,7 +155,7 @@ func TestIntervalFlush(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Run("ReturnsWhenClosed", func(t *testing.T) {
-		ctx, cancel := context.WithCancel(context.Background())
+		ctx, cancel := context.WithCancel(t.Context())
 		bs := &bufferedSender{
 			Sender: s,
 			buffer: []message.Composer{},

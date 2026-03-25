@@ -52,17 +52,17 @@ func MakeSystemdLogger() (Sender, error) {
 	return s, nil
 }
 
-func (s *systemdJournal) Send(m message.Composer) {
+func (s *systemdJournal) Send(ctx context.Context, m message.Composer) {
 	defer func() {
 		if err := recover(); err != nil {
-			s.ErrorHandler()(fmt.Errorf("panic: %v", err), m)
+			s.ErrorHandler()(ctx, fmt.Errorf("panic: %v", err), m)
 		}
 	}()
 
 	if s.Level().ShouldLog(m) {
 		err := journal.Send(m.String(), s.level.convertPrioritySystemd(m.Priority()), s.options)
 		if err != nil {
-			s.ErrorHandler()(err, m)
+			s.ErrorHandler()(ctx, err, m)
 		}
 	}
 }

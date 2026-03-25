@@ -3,6 +3,7 @@ package send
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"io"
 	"sync"
 	"unicode"
@@ -83,11 +84,11 @@ func (s *WriterSender) doSend() error {
 		copy(lncp, line)
 
 		if err == nil {
-			s.Send(message.NewBytesMessage(s.priority, bytes.TrimRightFunc(lncp, unicode.IsSpace)))
+			s.Sender.Send(context.Background(), message.NewBytesMessage(s.priority, bytes.TrimRightFunc(lncp, unicode.IsSpace)))
 			continue
 		}
 
-		s.Send(message.NewBytesMessage(s.priority, bytes.TrimRightFunc(lncp, unicode.IsSpace)))
+		s.Sender.Send(context.Background(), message.NewBytesMessage(s.priority, bytes.TrimRightFunc(lncp, unicode.IsSpace)))
 		return err
 	}
 }
@@ -102,7 +103,7 @@ func (s *WriterSender) Close() error {
 		return err
 	}
 
-	s.Send(message.NewBytesMessage(s.priority, bytes.TrimRightFunc(s.buffer.Bytes(), unicode.IsSpace)))
+	s.Sender.Send(context.Background(), message.NewBytesMessage(s.priority, bytes.TrimRightFunc(s.buffer.Bytes(), unicode.IsSpace)))
 	s.buffer.Reset()
 	s.writer.Reset(s.buffer)
 	return nil

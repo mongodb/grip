@@ -1,6 +1,7 @@
 package logging
 
 import (
+	"context"
 	"os"
 	"sync"
 
@@ -70,45 +71,46 @@ func (g *Grip) SetLevel(info send.LevelInfo) error {
 	return g.impl.SetLevel(info)
 }
 
-func (g *Grip) Send(m interface{}) {
+func (g *Grip) Send(ctx context.Context, m interface{}) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	g.impl.Send(message.ConvertToComposer(g.defaultLevel, m))
+	g.impl.Send(ctx, message.ConvertToComposer(g.defaultLevel, m))
 }
 
 // Internal
 
+// send delivers a composer that already carries priority/level.
+func (g *Grip) send(ctx context.Context, m message.Composer) {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	g.impl.Send(ctx, m)
+}
+
 // For sending logging messages, in most cases, use the
 // Journaler.sender.Send() method, but we have a couple of methods to
 // use for the Panic/Fatal helpers.
-func (g *Grip) sendPanic(m message.Composer) {
+func (g *Grip) sendPanic(ctx context.Context, m message.Composer) {
 	// the Send method in the Sender interface will perform this
 	// check but to add fatal methods we need to do this here.
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
 	if g.impl.Level().ShouldLog(m) {
-		g.impl.Send(m)
+		g.impl.Send(ctx, m)
 		panic(m.String())
 	}
 }
 
-func (g *Grip) sendFatal(m message.Composer) {
+func (g *Grip) sendFatal(ctx context.Context, m message.Composer) {
 	// the Send method in the Sender interface will perform this
 	// check but to add fatal methods we need to do this here.
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
 	if g.impl.Level().ShouldLog(m) {
-		g.impl.Send(m)
+		g.impl.Send(ctx, m)
 		os.Exit(1)
 	}
-}
-
-func (g *Grip) send(m message.Composer) {
-	g.mu.RLock()
-	defer g.mu.RUnlock()
-
-	g.impl.Send(m)
 }

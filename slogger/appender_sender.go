@@ -64,13 +64,13 @@ func (a *appenderSender) SetLevel(l send.LevelInfo) error {
 	return nil
 }
 
-func (a *appenderSender) Send(m message.Composer) {
+func (a *appenderSender) Send(ctx context.Context, m message.Composer) {
 	if a.Level().ShouldLog(m) {
 		log, ok := m.(*Log)
 		if ok {
-			_ = a.appender.Append(log)
+			_ = a.appender.Append(ctx, log)
 		} else {
-			_ = a.appender.Append(NewLog(m))
+			_ = a.appender.Append(ctx, NewLog(m))
 		}
 	}
 }

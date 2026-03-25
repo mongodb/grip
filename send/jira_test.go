@@ -84,15 +84,15 @@ func (j *JiraSuite) TestSendMethod() {
 	j.Equal(mock.numSent, 0)
 
 	m := message.NewDefaultMessage(level.Debug, "hello")
-	sender.Send(m)
+	sender.Send(j.T().Context(), m)
 	j.Equal(mock.numSent, 0)
 
 	m = message.NewDefaultMessage(level.Alert, "")
-	sender.Send(m)
+	sender.Send(j.T().Context(), m)
 	j.Equal(mock.numSent, 0)
 
 	m = message.NewDefaultMessage(level.Alert, "world")
-	sender.Send(m)
+	sender.Send(j.T().Context(), m)
 	j.Equal(mock.numSent, 1)
 }
 
@@ -107,11 +107,11 @@ func (j *JiraSuite) TestSendMethodWithError() {
 	j.False(mock.failSend)
 
 	m := message.NewDefaultMessage(level.Alert, "world")
-	sender.Send(m)
+	sender.Send(j.T().Context(), m)
 	j.Equal(mock.numSent, 1)
 
 	mock.failSend = true
-	sender.Send(m)
+	sender.Send(j.T().Context(), m)
 	j.Equal(mock.numSent, 1)
 }
 
@@ -187,7 +187,7 @@ func (j *JiraSuite) TestTruncate() {
 
 	m := message.NewDefaultMessage(level.Info, "aaa")
 	j.True(m.Loggable())
-	sender.Send(m)
+	sender.Send(j.T().Context(), m)
 	j.Len(mock.lastSummary, 3)
 
 	var longString bytes.Buffer
@@ -196,7 +196,7 @@ func (j *JiraSuite) TestTruncate() {
 	}
 	m = message.NewDefaultMessage(level.Info, longString.String())
 	j.True(m.Loggable())
-	sender.Send(m)
+	sender.Send(j.T().Context(), m)
 	j.Len(mock.lastSummary, 254)
 
 	buffer := bytes.NewBufferString("")
@@ -207,7 +207,7 @@ func (j *JiraSuite) TestTruncate() {
 
 	m = message.NewDefaultMessage(level.Info, buffer.String())
 	j.True(m.Loggable())
-	sender.Send(m)
+	sender.Send(j.T().Context(), m)
 	j.Len(mock.lastDescription, 32767)
 }
 
@@ -231,7 +231,7 @@ func (j *JiraSuite) TestCustomFields() {
 	m := message.MakeJiraMessage(jiraIssue)
 	j.NoError(m.SetPriority(level.Warning))
 	j.True(m.Loggable())
-	sender.Send(m)
+	sender.Send(j.T().Context(), m)
 
 	j.Equal([]string{"hi", "bye"}, mock.lastFields.Unknowns["customfield_12345"])
 	j.Equal("test", mock.lastFields.Summary)
@@ -263,7 +263,7 @@ func (j *JiraSuite) TestPopulateKey() {
 	m := message.MakeJiraMessage(jiraIssue)
 	j.NoError(m.SetPriority(level.Alert))
 	j.True(m.Loggable())
-	sender.Send(m)
+	sender.Send(j.T().Context(), m)
 	j.Equal(1, count)
 	issue := m.Raw().(*message.JiraIssue)
 	j.Equal(mock.issueKey, issue.IssueKey)
@@ -272,7 +272,7 @@ func (j *JiraSuite) TestPopulateKey() {
 		"message": "foo",
 	})
 	j.True(messageFields.Loggable())
-	sender.Send(messageFields)
+	sender.Send(j.T().Context(), messageFields)
 	messageIssue := messageFields.Raw().(message.Fields)
 	j.Equal(mock.issueKey, messageIssue[jiraIssueKey])
 }
@@ -294,6 +294,6 @@ func (j *JiraSuite) TestWhenCallbackNil() {
 	j.NoError(m.SetPriority(level.Alert))
 	j.True(m.Loggable())
 	j.NotPanics(func() {
-		sender.Send(m)
+		sender.Send(j.T().Context(), m)
 	})
 }

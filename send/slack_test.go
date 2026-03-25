@@ -169,20 +169,20 @@ func (s *SlackSuite) TestSendMethod() {
 	s.Equal(mock.numSent, 0)
 
 	m := message.NewDefaultMessage(level.Debug, "hello")
-	sender.Send(m)
+	sender.Send(s.T().Context(), m)
 	s.Equal(mock.numSent, 0)
 
 	m = message.NewDefaultMessage(level.Alert, "")
-	sender.Send(m)
+	sender.Send(s.T().Context(), m)
 	s.Equal(mock.numSent, 0)
 
 	m = message.NewDefaultMessage(level.Alert, "world")
-	sender.Send(m)
+	sender.Send(s.T().Context(), m)
 	s.Equal(mock.numSent, 1)
 	s.Equal("#test", mock.lastTarget)
 
 	m = message.NewSlackMessage(level.Alert, "#somewhere", "Hi", nil)
-	sender.Send(m)
+	sender.Send(s.T().Context(), m)
 	s.Equal(mock.numSent, 2)
 	s.Equal("#somewhere", mock.lastTarget)
 }
@@ -198,17 +198,17 @@ func (s *SlackSuite) TestSendMethodWithError() {
 	s.False(mock.failSendingMessage)
 
 	m := message.NewDefaultMessage(level.Alert, "world")
-	sender.Send(m)
+	sender.Send(s.T().Context(), m)
 	s.Equal(mock.numSent, 1)
 
 	mock.failSendingMessage = true
-	sender.Send(m)
+	sender.Send(s.T().Context(), m)
 	s.Equal(mock.numSent, 1)
 
 	// sender should not panic with empty attachments
 	s.NotPanics(func() {
 		m = message.NewSlackMessage(level.Alert, "#general", "I am a formatted slack message", nil)
-		sender.Send(m)
+		sender.Send(s.T().Context(), m)
 		s.Equal(mock.numSent, 1)
 	})
 }
@@ -233,11 +233,11 @@ func (s *SlackSuite) TestSendMethodDoesIncorrectlyAllowTooLowMessages() {
 
 	s.NoError(sender.SetLevel(LevelInfo{Default: level.Critical, Threshold: level.Alert}))
 	s.Equal(mock.numSent, 0)
-	sender.Send(message.NewDefaultMessage(level.Info, "hello"))
+	sender.Send(s.T().Context(), message.NewDefaultMessage(level.Info, "hello"))
 	s.Equal(mock.numSent, 0)
-	sender.Send(message.NewDefaultMessage(level.Alert, "hello"))
+	sender.Send(s.T().Context(), message.NewDefaultMessage(level.Alert, "hello"))
 	s.Equal(mock.numSent, 1)
-	sender.Send(message.NewDefaultMessage(level.Alert, "hello"))
+	sender.Send(s.T().Context(), message.NewDefaultMessage(level.Alert, "hello"))
 	s.Equal(mock.numSent, 2)
 }
 
@@ -252,7 +252,7 @@ func (s *SlackSuite) TestSettingBotIdentity() {
 	s.False(mock.failSendingMessage)
 
 	m := message.NewDefaultMessage(level.Alert, "world")
-	sender.Send(m)
+	sender.Send(s.T().Context(), m)
 	s.Equal(1, mock.numSent)
 	s.NotNil(mock.lastMsgOptions)
 	s.Equal(2, len(*mock.lastMsgOptions))
@@ -261,7 +261,7 @@ func (s *SlackSuite) TestSettingBotIdentity() {
 	s.opts.IconURL = "https://example.com/icon.ico"
 	sender, err = NewSlackLogger(s.opts, "foo", LevelInfo{level.Trace, level.Info})
 	s.NoError(err)
-	sender.Send(m)
+	sender.Send(s.T().Context(), m)
 	s.Equal(2, mock.numSent)
 	s.Equal(5, len(*mock.lastMsgOptions))
 }

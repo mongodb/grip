@@ -33,14 +33,14 @@ func NewGenericLogger(name string, l LevelInfo) (Sender, error) {
 	return gl, nil
 }
 
-func (gl *genericLogger) Send(m message.Composer) {
+func (gl *genericLogger) Send(ctx context.Context, m message.Composer) {
 	if !gl.Level().ShouldLog(m) {
 		return
 	}
 
 	generic := m.Raw().(message.Generic)
 	if err := generic.Send(); err != nil {
-		gl.ErrorHandler()(errors.Wrap(err, "sending generic message"), m)
+		gl.ErrorHandler()(ctx, errors.Wrap(err, "sending generic message"), m)
 	}
 }
 

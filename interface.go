@@ -1,6 +1,8 @@
 package grip
 
 import (
+	"context"
+
 	"github.com/mongodb/grip/level"
 	"github.com/mongodb/grip/send"
 )
@@ -19,14 +21,14 @@ type Journaler interface {
 
 	// Send allows you to push a composer which stores its own
 	// priorty (or uses the sender's default priority).
-	Send(interface{})
+	Send(context.Context, interface{})
 
 	// Specify a log level as an argument rather than a method
 	// name.
-	Log(level.Priority, interface{})
-	Logf(level.Priority, string, ...interface{})
-	Logln(level.Priority, ...interface{})
-	LogWhen(bool, level.Priority, interface{})
+	Log(context.Context, level.Priority, interface{})
+	Logf(context.Context, level.Priority, string, ...interface{})
+	Logln(context.Context, level.Priority, ...interface{})
+	LogWhen(context.Context, bool, level.Priority, interface{})
 
 	// Methods for sending messages at specific levels. If you
 	// send a message at a level that is below the threshold, then it is a no-op.
@@ -36,51 +38,51 @@ type Journaler interface {
 	// to be below threshold, however, if the message isn't
 	// loggable (e.g. error is nil, or message is empty,) these
 	// methods will not panic/error.
-	EmergencyFatal(interface{})
-	EmergencyPanic(interface{})
+	EmergencyFatal(context.Context, interface{})
+	EmergencyPanic(context.Context, interface{})
 
 	// For each level, in addition to a basic logger that takes
 	// strings and message.Composer objects (and tries to do its best
 	// with everythingelse.) there are println and printf
 	// loggers. Each Level also has "When" variants that only log
 	// if the passed condition are true.
-	Emergency(interface{})
-	Emergencyf(string, ...interface{})
-	Emergencyln(...interface{})
-	EmergencyWhen(bool, interface{})
+	Emergency(context.Context, interface{})
+	Emergencyf(context.Context, string, ...interface{})
+	Emergencyln(context.Context, ...interface{})
+	EmergencyWhen(context.Context, bool, interface{})
 
-	Alert(interface{})
-	Alertf(string, ...interface{})
-	Alertln(...interface{})
-	AlertWhen(bool, interface{})
+	Alert(context.Context, interface{})
+	Alertf(context.Context, string, ...interface{})
+	Alertln(context.Context, ...interface{})
+	AlertWhen(context.Context, bool, interface{})
 
-	Critical(interface{})
-	Criticalf(string, ...interface{})
-	Criticalln(...interface{})
-	CriticalWhen(bool, interface{})
+	Critical(context.Context, interface{})
+	Criticalf(context.Context, string, ...interface{})
+	Criticalln(context.Context, ...interface{})
+	CriticalWhen(context.Context, bool, interface{})
 
-	Error(interface{})
-	Errorf(string, ...interface{})
-	Errorln(...interface{})
-	ErrorWhen(bool, interface{})
+	Error(context.Context, interface{})
+	Errorf(context.Context, string, ...interface{})
+	Errorln(context.Context, ...interface{})
+	ErrorWhen(context.Context, bool, interface{})
 
-	Warning(interface{})
-	Warningf(string, ...interface{})
-	Warningln(...interface{})
-	WarningWhen(bool, interface{})
+	Warning(context.Context, interface{})
+	Warningf(context.Context, string, ...interface{})
+	Warningln(context.Context, ...interface{})
+	WarningWhen(context.Context, bool, interface{})
 
-	Notice(interface{})
-	Noticef(string, ...interface{})
-	Noticeln(...interface{})
-	NoticeWhen(bool, interface{})
+	Notice(context.Context, interface{})
+	Noticef(context.Context, string, ...interface{})
+	Noticeln(context.Context, ...interface{})
+	NoticeWhen(context.Context, bool, interface{})
 
-	Info(interface{})
-	Infof(string, ...interface{})
-	Infoln(...interface{})
-	InfoWhen(bool, interface{})
+	Info(context.Context, interface{})
+	Infof(context.Context, string, ...interface{})
+	Infoln(context.Context, ...interface{})
+	InfoWhen(context.Context, bool, interface{})
 
-	Debug(interface{})
-	Debugf(string, ...interface{})
-	Debugln(...interface{})
-	DebugWhen(bool, interface{})
+	Debug(context.Context, interface{})
+	Debugf(context.Context, string, ...interface{})
+	Debugln(context.Context, ...interface{})
+	DebugWhen(context.Context, bool, interface{})
 }

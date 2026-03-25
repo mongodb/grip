@@ -1,6 +1,7 @@
 package slogger
 
 import (
+	"context"
 	"errors"
 
 	"github.com/mongodb/grip/message"
@@ -24,11 +25,11 @@ type Logger struct {
 //
 // In this implementation, Logf will never return an error. This part
 // of the type definition was retained for backwards compatibility
-func (l *Logger) Logf(level Level, messageFmt string, args ...interface{}) (*Log, []error) {
+func (l *Logger) Logf(ctx context.Context, level Level, messageFmt string, args ...interface{}) (*Log, []error) {
 	m := newPrefixedLog(l.Name, message.NewFormattedMessage(level.Priority(), messageFmt, args...))
 
 	for _, send := range l.Appenders {
-		send.Send(m)
+		send.Send(ctx, m)
 	}
 
 	return m, []error{}
@@ -43,12 +44,12 @@ func (l *Logger) Logf(level Level, messageFmt string, args ...interface{}) (*Log
 //	    return slogger.Errorf(slogger.WARN, "Unexpected return value. Expected: %v Received: %v",
 //	        whatIsExpected, whatIsReturned)
 //	}
-func (l *Logger) Errorf(level Level, messageFmt string, args ...interface{}) error {
+func (l *Logger) Errorf(ctx context.Context, level Level, messageFmt string, args ...interface{}) error {
 	m := message.NewFormattedMessage(level.Priority(), messageFmt, args...)
 	log := newPrefixedLog(l.Name, m)
 
 	for _, send := range l.Appenders {
-		send.Send(log)
+		send.Send(ctx, log)
 	}
 
 	return errors.New(m.String())
@@ -64,7 +65,7 @@ func (l *Logger) Errorf(level Level, messageFmt string, args ...interface{}) err
 //
 // An additional difference is that the new implementation, will not
 // log if the error is nil, and the previous implementation would.
-func (l *Logger) Stackf(level Level, stackErr error, messageFmt string, args ...interface{}) (*Log, []error) {
+func (l *Logger) Stackf(ctx context.Context, level Level, stackErr error, messageFmt string, args ...interface{}) (*Log, []error) {
 	m := newPrefixedLog(l.Name, message.NewErrorWrapMessage(level.Priority(), stackErr, messageFmt, args...))
 
 	// this check is not necessary, but prevents redundancy if
@@ -75,7 +76,7 @@ func (l *Logger) Stackf(level Level, stackErr error, messageFmt string, args ...
 	}
 
 	for _, send := range l.Appenders {
-		send.Send(m)
+		send.Send(ctx, m)
 	}
 
 	return m, []error{}

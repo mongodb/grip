@@ -92,15 +92,15 @@ func (s *XMPPSuite) TestSendMethod() {
 	s.Equal(mock.numSent, 0)
 
 	m := message.NewDefaultMessage(level.Debug, "hello")
-	sender.Send(m)
+	sender.Send(s.T().Context(), m)
 	s.Equal(mock.numSent, 0)
 
 	m = message.NewDefaultMessage(level.Alert, "")
-	sender.Send(m)
+	sender.Send(s.T().Context(), m)
 	s.Equal(mock.numSent, 0)
 
 	m = message.NewDefaultMessage(level.Alert, "world")
-	sender.Send(m)
+	sender.Send(s.T().Context(), m)
 	s.Equal(mock.numSent, 1)
 }
 
@@ -115,10 +115,10 @@ func (s *XMPPSuite) TestSendMethodWithError() {
 	s.False(mock.failSend)
 
 	m := message.NewDefaultMessage(level.Alert, "world")
-	sender.Send(m)
+	sender.Send(s.T().Context(), m)
 	s.Equal(mock.numSent, 1)
 
 	mock.failSend = true
-	sender.Send(m)
+	sender.Send(s.T().Context(), m)
 	s.Equal(mock.numSent, 1)
 }

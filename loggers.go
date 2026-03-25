@@ -37,144 +37,148 @@ expensive message building operations.
 */
 package grip
 
-import "github.com/mongodb/grip/level"
+import (
+	"context"
 
-func Log(l level.Priority, msg interface{}) {
-	std.Log(l, msg)
+	"github.com/mongodb/grip/level"
+)
+
+func Log(ctx context.Context, l level.Priority, msg interface{}) {
+	std.Log(ctx, l, msg)
 }
-func Logf(l level.Priority, msg string, a ...interface{}) {
-	std.Logf(l, msg, a...)
+func Logf(ctx context.Context, l level.Priority, msg string, a ...interface{}) {
+	std.Logf(ctx, l, msg, a...)
 }
-func Logln(l level.Priority, a ...interface{}) {
-	std.Logln(l, a...)
+func Logln(ctx context.Context, l level.Priority, a ...interface{}) {
+	std.Logln(ctx, l, a...)
 }
-func LogWhen(conditional bool, l level.Priority, m interface{}) {
-	std.LogWhen(conditional, l, m)
+func LogWhen(ctx context.Context, conditional bool, l level.Priority, m interface{}) {
+	std.LogWhen(ctx, conditional, l, m)
 }
 
 // Leveled Logging Methods
 // Emergency-level logging methods
 
-func EmergencyFatal(msg interface{}) {
-	std.EmergencyFatal(msg)
+func EmergencyFatal(ctx context.Context, msg interface{}) {
+	std.EmergencyFatal(ctx, msg)
 }
-func Emergency(msg interface{}) {
-	std.Emergency(msg)
+func Emergency(ctx context.Context, msg interface{}) {
+	std.Emergency(ctx, msg)
 }
-func Emergencyf(msg string, a ...interface{}) {
-	std.Emergencyf(msg, a...)
+func Emergencyf(ctx context.Context, msg string, a ...interface{}) {
+	std.Emergencyf(ctx, msg, a...)
 }
-func Emergencyln(a ...interface{}) {
-	std.Emergencyln(a...)
+func Emergencyln(ctx context.Context, a ...interface{}) {
+	std.Emergencyln(ctx, a...)
 }
-func EmergencyPanic(msg interface{}) {
-	std.EmergencyPanic(msg)
+func EmergencyPanic(ctx context.Context, msg interface{}) {
+	std.EmergencyPanic(ctx, msg)
 }
-func EmergencyWhen(conditional bool, m interface{}) {
-	std.EmergencyWhen(conditional, m)
+func EmergencyWhen(ctx context.Context, conditional bool, m interface{}) {
+	std.EmergencyWhen(ctx, conditional, m)
 }
 
 // Alert-level logging methods
 
-func Alert(msg interface{}) {
-	std.Alert(msg)
+func Alert(ctx context.Context, msg interface{}) {
+	std.Alert(ctx, msg)
 }
-func Alertf(msg string, a ...interface{}) {
-	std.Alertf(msg, a...)
+func Alertf(ctx context.Context, msg string, a ...interface{}) {
+	std.Alertf(ctx, msg, a...)
 }
-func Alertln(a ...interface{}) {
-	std.Alertln(a...)
+func Alertln(ctx context.Context, a ...interface{}) {
+	std.Alertln(ctx, a...)
 }
-func AlertWhen(conditional bool, m interface{}) {
-	std.AlertWhen(conditional, m)
+func AlertWhen(ctx context.Context, conditional bool, m interface{}) {
+	std.AlertWhen(ctx, conditional, m)
 }
 
 // Critical-level logging methods
 
-func Critical(msg interface{}) {
-	std.Critical(msg)
+func Critical(ctx context.Context, msg interface{}) {
+	std.Critical(ctx, msg)
 }
-func Criticalf(msg string, a ...interface{}) {
-	std.Criticalf(msg, a...)
+func Criticalf(ctx context.Context, msg string, a ...interface{}) {
+	std.Criticalf(ctx, msg, a...)
 }
-func Criticalln(a ...interface{}) {
-	std.Criticalln(a...)
+func Criticalln(ctx context.Context, a ...interface{}) {
+	std.Criticalln(ctx, a...)
 }
-func CriticalWhen(conditional bool, m interface{}) {
-	std.CriticalWhen(conditional, m)
+func CriticalWhen(ctx context.Context, conditional bool, m interface{}) {
+	std.CriticalWhen(ctx, conditional, m)
 }
 
 // Error-level logging methods
 
-func Error(msg interface{}) {
-	std.Error(msg)
+func Error(ctx context.Context, msg interface{}) {
+	std.Error(ctx, msg)
 }
-func Errorf(msg string, a ...interface{}) {
-	std.Errorf(msg, a...)
+func Errorf(ctx context.Context, msg string, a ...interface{}) {
+	std.Errorf(ctx, msg, a...)
 }
-func Errorln(a ...interface{}) {
-	std.Errorln(a...)
+func Errorln(ctx context.Context, a ...interface{}) {
+	std.Errorln(ctx, a...)
 }
-func ErrorWhen(conditional bool, m interface{}) {
-	std.ErrorWhen(conditional, m)
+func ErrorWhen(ctx context.Context, conditional bool, m interface{}) {
+	std.ErrorWhen(ctx, conditional, m)
 }
 
 // Warning-level logging methods
 
-func Warning(msg interface{}) {
-	std.Warning(msg)
+func Warning(ctx context.Context, msg interface{}) {
+	std.Warning(ctx, msg)
 }
-func Warningf(msg string, a ...interface{}) {
-	std.Warningf(msg, a...)
+func Warningf(ctx context.Context, msg string, a ...interface{}) {
+	std.Warningf(ctx, msg, a...)
 }
-func Warningln(a ...interface{}) {
-	std.Warningln(a...)
+func Warningln(ctx context.Context, a ...interface{}) {
+	std.Warningln(ctx, a...)
 }
-func WarningWhen(conditional bool, m interface{}) {
-	std.WarningWhen(conditional, m)
+func WarningWhen(ctx context.Context, conditional bool, m interface{}) {
+	std.WarningWhen(ctx, conditional, m)
 }
 
 // Notice-level logging methods
 
-func Notice(msg interface{}) {
-	std.Notice(msg)
+func Notice(ctx context.Context, msg interface{}) {
+	std.Notice(ctx, msg)
 }
-func Noticef(msg string, a ...interface{}) {
-	std.Noticef(msg, a...)
+func Noticef(ctx context.Context, msg string, a ...interface{}) {
+	std.Noticef(ctx, msg, a...)
 }
-func Noticeln(a ...interface{}) {
-	std.Noticeln(a...)
+func Noticeln(ctx context.Context, a ...interface{}) {
+	std.Noticeln(ctx, a...)
 }
-func NoticeWhen(conditional bool, m interface{}) {
-	std.NoticeWhen(conditional, m)
+func NoticeWhen(ctx context.Context, conditional bool, m interface{}) {
+	std.NoticeWhen(ctx, conditional, m)
 }
 
 // Info-level logging methods
 
-func Info(msg interface{}) {
-	std.Info(msg)
+func Info(ctx context.Context, msg interface{}) {
+	std.Info(ctx, msg)
 }
-func Infof(msg string, a ...interface{}) {
-	std.Infof(msg, a...)
+func Infof(ctx context.Context, msg string, a ...interface{}) {
+	std.Infof(ctx, msg, a...)
 }
-func Infoln(a ...interface{}) {
-	std.Infoln(a...)
+func Infoln(ctx context.Context, a ...interface{}) {
+	std.Infoln(ctx, a...)
 }
-func InfoWhen(conditional bool, message interface{}) {
-	std.InfoWhen(conditional, message)
+func InfoWhen(ctx context.Context, conditional bool, message interface{}) {
+	std.InfoWhen(ctx, conditional, message)
 }
 
 // Debug-level logging methods
 
-func Debug(msg interface{}) {
-	std.Debug(msg)
+func Debug(ctx context.Context, msg interface{}) {
+	std.Debug(ctx, msg)
 }
-func Debugf(msg string, a ...interface{}) {
-	std.Debugf(msg, a...)
+func Debugf(ctx context.Context, msg string, a ...interface{}) {
+	std.Debugf(ctx, msg, a...)
 }
-func Debugln(a ...interface{}) {
-	std.Debugln(a...)
+func Debugln(ctx context.Context, a ...interface{}) {
+	std.Debugln(ctx, a...)
 }
-func DebugWhen(conditional bool, m interface{}) {
-	std.DebugWhen(conditional, m)
+func DebugWhen(ctx context.Context, conditional bool, m interface{}) {
+	std.DebugWhen(ctx, conditional, m)
 }
