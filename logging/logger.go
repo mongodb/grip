@@ -78,15 +78,15 @@ func (g *Grip) Send(ctx context.Context, m interface{}) {
 	g.impl.Send(ctx, message.ConvertToComposer(g.defaultLevel, m))
 }
 
-// deliver sends a composer that already carries priority/level.
-func (g *Grip) deliver(ctx context.Context, m message.Composer) {
+// Internal
+
+// send delivers a composer that already carries priority/level.
+func (g *Grip) send(ctx context.Context, m message.Composer) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
 	g.impl.Send(ctx, m)
 }
-
-// Internal
 
 // For sending logging messages, in most cases, use the
 // Journaler.sender.Send() method, but we have a couple of methods to

@@ -26,23 +26,23 @@ import (
 )
 
 func (g *Grip) Log(ctx context.Context, l level.Priority, msg interface{}) {
-	g.deliver(ctx, message.ConvertToComposer(l, msg))
+	g.send(ctx, message.ConvertToComposer(l, msg))
 }
 func (g *Grip) Logf(ctx context.Context, l level.Priority, msg string, a ...interface{}) {
-	g.deliver(ctx, message.NewFormattedMessage(l, msg, a...))
+	g.send(ctx, message.NewFormattedMessage(l, msg, a...))
 }
 func (g *Grip) Logln(ctx context.Context, l level.Priority, a ...interface{}) {
-	g.deliver(ctx, message.NewLineMessage(l, a...))
+	g.send(ctx, message.NewLineMessage(l, a...))
 }
 
 func (g *Grip) Emergency(ctx context.Context, msg interface{}) {
-	g.deliver(ctx, message.ConvertToComposer(level.Emergency, msg))
+	g.send(ctx, message.ConvertToComposer(level.Emergency, msg))
 }
 func (g *Grip) Emergencyf(ctx context.Context, msg string, a ...interface{}) {
-	g.deliver(ctx, message.NewFormattedMessage(level.Emergency, msg, a...))
+	g.send(ctx, message.NewFormattedMessage(level.Emergency, msg, a...))
 }
 func (g *Grip) Emergencyln(ctx context.Context, a ...interface{}) {
-	g.deliver(ctx, message.NewLineMessage(level.Emergency, a...))
+	g.send(ctx, message.NewLineMessage(level.Emergency, a...))
 }
 func (g *Grip) EmergencyPanic(ctx context.Context, msg interface{}) {
 	g.sendPanic(ctx, message.ConvertToComposer(level.Emergency, msg))
@@ -64,70 +64,70 @@ func (g *Grip) EmergencyFatalln(ctx context.Context, a ...interface{}) {
 }
 
 func (g *Grip) Alert(ctx context.Context, msg interface{}) {
-	g.deliver(ctx, message.ConvertToComposer(level.Alert, msg))
+	g.send(ctx, message.ConvertToComposer(level.Alert, msg))
 }
 func (g *Grip) Alertf(ctx context.Context, msg string, a ...interface{}) {
-	g.deliver(ctx, message.NewFormattedMessage(level.Alert, msg, a...))
+	g.send(ctx, message.NewFormattedMessage(level.Alert, msg, a...))
 }
 func (g *Grip) Alertln(ctx context.Context, a ...interface{}) {
-	g.deliver(ctx, message.NewLineMessage(level.Alert, a...))
+	g.send(ctx, message.NewLineMessage(level.Alert, a...))
 }
 
 func (g *Grip) Critical(ctx context.Context, msg interface{}) {
-	g.deliver(ctx, message.ConvertToComposer(level.Critical, msg))
+	g.send(ctx, message.ConvertToComposer(level.Critical, msg))
 }
 func (g *Grip) Criticalf(ctx context.Context, msg string, a ...interface{}) {
-	g.deliver(ctx, message.NewFormattedMessage(level.Critical, msg, a...))
+	g.send(ctx, message.NewFormattedMessage(level.Critical, msg, a...))
 }
 func (g *Grip) Criticalln(ctx context.Context, a ...interface{}) {
-	g.deliver(ctx, message.NewLineMessage(level.Critical, a...))
+	g.send(ctx, message.NewLineMessage(level.Critical, a...))
 }
 
 func (g *Grip) Error(ctx context.Context, msg interface{}) {
-	g.deliver(ctx, message.ConvertToComposer(level.Error, msg))
+	g.send(ctx, message.ConvertToComposer(level.Error, msg))
 }
 func (g *Grip) Errorf(ctx context.Context, msg string, a ...interface{}) {
-	g.deliver(ctx, message.NewFormattedMessage(level.Error, msg, a...))
+	g.send(ctx, message.NewFormattedMessage(level.Error, msg, a...))
 }
 func (g *Grip) Errorln(ctx context.Context, a ...interface{}) {
-	g.deliver(ctx, message.NewLineMessage(level.Error, a...))
+	g.send(ctx, message.NewLineMessage(level.Error, a...))
 }
 
 func (g *Grip) Warning(ctx context.Context, msg interface{}) {
-	g.deliver(ctx, message.ConvertToComposer(level.Warning, msg))
+	g.send(ctx, message.ConvertToComposer(level.Warning, msg))
 }
 func (g *Grip) Warningf(ctx context.Context, msg string, a ...interface{}) {
-	g.deliver(ctx, message.NewFormattedMessage(level.Warning, msg, a...))
+	g.send(ctx, message.NewFormattedMessage(level.Warning, msg, a...))
 }
 func (g *Grip) Warningln(ctx context.Context, a ...interface{}) {
-	g.deliver(ctx, message.NewLineMessage(level.Warning, a...))
+	g.send(ctx, message.NewLineMessage(level.Warning, a...))
 }
 
 func (g *Grip) Notice(ctx context.Context, msg interface{}) {
-	g.deliver(ctx, message.ConvertToComposer(level.Notice, msg))
+	g.send(ctx, message.ConvertToComposer(level.Notice, msg))
 }
 func (g *Grip) Noticef(ctx context.Context, msg string, a ...interface{}) {
-	g.deliver(ctx, message.NewFormattedMessage(level.Notice, msg, a...))
+	g.send(ctx, message.NewFormattedMessage(level.Notice, msg, a...))
 }
 func (g *Grip) Noticeln(ctx context.Context, a ...interface{}) {
-	g.deliver(ctx, message.NewLineMessage(level.Notice, a...))
+	g.send(ctx, message.NewLineMessage(level.Notice, a...))
 }
 
 func (g *Grip) Info(ctx context.Context, msg interface{}) {
-	g.deliver(ctx, message.ConvertToComposer(level.Info, msg))
+	g.send(ctx, message.ConvertToComposer(level.Info, msg))
 }
 func (g *Grip) Infof(ctx context.Context, msg string, a ...interface{}) {
-	g.deliver(ctx, message.NewFormattedMessage(level.Info, msg, a...))
+	g.send(ctx, message.NewFormattedMessage(level.Info, msg, a...))
 }
 func (g *Grip) Infoln(ctx context.Context, a ...interface{}) {
-	g.deliver(ctx, message.NewLineMessage(level.Info, a...))
+	g.send(ctx, message.NewLineMessage(level.Info, a...))
 }
 func (g *Grip) Debug(ctx context.Context, msg interface{}) {
-	g.deliver(ctx, message.ConvertToComposer(level.Debug, msg))
+	g.send(ctx, message.ConvertToComposer(level.Debug, msg))
 }
 func (g *Grip) Debugf(ctx context.Context, msg string, a ...interface{}) {
-	g.deliver(ctx, message.NewFormattedMessage(level.Debug, msg, a...))
+	g.send(ctx, message.NewFormattedMessage(level.Debug, msg, a...))
 }
 func (g *Grip) Debugln(ctx context.Context, a ...interface{}) {
-	g.deliver(ctx, message.NewLineMessage(level.Debug, a...))
+	g.send(ctx, message.NewLineMessage(level.Debug, a...))
 }
