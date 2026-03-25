@@ -44,7 +44,7 @@ func NewAsyncGroupSender(ctx context.Context, bufferSize int, senders ...Sender)
 					if m == nil {
 						continue
 					}
-					sender.Send(context.Background(), m)
+					sender.Send(ctx, m)
 				}
 			}
 		}(p, senders[i])

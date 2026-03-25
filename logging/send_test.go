@@ -176,7 +176,9 @@ func (s *GripInternalSuite) TestCatchMethods() {
 
 		func(ctx context.Context, w bool, m interface{}) { s.grip.LogWhen(ctx, w, level.Info, m) },
 		func(ctx context.Context, w bool, m ...interface{}) { s.grip.LogWhenln(ctx, w, level.Info, m...) },
-		func(ctx context.Context, w bool, m string, a ...interface{}) { s.grip.LogWhenf(ctx, w, level.Info, m, a...) },
+		func(ctx context.Context, w bool, m string, a ...interface{}) {
+			s.grip.LogWhenf(ctx, w, level.Info, m, a...)
+		},
 		func(ctx context.Context, m interface{}) { s.grip.Log(ctx, level.Info, m) },
 		func(ctx context.Context, m string, a ...interface{}) { s.grip.Logf(ctx, level.Info, m, a...) },
 		func(ctx context.Context, m ...interface{}) { s.grip.Logln(ctx, level.Info, m...) },
@@ -258,7 +260,7 @@ func (s *GripInternalSuite) TestCatchMethods() {
 func TestSendFatalExits(t *testing.T) {
 	grip := NewGrip("test")
 	if os.Getenv("SHOULD_CRASH") == "1" {
-		grip.sendFatal(context.Background(), message.NewLineMessage(level.Error, "foo"))
+		grip.sendFatal(t.Context(), message.NewLineMessage(level.Error, "foo"))
 		return
 	}
 

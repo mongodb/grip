@@ -102,12 +102,12 @@ func (s *bufferedSender) Send(ctx context.Context, msg message.Composer) {
 	}
 }
 
-func (s *bufferedSender) Flush(_ context.Context) error {
+func (s *bufferedSender) Flush(ctx context.Context) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	if !s.closed {
-		s.flush(context.Background())
+		s.flush(ctx)
 	}
 
 	return nil
