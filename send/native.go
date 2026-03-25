@@ -147,7 +147,7 @@ func (s *nativeLogger) Send(ctx context.Context, m message.Composer) {
 	if s.Level().ShouldLog(m) {
 		out, err := s.formatter(m)
 		if err != nil {
-			s.ErrorHandler()(err, m)
+			s.ErrorHandler()(ctx, err, m)
 			return
 		}
 

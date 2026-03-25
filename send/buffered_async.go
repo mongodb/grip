@@ -94,7 +94,7 @@ func (opts *BufferedAsyncSenderOptions) validate() error {
 // any new messages will be dropped until the number of messages is below the limit.
 func (s *bufferedAsyncSender) Send(ctx context.Context, msg message.Composer) {
 	if err := s.ctx.Err(); err != nil {
-		s.ErrorHandler()(errors.Wrap(err, "sending message"), msg)
+		s.ErrorHandler()(ctx, errors.Wrap(err, "sending message"), msg)
 	}
 
 	if !s.Level().ShouldLog(msg) {
@@ -104,7 +104,7 @@ func (s *bufferedAsyncSender) Send(ctx context.Context, msg message.Composer) {
 	select {
 	case s.incoming <- msg:
 	default:
-		s.ErrorHandler()(errors.New("the message was dropped because the buffer was full"), msg)
+		s.ErrorHandler()(ctx, errors.New("the message was dropped because the buffer was full"), msg)
 	}
 }
 
@@ -132,7 +132,7 @@ func (s *bufferedAsyncSender) Close() error {
 func (s *bufferedAsyncSender) processMessages() {
 	defer func() {
 		if r := recover(); r != nil {
-			s.ErrorHandler()(errors.New("panic in processMessages loop"), message.NewString(""))
+			s.ErrorHandler()(s.ctx, errors.New("panic in processMessages loop"), message.NewString(""))
 		}
 	}()
 

@@ -79,7 +79,7 @@ func (s *splunkLogger) Send(ctx context.Context, m message.Composer) {
 				}
 			}
 			if err := s.client.WriteBatch(batch); err != nil {
-				s.ErrorHandler()(err, m)
+				s.ErrorHandler()(ctx, err, m)
 			}
 			return
 		}
@@ -87,7 +87,7 @@ func (s *splunkLogger) Send(ctx context.Context, m message.Composer) {
 		e := hec.NewEvent(m.Raw())
 		e.SetHost(s.hostname)
 		if err := s.client.WriteEvent(e); err != nil {
-			s.ErrorHandler()(err, m)
+			s.ErrorHandler()(ctx, err, m)
 		}
 	}
 }

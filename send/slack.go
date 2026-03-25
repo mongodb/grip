@@ -109,7 +109,7 @@ func (s *slackJournal) Send(ctx context.Context, m message.Composer) {
 		}
 
 		_, _, err := s.opts.client.PostMessage(channel, params...)
-		s.ErrorHandler()(err, message.NewFormattedMessage(m.Priority(), "%s\n", msg))
+		s.ErrorHandler()(ctx, err, message.NewFormattedMessage(m.Priority(), "%s\n", msg))
 	}
 }
 

@@ -57,7 +57,7 @@ func (s *streamLogger) Send(ctx context.Context, m message.Composer) {
 		}
 
 		if _, err := s.fobj.WriteString(msg); err != nil {
-			s.ErrorHandler()(err, m)
+			s.ErrorHandler()(ctx, err, m)
 		}
 	}
 }

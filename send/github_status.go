@@ -61,11 +61,11 @@ func (s *githubStatusMessageLogger) Send(ctx context.Context, m message.Composer
 			owner = s.ref
 		}
 		if status == nil {
-			s.ErrorHandler()(errors.New("composer cannot be converted to GitHub status"), m)
+			s.ErrorHandler()(ctx, errors.New("composer cannot be converted to GitHub status"), m)
 			return
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+		ctx, cancel := context.WithTimeout(ctx, time.Minute)
 		defer cancel()
 
 		ctx, span := tracer.Start(ctx, "CreateStatus", trace.WithAttributes(
@@ -77,12 +77,12 @@ func (s *githubStatusMessageLogger) Send(ctx context.Context, m message.Composer
 		defer span.End()
 
 		if _, resp, err := s.gh.CreateStatus(ctx, owner, repo, ref, *status); err != nil {
-			s.ErrorHandler()(errors.Wrap(err, "sending GitHub create status request"), m)
+			s.ErrorHandler()(ctx, errors.Wrap(err, "sending GitHub create status request"), m)
 
 			span.RecordError(err)
 			span.SetStatus(codes.Error, "sending status")
 		} else if err = handleHTTPResponseError(resp.Response); err != nil {
-			s.ErrorHandler()(errors.Wrap(err, "creating GitHub status"), m)
+			s.ErrorHandler()(ctx, errors.Wrap(err, "creating GitHub status"), m)
 
 			span.RecordError(err)
 			span.SetStatus(codes.Error, "sending status")

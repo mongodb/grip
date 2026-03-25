@@ -73,7 +73,7 @@ func (j *jiraCommentJournal) Send(ctx context.Context, m message.Composer) {
 			issue = c.IssueID
 		}
 
-		j.ErrorHandler()(j.opts.client.PostComment(issue, m.String()), m)
+		j.ErrorHandler()(ctx, j.opts.client.PostComment(issue, m.String()), m)
 	}
 }
 

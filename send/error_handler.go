@@ -13,10 +13,10 @@ import (
 // ErrorHandler is a function that you can use define how a sender
 // handles errors sending messages. Implementations of this type
 // should perform a noop if the err object is nil.
-type ErrorHandler func(error, message.Composer)
+type ErrorHandler func(context.Context, error, message.Composer)
 
 func ErrorHandlerFromLogger(l *log.Logger) ErrorHandler {
-	return func(err error, m message.Composer) {
+	return func(_ context.Context, err error, m message.Composer) {
 		if err == nil {
 			return
 		}
@@ -27,12 +27,12 @@ func ErrorHandlerFromLogger(l *log.Logger) ErrorHandler {
 
 // ErrorHandlerFromSender wraps an existing Sender for sending error messages.
 func ErrorHandlerFromSender(s Sender) ErrorHandler {
-	return func(err error, m message.Composer) {
+	return func(ctx context.Context, err error, m message.Composer) {
 		if err == nil {
 			return
 		}
 
-		s.Send(context.Background(), message.WrapError(err, m))
+		s.Send(ctx, message.WrapError(err, m))
 	}
 }
 

@@ -45,13 +45,13 @@ func MakeSysLogger(network, raddr string) Sender {
 
 		if s.logger != nil {
 			if err := s.logger.Close(); err != nil {
-				s.ErrorHandler()(err, message.NewErrorWrapMessage(level.Error, err, "closing syslogger"))
+				s.ErrorHandler()(context.Background(), err, message.NewErrorWrapMessage(level.Error, err, "closing syslogger"))
 			}
 		}
 
 		w, err := syslog.Dial(network, raddr, syslog.LOG_DEBUG, s.Name())
 		if err != nil {
-			s.ErrorHandler()(err, message.NewErrorWrapMessage(level.Error, err, "restarting syslog for logger '%s'", s.Name()))
+			s.ErrorHandler()(context.Background(), err, message.NewErrorWrapMessage(level.Error, err, "restarting syslog for logger '%s'", s.Name()))
 			return
 		}
 
@@ -79,13 +79,13 @@ func (s *syslogger) Close() error { return s.logger.Close() }
 func (s *syslogger) Send(ctx context.Context, m message.Composer) {
 	defer func() {
 		if err := recover(); err != nil {
-			s.ErrorHandler()(fmt.Errorf("panic: %v", err), m)
+			s.ErrorHandler()(ctx, fmt.Errorf("panic: %v", err), m)
 		}
 	}()
 
 	if s.Level().ShouldLog(m) {
 		if err := s.sendToSysLog(m.Priority(), m.String()); err != nil {
-			s.ErrorHandler()(err, m)
+			s.ErrorHandler()(ctx, err, m)
 		}
 	}
 }

@@ -1,6 +1,7 @@
 package send
 
 import (
+	"context"
 	"net/mail"
 	"runtime"
 	"strings"
@@ -282,7 +283,7 @@ func (s *SMTPSuite) TestSendMethodWithEmailComposerOverridesSMTPOptions() {
 	s.NoError(err)
 	s.NotNil(sender)
 
-	s.NoError(sender.SetErrorHandler(func(err error, m message.Composer) {
+	s.NoError(sender.SetErrorHandler(func(_ context.Context, err error, m message.Composer) {
 		s.T().Errorf("unexpected error in sender: %+v", err)
 		s.T().FailNow()
 	}))

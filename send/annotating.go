@@ -44,7 +44,7 @@ func (s *annotatingSender) Send(ctx context.Context, m message.Composer) {
 		}
 	}
 	if len(errs) > 0 {
-		s.ErrorHandler()(errors.New(strings.Join(errs, ";\n")), m)
+		s.ErrorHandler()(ctx, errors.New(strings.Join(errs, ";\n")), m)
 	}
 
 	s.Sender.Send(ctx, m)

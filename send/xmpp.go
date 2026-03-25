@@ -136,7 +136,7 @@ func (s *xmppLogger) Send(ctx context.Context, m message.Composer) {
 	if s.Level().ShouldLog(m) {
 		text, err := s.formatter(m)
 		if err != nil {
-			s.ErrorHandler()(err, m)
+			s.ErrorHandler()(ctx, err, m)
 			return
 		}
 
@@ -147,7 +147,7 @@ func (s *xmppLogger) Send(ctx context.Context, m message.Composer) {
 		}
 
 		if _, err := s.info.client.Send(c); err != nil {
-			s.ErrorHandler()(err, m)
+			s.ErrorHandler()(ctx, err, m)
 		}
 	}
 }

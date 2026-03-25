@@ -40,7 +40,7 @@ func (gl *genericLogger) Send(ctx context.Context, m message.Composer) {
 
 	generic := m.Raw().(message.Generic)
 	if err := generic.Send(); err != nil {
-		gl.ErrorHandler()(errors.Wrap(err, "sending generic message"), m)
+		gl.ErrorHandler()(ctx, errors.Wrap(err, "sending generic message"), m)
 	}
 }
 

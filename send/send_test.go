@@ -2,6 +2,7 @@ package send
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -326,7 +327,7 @@ func TestBaseConstructor(t *testing.T) {
 			assert.Error(s.SetFormatter(nil))
 			assert.Error(s.SetErrorHandler(nil))
 			assert.NoError(s.SetErrorHandler(handler))
-			s.ErrorHandler()(errors.New("failed"), message.NewString("fated"))
+			s.ErrorHandler()(t.Context(), errors.New("failed"), message.NewString("fated"))
 		}
 	}
 
@@ -349,7 +350,7 @@ func (s *SenderSuite) TestGithubIssuesLogger() {
 			name:  "FailedSend",
 			setup: func() { client.failSend = true },
 			m:     message.NewString("hi"),
-			eh: func(err error, _ message.Composer) {
+			eh: func(_ context.Context, err error, _ message.Composer) {
 				s.Contains(err.Error(), "failed to create issue")
 			},
 		},
@@ -360,7 +361,7 @@ func (s *SenderSuite) TestGithubIssuesLogger() {
 				client.httpStatusCode = http.StatusInternalServerError
 			},
 			m: message.NewString("hi"),
-			eh: func(err error, _ message.Composer) {
+			eh: func(_ context.Context, err error, _ message.Composer) {
 				s.Contains(err.Error(), "received HTTP status")
 			},
 			numSent: 1,
@@ -372,7 +373,7 @@ func (s *SenderSuite) TestGithubIssuesLogger() {
 				client.httpStatusCode = http.StatusOK
 			},
 			m: message.NewString("hi"),
-			eh: func(err error, m message.Composer) {
+			eh: func(_ context.Context, err error, m message.Composer) {
 				s.Fail("Got error, but shouldn't have: %s for composer: %s", err.Error(), m.String())
 			},
 			numSent: 1,
@@ -384,7 +385,7 @@ func (s *SenderSuite) TestGithubIssuesLogger() {
 				client.httpStatusCode = http.StatusOK
 			},
 			m: message.NewString(""),
-			eh: func(err error, m message.Composer) {
+			eh: func(_ context.Context, err error, m message.Composer) {
 				s.Fail("Got error, but shouldn't have: %s for composer: %s", err.Error(), m.String())
 			},
 		},
@@ -418,7 +419,7 @@ func (s *SenderSuite) TestGithubStatusLogger() {
 			name:  "FailedSend",
 			setup: func() { client.failSend = true },
 			m:     message.NewGithubStatusMessage(level.Info, "example", message.GithubStatePending, "https://example.com/hi", "description"),
-			eh: func(err error, _ message.Composer) {
+			eh: func(_ context.Context, err error, _ message.Composer) {
 				s.Contains(err.Error(), "failed to create status")
 			},
 		},
@@ -429,7 +430,7 @@ func (s *SenderSuite) TestGithubStatusLogger() {
 				client.httpStatusCode = http.StatusInternalServerError
 			},
 			m: message.NewGithubStatusMessage(level.Info, "example", message.GithubStatePending, "https://example.com/hi", "description"),
-			eh: func(err error, _ message.Composer) {
+			eh: func(_ context.Context, err error, _ message.Composer) {
 				s.Contains(err.Error(), "received HTTP status")
 			},
 			numSent: 1,
@@ -441,7 +442,7 @@ func (s *SenderSuite) TestGithubStatusLogger() {
 				client.httpStatusCode = http.StatusOK
 			},
 			m: message.NewGithubStatusMessage(level.Info, "example", message.GithubStatePending, "https://example.com/hi", "description"),
-			eh: func(err error, m message.Composer) {
+			eh: func(_ context.Context, err error, m message.Composer) {
 				s.Fail("Got error, but shouldn't have: %s for composer: %s", err.Error(), m.String())
 			},
 			numSent: 1,
@@ -461,7 +462,7 @@ func (s *SenderSuite) TestGithubStatusLogger() {
 				URL:         "https://example.com/hi",
 				Description: "description",
 			}),
-			eh: func(err error, m message.Composer) {
+			eh: func(_ context.Context, err error, m message.Composer) {
 				s.Fail("Got error, but shouldn't have: %s for composer: %s", err.Error(), m.String())
 			},
 			numSent:  1,
@@ -475,7 +476,7 @@ func (s *SenderSuite) TestGithubStatusLogger() {
 			},
 
 			m: message.NewGithubStatusMessage(level.Info, "", message.GithubStatePending, "https://example.com/hi", "description"),
-			eh: func(err error, m message.Composer) {
+			eh: func(_ context.Context, err error, m message.Composer) {
 				s.Fail("Got error, but shouldn't have: %s for composer: %s", err.Error(), m.String())
 			},
 		},
@@ -511,7 +512,7 @@ func (s *SenderSuite) TestGithubCommentLogger() {
 			name:  "FailedSend",
 			setup: func() { client.failSend = true },
 			m:     message.NewString("hi"),
-			eh: func(err error, _ message.Composer) {
+			eh: func(_ context.Context, err error, _ message.Composer) {
 				s.Contains(err.Error(), "failed to create comment")
 			},
 		},
@@ -522,7 +523,7 @@ func (s *SenderSuite) TestGithubCommentLogger() {
 				client.httpStatusCode = http.StatusInternalServerError
 			},
 			m: message.NewString("hi"),
-			eh: func(err error, _ message.Composer) {
+			eh: func(_ context.Context, err error, _ message.Composer) {
 				s.Contains(err.Error(), "received HTTP status")
 			},
 			numSent: 1,
@@ -534,7 +535,7 @@ func (s *SenderSuite) TestGithubCommentLogger() {
 				client.httpStatusCode = http.StatusOK
 			},
 			m: message.NewString("hi"),
-			eh: func(err error, m message.Composer) {
+			eh: func(_ context.Context, err error, m message.Composer) {
 				s.Fail("Got error, but shouldn't have: %s for composer: %s", err.Error(), m.String())
 			},
 			numSent: 1,
@@ -546,7 +547,7 @@ func (s *SenderSuite) TestGithubCommentLogger() {
 				client.httpStatusCode = http.StatusOK
 			},
 			m: message.NewString(""),
-			eh: func(err error, m message.Composer) {
+			eh: func(_ context.Context, err error, m message.Composer) {
 				s.Fail("Got error, but shouldn't have: %s for composer: %s", err.Error(), m.String())
 			},
 		},

@@ -103,7 +103,7 @@ func (j *jiraJournal) Send(ctx context.Context, m message.Composer) {
 
 		issueKey, err := j.opts.client.PostIssue(issueFields)
 		if err != nil {
-			j.ErrorHandler()(err, message.NewFormattedMessage(m.Priority(), m.String()))
+			j.ErrorHandler()(ctx, err, message.NewFormattedMessage(m.Priority(), m.String()))
 			return
 		}
 		populateKey(m, issueKey)

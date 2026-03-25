@@ -72,7 +72,7 @@ func MakeSMTPLogger(opts *SMTPOptions) (Sender, error) {
 
 func (s *smtpLogger) Send(ctx context.Context, m message.Composer) {
 	if s.Level().ShouldLog(m) {
-		s.ErrorHandler()(s.opts.sendMail(m), m)
+		s.ErrorHandler()(ctx, s.opts.sendMail(m), m)
 	}
 }
 

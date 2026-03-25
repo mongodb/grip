@@ -73,7 +73,7 @@ func TestBufferedAsyncSend(t *testing.T) {
 		"OverflowBuffer": func(t *testing.T) {
 			bs := newBufferedAsyncSender(time.Minute, 10)
 			var capturedErr error
-			assert.NoError(t, bs.SetErrorHandler(func(err error, _ message.Composer) { capturedErr = err }))
+			assert.NoError(t, bs.SetErrorHandler(func(_ context.Context, err error, _ message.Composer) { capturedErr = err }))
 
 			for x := 0; x < defaultIncomingBufferFactor*10; x++ {
 				bs.Send(t.Context(), message.ConvertToComposer(level.Debug, "message"))
@@ -141,7 +141,7 @@ func TestBufferedAsyncSend(t *testing.T) {
 		"SendErrorsAfterClose": func(t *testing.T) {
 			bs := newBufferedAsyncSender(time.Minute, 10)
 			var capturedErr error
-			assert.NoError(t, bs.SetErrorHandler(func(err error, _ message.Composer) { capturedErr = err }))
+			assert.NoError(t, bs.SetErrorHandler(func(_ context.Context, err error, _ message.Composer) { capturedErr = err }))
 
 			assert.NoError(t, bs.Close())
 			bs.Send(t.Context(), message.ConvertToComposer(level.Debug, "message"))
