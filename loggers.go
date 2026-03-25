@@ -55,24 +55,12 @@ func Logln(ctx context.Context, l level.Priority, a ...interface{}) {
 func LogWhen(ctx context.Context, conditional bool, l level.Priority, m interface{}) {
 	std.LogWhen(ctx, conditional, l, m)
 }
-func LogWhenln(ctx context.Context, conditional bool, l level.Priority, m ...interface{}) {
-	std.LogWhenln(ctx, conditional, l, m...)
-}
-func LogWhenf(ctx context.Context, conditional bool, l level.Priority, m string, a ...interface{}) {
-	std.LogWhenf(ctx, conditional, l, m, a...)
-}
 
 // Leveled Logging Methods
 // Emergency-level logging methods
 
 func EmergencyFatal(ctx context.Context, msg interface{}) {
 	std.EmergencyFatal(ctx, msg)
-}
-func EmergencyFatalf(ctx context.Context, msg string, a ...interface{}) {
-	std.EmergencyFatalf(ctx, msg, a...)
-}
-func EmergencyFatalln(ctx context.Context, a ...interface{}) {
-	std.EmergencyFatalln(ctx, a...)
 }
 func Emergency(ctx context.Context, msg interface{}) {
 	std.Emergency(ctx, msg)
@@ -86,20 +74,8 @@ func Emergencyln(ctx context.Context, a ...interface{}) {
 func EmergencyPanic(ctx context.Context, msg interface{}) {
 	std.EmergencyPanic(ctx, msg)
 }
-func EmergencyPanicf(ctx context.Context, msg string, a ...interface{}) {
-	std.EmergencyPanicf(ctx, msg, a...)
-}
-func EmergencyPanicln(ctx context.Context, a ...interface{}) {
-	std.EmergencyPanicln(ctx, a...)
-}
 func EmergencyWhen(ctx context.Context, conditional bool, m interface{}) {
 	std.EmergencyWhen(ctx, conditional, m)
-}
-func EmergencyWhenln(ctx context.Context, conditional bool, m ...interface{}) {
-	std.EmergencyWhenln(ctx, conditional, m...)
-}
-func EmergencyWhenf(ctx context.Context, conditional bool, m string, a ...interface{}) {
-	std.EmergencyWhenf(ctx, conditional, m, a...)
 }
 
 // Alert-level logging methods
@@ -116,12 +92,6 @@ func Alertln(ctx context.Context, a ...interface{}) {
 func AlertWhen(ctx context.Context, conditional bool, m interface{}) {
 	std.AlertWhen(ctx, conditional, m)
 }
-func AlertWhenln(ctx context.Context, conditional bool, m ...interface{}) {
-	std.AlertWhenln(ctx, conditional, m...)
-}
-func AlertWhenf(ctx context.Context, conditional bool, m string, a ...interface{}) {
-	std.AlertWhenf(ctx, conditional, m, a...)
-}
 
 // Critical-level logging methods
 
@@ -136,12 +106,6 @@ func Criticalln(ctx context.Context, a ...interface{}) {
 }
 func CriticalWhen(ctx context.Context, conditional bool, m interface{}) {
 	std.CriticalWhen(ctx, conditional, m)
-}
-func CriticalWhenln(ctx context.Context, conditional bool, m ...interface{}) {
-	std.CriticalWhenln(ctx, conditional, m...)
-}
-func CriticalWhenf(ctx context.Context, conditional bool, m string, a ...interface{}) {
-	std.CriticalWhenf(ctx, conditional, m, a...)
 }
 
 // Error-level logging methods
@@ -158,12 +122,6 @@ func Errorln(ctx context.Context, a ...interface{}) {
 func ErrorWhen(ctx context.Context, conditional bool, m interface{}) {
 	std.ErrorWhen(ctx, conditional, m)
 }
-func ErrorWhenln(ctx context.Context, conditional bool, m ...interface{}) {
-	std.ErrorWhenln(ctx, conditional, m...)
-}
-func ErrorWhenf(ctx context.Context, conditional bool, m string, a ...interface{}) {
-	std.ErrorWhenf(ctx, conditional, m, a...)
-}
 
 // Warning-level logging methods
 
@@ -178,12 +136,6 @@ func Warningln(ctx context.Context, a ...interface{}) {
 }
 func WarningWhen(ctx context.Context, conditional bool, m interface{}) {
 	std.WarningWhen(ctx, conditional, m)
-}
-func WarningWhenln(ctx context.Context, conditional bool, m ...interface{}) {
-	std.WarningWhenln(ctx, conditional, m...)
-}
-func WarningWhenf(ctx context.Context, conditional bool, m string, a ...interface{}) {
-	std.WarningWhenf(ctx, conditional, m, a...)
 }
 
 // Notice-level logging methods
@@ -200,12 +152,6 @@ func Noticeln(ctx context.Context, a ...interface{}) {
 func NoticeWhen(ctx context.Context, conditional bool, m interface{}) {
 	std.NoticeWhen(ctx, conditional, m)
 }
-func NoticeWhenln(ctx context.Context, conditional bool, m ...interface{}) {
-	std.NoticeWhenln(ctx, conditional, m...)
-}
-func NoticeWhenf(ctx context.Context, conditional bool, m string, a ...interface{}) {
-	std.NoticeWhenf(ctx, conditional, m, a...)
-}
 
 // Info-level logging methods
 
@@ -221,12 +167,6 @@ func Infoln(ctx context.Context, a ...interface{}) {
 func InfoWhen(ctx context.Context, conditional bool, message interface{}) {
 	std.InfoWhen(ctx, conditional, message)
 }
-func InfoWhenln(ctx context.Context, conditional bool, m ...interface{}) {
-	std.InfoWhenln(ctx, conditional, m...)
-}
-func InfoWhenf(ctx context.Context, conditional bool, m string, a ...interface{}) {
-	std.InfoWhenf(ctx, conditional, m, a...)
-}
 
 // Debug-level logging methods
 
@@ -241,10 +181,4 @@ func Debugln(ctx context.Context, a ...interface{}) {
 }
 func DebugWhen(ctx context.Context, conditional bool, m interface{}) {
 	std.DebugWhen(ctx, conditional, m)
-}
-func DebugWhenln(ctx context.Context, conditional bool, m ...interface{}) {
-	std.DebugWhenln(ctx, conditional, m...)
-}
-func DebugWhenf(ctx context.Context, conditional bool, m string, a ...interface{}) {
-	std.DebugWhenf(ctx, conditional, m, a...)
 }
