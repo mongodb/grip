@@ -19,7 +19,7 @@ func TestLoggerLogf(t *testing.T) {
 
 	assert.NoError(err)
 
-	l, errs := logger.Logf(INFO, "foo %s", "bar")
+	l, errs := logger.Logf(t.Context(), INFO, "foo %s", "bar")
 	assert.True(len(errs) == 0)
 	assert.NotNil(l)
 	assert.Equal(l, sink.GetMessage().Message)
@@ -32,7 +32,7 @@ func TestLoggerErrorf(t *testing.T) {
 	defer sink.Close()
 	logger := &Logger{Name: "sloggerTest", Appenders: []send.Sender{sink}}
 
-	err = logger.Errorf(INFO, "foo %s", "bar")
+	err = logger.Errorf(t.Context(), INFO, "foo %s", "bar")
 	assert.Error(err)
 	assert.Equal("foo bar", err.Error())
 	assert.True(strings.Contains(sink.GetMessage().Rendered, "foo bar"))
@@ -47,7 +47,7 @@ func TestLoggerStackf(t *testing.T) {
 
 	assert.NoError(err)
 
-	l, errs := logger.Stackf(INFO, errors.New("baz"), "foo %s", "bar")
+	l, errs := logger.Stackf(t.Context(), INFO, errors.New("baz"), "foo %s", "bar")
 	assert.True(len(errs) == 0)
 	assert.NotNil(l)
 

@@ -28,7 +28,7 @@ func wrapCase(ctx context.Context, b *testing.B, size int, numMsgs int, bench be
 		b.ResetTimer()
 		err := bench(ctx, b, b.N, size, numMsgs)
 		if err != nil {
-			grip.Error(err)
+			grip.Error(b.Context(), err)
 		}
 	}
 }

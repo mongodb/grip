@@ -1,7 +1,7 @@
 package logging
 
 import (
-	"errors"
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -55,7 +55,7 @@ func (s *GripInternalSuite) TestPanicSenderActuallyPanics() {
 			s.NotNil(recover())
 		}()
 
-		s.grip.sendPanic(message.NewLineMessage(level.Info, "foo"))
+		s.grip.sendPanic(s.T().Context(), message.NewLineMessage(level.Info, "foo"))
 	}()
 }
 
@@ -73,7 +73,7 @@ func (s *GripInternalSuite) TestPanicSenderRespectsTThreshold() {
 		s.Nil(recover())
 	}()
 
-	s.grip.sendPanic(message.NewLineMessage(level.Debug, "foo"))
+	s.grip.sendPanic(s.T().Context(), message.NewLineMessage(level.Debug, "foo"))
 }
 
 func (s *GripInternalSuite) TestConditionalSend() {
@@ -86,14 +86,15 @@ func (s *GripInternalSuite) TestConditionalSend() {
 
 	msg := message.NewLineMessage(level.Info, "foo")
 	msgTwo := message.NewLineMessage(level.Notice, "bar")
+	ctx := s.T().Context()
 
 	// when the conditional argument is true, it should work
-	s.grip.Log(msg.Priority(), message.When(true, msg))
+	s.grip.Log(ctx, msg.Priority(), message.When(true, msg))
 	s.Equal(msg.Raw(), sink.GetMessage().Message.Raw())
 
 	// when the conditional argument is true, it should work, and the channel is fifo
-	s.grip.Log(msgTwo.Priority(), message.When(false, msgTwo))
-	s.grip.Log(msg.Priority(), message.When(true, msg))
+	s.grip.Log(ctx, msgTwo.Priority(), message.When(false, msgTwo))
+	s.grip.Log(ctx, msg.Priority(), message.When(true, msg))
 	result := sink.GetMessage().Message
 	if result.Loggable() {
 		s.Equal(msg.Raw(), result.Raw())
@@ -102,8 +103,8 @@ func (s *GripInternalSuite) TestConditionalSend() {
 	}
 
 	// change the order
-	s.grip.Log(msg.Priority(), message.When(true, msg))
-	s.grip.Log(msgTwo.Priority(), message.When(false, msgTwo))
+	s.grip.Log(ctx, msg.Priority(), message.When(true, msg))
+	s.grip.Log(ctx, msgTwo.Priority(), message.When(false, msgTwo))
 	result = sink.GetMessage().Message
 
 	if result.Loggable() {
@@ -173,16 +174,16 @@ func (s *GripInternalSuite) TestCatchMethods() {
 		s.grip.NoticeWhenf,
 		s.grip.WarningWhenf,
 
-		func(w bool, m interface{}) { s.grip.LogWhen(w, level.Info, m) },
-		func(w bool, m ...interface{}) { s.grip.LogWhenln(w, level.Info, m...) },
-		func(w bool, m string, a ...interface{}) { s.grip.LogWhenf(w, level.Info, m, a...) },
-		func(m interface{}) { s.grip.Log(level.Info, m) },
-		func(m string, a ...interface{}) { s.grip.Logf(level.Info, m, a...) },
-		func(m ...interface{}) { s.grip.Logln(level.Info, m...) },
-		func(m ...message.Composer) { s.grip.Log(level.Info, m) },
-		func(m []message.Composer) { s.grip.Log(level.Info, m) },
-		func(w bool, m ...message.Composer) { s.grip.LogWhen(w, level.Info, m) },
-		func(w bool, m []message.Composer) { s.grip.LogWhen(w, level.Info, m) },
+		func(ctx context.Context, w bool, m interface{}) { s.grip.LogWhen(ctx, w, level.Info, m) },
+		func(ctx context.Context, w bool, m ...interface{}) { s.grip.LogWhenln(ctx, w, level.Info, m...) },
+		func(ctx context.Context, w bool, m string, a ...interface{}) { s.grip.LogWhenf(ctx, w, level.Info, m, a...) },
+		func(ctx context.Context, m interface{}) { s.grip.Log(ctx, level.Info, m) },
+		func(ctx context.Context, m string, a ...interface{}) { s.grip.Logf(ctx, level.Info, m, a...) },
+		func(ctx context.Context, m ...interface{}) { s.grip.Logln(ctx, level.Info, m...) },
+		func(ctx context.Context, m ...message.Composer) { s.grip.Log(ctx, level.Info, m) },
+		func(ctx context.Context, m []message.Composer) { s.grip.Log(ctx, level.Info, m) },
+		func(ctx context.Context, w bool, m ...message.Composer) { s.grip.LogWhen(ctx, w, level.Info, m) },
+		func(ctx context.Context, w bool, m []message.Composer) { s.grip.LogWhen(ctx, w, level.Info, m) },
 	}
 
 	const msg = "hello world!"
@@ -191,38 +192,37 @@ func (s *GripInternalSuite) TestCatchMethods() {
 		message.ConvertToComposer(0, msg),
 	}
 
+	ctx := s.T().Context()
 	for _, logger := range cases {
 		s.Equal(0, sink.Len())
 		s.False(sink.HasMessage())
 
 		switch log := logger.(type) {
-		case func(error):
-			log(errors.New(msg))
-		case func(interface{}):
-			log(msg)
-		case func(...interface{}):
-			log(msg, "", nil)
-		case func(string, ...interface{}):
-			log("%s", msg)
-		case func(bool, interface{}):
-			log(false, msg)
-			log(true, msg)
-		case func(bool, ...interface{}):
-			log(false, msg, "", nil)
-			log(true, msg, "", nil)
-		case func(bool, string, ...interface{}):
-			log(false, "%s", msg)
-			log(true, "%s", msg)
-		case func(...message.Composer):
-			log(multiMessage...)
-		case func(bool, ...message.Composer):
-			log(false, multiMessage...)
-			log(true, multiMessage...)
-		case func([]message.Composer):
-			log(multiMessage)
-		case func(bool, []message.Composer):
-			log(false, multiMessage)
-			log(true, multiMessage)
+		case func(context.Context, interface{}):
+			log(ctx, msg)
+		case func(context.Context, ...interface{}):
+			log(ctx, msg, "", nil)
+		case func(context.Context, string, ...interface{}):
+			log(ctx, "%s", msg)
+		case func(context.Context, bool, interface{}):
+			log(ctx, false, msg)
+			log(ctx, true, msg)
+		case func(context.Context, bool, ...interface{}):
+			log(ctx, false, msg, "", nil)
+			log(ctx, true, msg, "", nil)
+		case func(context.Context, bool, string, ...interface{}):
+			log(ctx, false, "%s", msg)
+			log(ctx, true, "%s", msg)
+		case func(context.Context, ...message.Composer):
+			log(ctx, multiMessage...)
+		case func(context.Context, bool, ...message.Composer):
+			log(ctx, false, multiMessage...)
+			log(ctx, true, multiMessage...)
+		case func(context.Context, []message.Composer):
+			log(ctx, multiMessage)
+		case func(context.Context, bool, []message.Composer):
+			log(ctx, false, multiMessage)
+			log(ctx, true, multiMessage)
 		default:
 			panic(fmt.Sprintf("%T is not supported\n", log))
 		}
@@ -258,7 +258,7 @@ func (s *GripInternalSuite) TestCatchMethods() {
 func TestSendFatalExits(t *testing.T) {
 	grip := NewGrip("test")
 	if os.Getenv("SHOULD_CRASH") == "1" {
-		grip.sendFatal(message.NewLineMessage(level.Error, "foo"))
+		grip.sendFatal(context.Background(), message.NewLineMessage(level.Error, "foo"))
 		return
 	}
 

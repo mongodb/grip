@@ -1,6 +1,7 @@
 package grip
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -14,10 +15,10 @@ import (
 const testMessage = "hello world"
 
 type (
-	basicMethod func(interface{})
-	lnMethod    func(...interface{})
-	fMethod     func(string, ...interface{})
-	whenMethod  func(bool, interface{})
+	basicMethod func(context.Context, interface{})
+	lnMethod    func(context.Context, ...interface{})
+	fMethod     func(context.Context, string, ...interface{})
+	whenMethod  func(context.Context, bool, interface{})
 )
 
 type LoggingMethodSuite struct {
@@ -44,6 +45,7 @@ func (s *LoggingMethodSuite) SetupTest() {
 }
 
 func (s *LoggingMethodSuite) TestWhenMethods() {
+	ctx := s.T().Context()
 	cases := map[string][]whenMethod{
 		"emergency": {EmergencyWhen, s.logger.EmergencyWhen},
 		"alert":     {AlertWhen, s.logger.AlertWhen},
@@ -57,8 +59,8 @@ func (s *LoggingMethodSuite) TestWhenMethods() {
 
 	for kind, loggers := range cases {
 		s.Len(loggers, 2)
-		loggers[0](true, testMessage)
-		loggers[1](true, testMessage)
+		loggers[0](ctx, true, testMessage)
+		loggers[1](ctx, true, testMessage)
 
 		s.True(s.loggingSender.HasMessage())
 		s.True(s.stdSender.HasMessage())
@@ -70,8 +72,8 @@ func (s *LoggingMethodSuite) TestWhenMethods() {
 		s.Equal(lgrMsg.Rendered, stdMsg.Rendered,
 			fmt.Sprintf("%s: \n\tlogger: %+v \n\tstandard: %+v", kind, lgrMsg, stdMsg))
 
-		loggers[0](false, testMessage)
-		loggers[1](false, testMessage)
+		loggers[0](ctx, false, testMessage)
+		loggers[1](ctx, false, testMessage)
 
 		lgrMsg = s.loggingSender.GetMessage()
 		s.False(lgrMsg.Logged)
@@ -82,6 +84,7 @@ func (s *LoggingMethodSuite) TestWhenMethods() {
 }
 
 func (s *LoggingMethodSuite) TestBasicMethod() {
+	ctx := s.T().Context()
 	cases := map[string][]basicMethod{
 		"emergency": {Emergency, s.logger.Emergency},
 		"alert":     {Alert, s.logger.Alert},
@@ -101,8 +104,8 @@ func (s *LoggingMethodSuite) TestBasicMethod() {
 		s.False(s.stdSender.HasMessage())
 
 		for _, msg := range inputs {
-			loggers[0](msg)
-			loggers[1](msg)
+			loggers[0](ctx, msg)
+			loggers[1](ctx, msg)
 
 			s.True(s.loggingSender.HasMessage())
 			s.True(s.stdSender.HasMessage())
@@ -116,6 +119,7 @@ func (s *LoggingMethodSuite) TestBasicMethod() {
 }
 
 func (s *LoggingMethodSuite) TestlnMethods() {
+	ctx := s.T().Context()
 	cases := map[string][]lnMethod{
 		"emergency": {Emergencyln, s.logger.Emergencyln},
 		"alert":     {Alertln, s.logger.Alertln},
@@ -132,8 +136,8 @@ func (s *LoggingMethodSuite) TestlnMethods() {
 		s.False(s.loggingSender.HasMessage())
 		s.False(s.stdSender.HasMessage())
 
-		loggers[0](true, testMessage, testMessage)
-		loggers[1](true, testMessage, testMessage)
+		loggers[0](ctx, true, testMessage, testMessage)
+		loggers[1](ctx, true, testMessage, testMessage)
 
 		s.True(s.loggingSender.HasMessage())
 		s.True(s.stdSender.HasMessage())
@@ -145,6 +149,7 @@ func (s *LoggingMethodSuite) TestlnMethods() {
 }
 
 func (s *LoggingMethodSuite) TestfMethods() {
+	ctx := s.T().Context()
 	cases := map[string][]fMethod{
 		"emergency": {Emergencyf, s.logger.Emergencyf},
 		"alert":     {Alertf, s.logger.Alertf},
@@ -161,8 +166,8 @@ func (s *LoggingMethodSuite) TestfMethods() {
 		s.False(s.loggingSender.HasMessage())
 		s.False(s.stdSender.HasMessage())
 
-		loggers[0]("%s: %d", testMessage, 3)
-		loggers[1]("%s: %d", testMessage, 3)
+		loggers[0](ctx, "%s: %d", testMessage, 3)
+		loggers[1](ctx, "%s: %d", testMessage, 3)
 
 		s.True(s.loggingSender.HasMessage())
 		s.True(s.stdSender.HasMessage())
@@ -175,12 +180,12 @@ func (s *LoggingMethodSuite) TestfMethods() {
 
 func (s *LoggingMethodSuite) TestProgramaticLevelMethods() {
 	type (
-		lgwhen   func(bool, level.Priority, interface{})
-		lgwhenln func(bool, level.Priority, ...interface{})
-		lgwhenf  func(bool, level.Priority, string, ...interface{})
-		lg       func(level.Priority, interface{})
-		lgln     func(level.Priority, ...interface{})
-		lgf      func(level.Priority, string, ...interface{})
+		lgwhen   func(context.Context, bool, level.Priority, interface{})
+		lgwhenln func(context.Context, bool, level.Priority, ...interface{})
+		lgwhenf  func(context.Context, bool, level.Priority, string, ...interface{})
+		lg       func(context.Context, level.Priority, interface{})
+		lgln     func(context.Context, level.Priority, ...interface{})
+		lgf      func(context.Context, level.Priority, string, ...interface{})
 	)
 
 	cases := map[string]interface{}{
@@ -191,6 +196,7 @@ func (s *LoggingMethodSuite) TestProgramaticLevelMethods() {
 	}
 
 	const l = level.Emergency
+	ctx := s.T().Context()
 
 	for kind, loggers := range cases {
 		s.Len(loggers, 2)
@@ -199,23 +205,23 @@ func (s *LoggingMethodSuite) TestProgramaticLevelMethods() {
 
 		switch log := loggers.(type) {
 		case []lgwhen:
-			log[0](true, l, testMessage)
-			log[1](true, l, testMessage)
+			log[0](ctx, true, l, testMessage)
+			log[1](ctx, true, l, testMessage)
 		case []lgwhenln:
-			log[0](true, l, testMessage, "->", testMessage)
-			log[1](true, l, testMessage, "->", testMessage)
+			log[0](ctx, true, l, testMessage, "->", testMessage)
+			log[1](ctx, true, l, testMessage, "->", testMessage)
 		case []lgwhenf:
-			log[0](true, l, "%T: (%s) %s", log, kind, testMessage)
-			log[1](true, l, "%T: (%s) %s", log, kind, testMessage)
+			log[0](ctx, true, l, "%T: (%s) %s", log, kind, testMessage)
+			log[1](ctx, true, l, "%T: (%s) %s", log, kind, testMessage)
 		case []lg:
-			log[0](l, testMessage)
-			log[1](l, testMessage)
+			log[0](ctx, l, testMessage)
+			log[1](ctx, l, testMessage)
 		case []lgln:
-			log[0](l, testMessage, "->", testMessage)
-			log[1](l, testMessage, "->", testMessage)
+			log[0](ctx, l, testMessage, "->", testMessage)
+			log[1](ctx, l, testMessage, "->", testMessage)
 		case []lgf:
-			log[0](l, "%T: (%s) %s", log, kind, testMessage)
-			log[1](l, "%T: (%s) %s", log, kind, testMessage)
+			log[0](ctx, l, "%T: (%s) %s", log, kind, testMessage)
+			log[1](ctx, l, "%T: (%s) %s", log, kind, testMessage)
 		default:
 			panic("testing error")
 		}

@@ -14,7 +14,7 @@ import (
 // provides the same public interface for Appenders, in terms of Grip's
 // senders.
 type Appender interface {
-	Append(log *Log) error
+	Append(ctx context.Context, log *Log) error
 }
 
 // StdOutAppender returns a configured stream logger Sender instance
@@ -80,8 +80,8 @@ type SenderAppender struct {
 }
 
 // Append sends a log message. This method *always* returns nil.
-func (s SenderAppender) Append(log *Log) error {
-	s.Send(context.Background(), log.msg)
+func (s SenderAppender) Append(ctx context.Context, log *Log) error {
+	s.Send(ctx, log.msg)
 
 	return nil
 }

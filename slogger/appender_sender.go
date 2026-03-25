@@ -68,9 +68,9 @@ func (a *appenderSender) Send(ctx context.Context, m message.Composer) {
 	if a.Level().ShouldLog(m) {
 		log, ok := m.(*Log)
 		if ok {
-			_ = a.appender.Append(log)
+			_ = a.appender.Append(ctx, log)
 		} else {
-			_ = a.appender.Append(NewLog(m))
+			_ = a.appender.Append(ctx, NewLog(m))
 		}
 	}
 }
