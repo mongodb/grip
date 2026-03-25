@@ -143,7 +143,7 @@ func WrapWriter(wr io.Writer) Sender {
 	return s
 }
 
-func (s *nativeLogger) Send(m message.Composer) {
+func (s *nativeLogger) Send(ctx context.Context, m message.Composer) {
 	if s.Level().ShouldLog(m) {
 		out, err := s.formatter(m)
 		if err != nil {

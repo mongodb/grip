@@ -33,7 +33,7 @@ func NewGenericLogger(name string, l LevelInfo) (Sender, error) {
 	return gl, nil
 }
 
-func (gl *genericLogger) Send(m message.Composer) {
+func (gl *genericLogger) Send(ctx context.Context, m message.Composer) {
 	if !gl.Level().ShouldLog(m) {
 		return
 	}

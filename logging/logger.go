@@ -1,6 +1,7 @@
 package logging
 
 import (
+	"context"
 	"os"
 	"sync"
 
@@ -70,11 +71,19 @@ func (g *Grip) SetLevel(info send.LevelInfo) error {
 	return g.impl.SetLevel(info)
 }
 
-func (g *Grip) Send(m interface{}) {
+func (g *Grip) Send(ctx context.Context, m interface{}) {
 	g.mu.RLock()
 	defer g.mu.RUnlock()
 
-	g.impl.Send(message.ConvertToComposer(g.defaultLevel, m))
+	g.impl.Send(ctx, message.ConvertToComposer(g.defaultLevel, m))
+}
+
+// send delivers a composer that already carries priority/level (used by Log, Emergency, etc.).
+func (g *Grip) send(m message.Composer) {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	g.impl.Send(context.Background(), m)
 }
 
 // Internal
@@ -89,7 +98,7 @@ func (g *Grip) sendPanic(m message.Composer) {
 	defer g.mu.RUnlock()
 
 	if g.impl.Level().ShouldLog(m) {
-		g.impl.Send(m)
+		g.impl.Send(context.Background(), m)
 		panic(m.String())
 	}
 }
@@ -101,14 +110,7 @@ func (g *Grip) sendFatal(m message.Composer) {
 	defer g.mu.RUnlock()
 
 	if g.impl.Level().ShouldLog(m) {
-		g.impl.Send(m)
+		g.impl.Send(context.Background(), m)
 		os.Exit(1)
 	}
-}
-
-func (g *Grip) send(m message.Composer) {
-	g.mu.RLock()
-	defer g.mu.RUnlock()
-
-	g.impl.Send(m)
 }

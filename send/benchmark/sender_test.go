@@ -15,7 +15,7 @@ func wrapBenchmark(b *testing.B, bench benchCase) {
 	for _, msgSize := range messageSizes() {
 		b.Run(fmt.Sprintf("%dBytesPerMessage", msgSize), func(b *testing.B) {
 			for _, msgCount := range messageCounts() {
-				ctx, cancel := context.WithTimeout(context.Background(), maxBenchTime)
+				ctx, cancel := context.WithTimeout(b.Context(), maxBenchTime)
 				defer cancel()
 				b.Run(fmt.Sprintf("Send%dMessages", msgCount), wrapCase(ctx, b, msgSize, msgCount, bench))
 			}

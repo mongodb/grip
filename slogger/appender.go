@@ -2,6 +2,7 @@ package slogger
 
 import (
 	"bytes"
+	"context"
 	"os"
 	"strings"
 
@@ -80,7 +81,7 @@ type SenderAppender struct {
 
 // Append sends a log message. This method *always* returns nil.
 func (s SenderAppender) Append(log *Log) error {
-	s.Send(log.msg)
+	s.Send(context.Background(), log.msg)
 
 	return nil
 }

@@ -93,7 +93,7 @@ func (s *InternalSender) Len() int {
 // Send sends a message. Unlike all other sender implementations, all
 // messages are sent, but the InternalMessage format tracks
 // "loggability" for testing purposes.
-func (s *InternalSender) Send(m message.Composer) {
+func (s *InternalSender) Send(ctx context.Context, m message.Composer) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.output <- &InternalMessage{

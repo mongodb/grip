@@ -11,7 +11,7 @@ import (
 
 func TestAsyncGroupSender(t *testing.T) {
 	assert := assert.New(t) // nolint
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(t.Context())
 	defer cancel()
 	cs := MakeErrorLogger()
 	assert.NoError(cs.SetLevel(LevelInfo{Default: level.Debug, Threshold: level.Notice}))
@@ -34,11 +34,11 @@ func TestAsyncGroupSender(t *testing.T) {
 	impl.level = newLevel
 	assert.Equal(newLevel, s.Level())
 
-	s.Send(message.NewDefaultMessage(level.Debug, "hello"))
+	s.Send(t.Context(), message.NewDefaultMessage(level.Debug, "hello"))
 	newLevel = LevelInfo{Default: level.Debug, Threshold: level.Alert}
 	assert.NoError(impl.SetLevel(newLevel))
 	assert.Equal(newLevel, s.Level())
 
-	assert.NoError(s.Flush(context.TODO()))
+	assert.NoError(s.Flush(t.Context()))
 	assert.NoError(s.Close())
 }

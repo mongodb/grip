@@ -134,7 +134,7 @@ func (s *multiSender) SetLevel(l LevelInfo) error {
 	return nil
 }
 
-func (s *multiSender) Send(m message.Composer) {
+func (s *multiSender) Send(ctx context.Context, m message.Composer) {
 	// if the base level isn't valid, then we should let each
 	// sender decide for itself, rather than short circuiting here
 	bl := s.Base.Level()
@@ -143,7 +143,7 @@ func (s *multiSender) Send(m message.Composer) {
 	}
 
 	for _, sender := range s.senders {
-		sender.Send(m)
+		sender.Send(ctx, m)
 	}
 }
 

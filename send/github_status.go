@@ -23,7 +23,7 @@ type githubStatusMessageLogger struct {
 	*Base
 }
 
-func (s *githubStatusMessageLogger) Send(m message.Composer) {
+func (s *githubStatusMessageLogger) Send(ctx context.Context, m message.Composer) {
 	if s.Level().ShouldLog(m) {
 		var status *github.RepoStatus
 		owner := ""

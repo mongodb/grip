@@ -28,7 +28,7 @@ type Sender interface {
 	// capture system. The Send() method filters out logged messages based
 	// based on priority, typically using the generic
 	// MessageInfo.ShouldLog() function.
-	Send(message.Composer)
+	Send(context.Context, message.Composer)
 
 	// Flush flushes any potential buffered messages to the logging capture
 	// system. If the Sender is not buffered, this function should noop and

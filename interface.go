@@ -1,6 +1,8 @@
 package grip
 
 import (
+	"context"
+
 	"github.com/mongodb/grip/level"
 	"github.com/mongodb/grip/send"
 )
@@ -19,7 +21,7 @@ type Journaler interface {
 
 	// Send allows you to push a composer which stores its own
 	// priorty (or uses the sender's default priority).
-	Send(interface{})
+	Send(context.Context, interface{})
 
 	// Specify a log level as an argument rather than a method
 	// name.

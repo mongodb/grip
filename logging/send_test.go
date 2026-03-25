@@ -46,7 +46,7 @@ func (s *GripInternalSuite) TestPanicSenderActuallyPanics() {
 			s.Nil(recover())
 		}()
 
-		s.grip.GetSender().Send(message.NewLineMessage(level.Critical, "foo"))
+		s.grip.GetSender().Send(s.T().Context(), message.NewLineMessage(level.Critical, "foo"))
 	}()
 
 	func() {

@@ -12,7 +12,7 @@ import (
 func BenchmarkAllSenders(b *testing.B) {
 	outputFileName := getProjectRoot() + string(os.PathSeparator) + "build" + string(os.PathSeparator) + "perf.json"
 
-	ctx := context.Background()
+	ctx := b.Context()
 	output := []interface{}{}
 	for _, res := range runAllCases(ctx) {
 		evg, err := res.evergreenPerfFormat()

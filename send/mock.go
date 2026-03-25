@@ -25,7 +25,7 @@ func NewMockSender(name string) *MockSender {
 }
 
 // Send appends the message to the mock sender's messages slice.
-func (s *MockSender) Send(m message.Composer) {
+func (s *MockSender) Send(ctx context.Context, m message.Composer) {
 	s.Messages = append(s.Messages, m)
 }
 

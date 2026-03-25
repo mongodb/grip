@@ -92,7 +92,7 @@ func (opts *BufferedAsyncSenderOptions) validate() error {
 // on the underlying sender sending the messages.
 // If the number of messages being currently processed exceeds the processing limit,
 // any new messages will be dropped until the number of messages is below the limit.
-func (s *bufferedAsyncSender) Send(msg message.Composer) {
+func (s *bufferedAsyncSender) Send(ctx context.Context, msg message.Composer) {
 	if err := s.ctx.Err(); err != nil {
 		s.ErrorHandler()(errors.Wrap(err, "sending message"), msg)
 	}
@@ -172,9 +172,9 @@ func (s *bufferedAsyncSender) addToBuffer(msg message.Composer) {
 
 func (s *bufferedAsyncSender) flush() {
 	if len(s.buffer) == 1 {
-		s.Sender.Send(s.buffer[0])
+		s.Sender.Send(s.ctx, s.buffer[0])
 	} else if len(s.buffer) > 1 {
-		s.Sender.Send(message.NewGroupComposer(s.buffer))
+		s.Sender.Send(s.ctx, message.NewGroupComposer(s.buffer))
 	}
 
 	s.flushTimer.Reset(s.opts.FlushInterval)

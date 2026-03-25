@@ -15,5 +15,5 @@ func TestDevNull(t *testing.T) {
 		assert.Fail(t, "Send() should not fail for DevNullAppender()")
 	}))
 
-	devNull.Send(message.NewDefaultMessage(level.Info, "foobar"))
+	devNull.Send(t.Context(), message.NewDefaultMessage(level.Info, "foobar"))
 }

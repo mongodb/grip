@@ -1,7 +1,6 @@
 package send
 
 import (
-	"context"
 	"testing"
 
 	"github.com/mongodb/grip/level"
@@ -30,38 +29,38 @@ func (j *JiraCommentSuite) SetupTest() {
 }
 
 func (j *JiraCommentSuite) TestMockSenderWithNewConstructor() {
-	sender, err := NewJiraCommentLogger(context.Background(), "1234", j.opts, LevelInfo{level.Trace, level.Info})
+	sender, err := NewJiraCommentLogger(j.T().Context(), "1234", j.opts, LevelInfo{level.Trace, level.Info})
 	j.NotNil(sender)
 	j.NoError(err)
 }
 
 func (j *JiraCommentSuite) TestConstructorMustCreate() {
 	j.opts.client = &jiraClientMock{failCreate: true}
-	sender, err := NewJiraCommentLogger(context.Background(), "1234", j.opts, LevelInfo{level.Trace, level.Info})
+	sender, err := NewJiraCommentLogger(j.T().Context(), "1234", j.opts, LevelInfo{level.Trace, level.Info})
 	j.Nil(sender)
 	j.Error(err)
 }
 
 func (j *JiraCommentSuite) TestConstructorMustPassAuthTest() {
 	j.opts.client = &jiraClientMock{failAuth: true}
-	sender, err := NewJiraCommentLogger(context.Background(), "1234", j.opts, LevelInfo{level.Trace, level.Info})
+	sender, err := NewJiraCommentLogger(j.T().Context(), "1234", j.opts, LevelInfo{level.Trace, level.Info})
 	j.Nil(sender)
 	j.Error(err)
 }
 
 func (j *JiraCommentSuite) TestConstructorErrorsWithInvalidConfigs() {
-	sender, err := NewJiraCommentLogger(context.Background(), "1234", nil, LevelInfo{level.Trace, level.Info})
+	sender, err := NewJiraCommentLogger(j.T().Context(), "1234", nil, LevelInfo{level.Trace, level.Info})
 	j.Nil(sender)
 	j.Error(err)
 
-	sender, err = NewJiraLogger(context.Background(), &JiraOptions{}, LevelInfo{level.Trace, level.Info})
+	sender, err = NewJiraLogger(j.T().Context(), &JiraOptions{}, LevelInfo{level.Trace, level.Info})
 	j.Nil(sender)
 	j.Error(err)
 }
 
 func (j *JiraCommentSuite) TestSendMethod() {
 	numShouldHaveSent := 0
-	sender, err := NewJiraCommentLogger(context.Background(), "1234", j.opts, LevelInfo{level.Trace, level.Info})
+	sender, err := NewJiraCommentLogger(j.T().Context(), "1234", j.opts, LevelInfo{level.Trace, level.Info})
 	j.NoError(err)
 	j.Require().NotNil(sender)
 
@@ -70,22 +69,22 @@ func (j *JiraCommentSuite) TestSendMethod() {
 	j.Equal(mock.numSent, 0)
 
 	m := message.NewDefaultMessage(level.Debug, "sending debug level comment")
-	sender.Send(m)
+	sender.Send(j.T().Context(), m)
 	j.Equal(mock.numSent, numShouldHaveSent)
 
 	m = message.NewDefaultMessage(level.Alert, "sending alert level comment")
-	sender.Send(m)
+	sender.Send(j.T().Context(), m)
 	numShouldHaveSent++
 	j.Equal(mock.numSent, numShouldHaveSent)
 
 	m = message.NewDefaultMessage(level.Emergency, "sending emergency level comment")
-	sender.Send(m)
+	sender.Send(j.T().Context(), m)
 	numShouldHaveSent++
 	j.Equal(mock.numSent, numShouldHaveSent)
 }
 
 func (j *JiraCommentSuite) TestSendMethodWithError() {
-	sender, err := NewJiraCommentLogger(context.Background(), "1234", j.opts, LevelInfo{level.Trace, level.Info})
+	sender, err := NewJiraCommentLogger(j.T().Context(), "1234", j.opts, LevelInfo{level.Trace, level.Info})
 	j.NotNil(sender)
 	j.NoError(err)
 
@@ -95,11 +94,11 @@ func (j *JiraCommentSuite) TestSendMethodWithError() {
 	j.False(mock.failSend)
 
 	m := message.NewDefaultMessage(level.Alert, "test")
-	sender.Send(m)
+	sender.Send(j.T().Context(), m)
 	j.Equal(mock.numSent, 1)
 
 	mock.failSend = true
-	sender.Send(m)
+	sender.Send(j.T().Context(), m)
 	j.Equal(mock.numSent, 1)
 }
 
@@ -115,11 +114,11 @@ func (j *JiraCommentSuite) TestCreateMethodChangesClientState() {
 func (j *JiraCommentSuite) TestSendWithJiraIssueComposer() {
 	c := message.NewJIRACommentMessage(level.Notice, "ABC-123", "Hi")
 
-	sender, err := NewJiraCommentLogger(context.Background(), "XYZ-123", j.opts, LevelInfo{level.Trace, level.Info})
+	sender, err := NewJiraCommentLogger(j.T().Context(), "XYZ-123", j.opts, LevelInfo{level.Trace, level.Info})
 	j.NoError(err)
 	j.Require().NotNil(sender)
 
-	sender.Send(c)
+	sender.Send(j.T().Context(), c)
 
 	mock, ok := j.opts.client.(*jiraClientMock)
 	j.True(ok)

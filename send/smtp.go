@@ -70,7 +70,7 @@ func MakeSMTPLogger(opts *SMTPOptions) (Sender, error) {
 	return s, nil
 }
 
-func (s *smtpLogger) Send(m message.Composer) {
+func (s *smtpLogger) Send(ctx context.Context, m message.Composer) {
 	if s.Level().ShouldLog(m) {
 		s.ErrorHandler()(s.opts.sendMail(m), m)
 	}

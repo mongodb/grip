@@ -170,7 +170,7 @@ func (s *InMemorySender) GetRaw() []interface{} {
 
 // Send adds the given message to the buffer. If the buffer is at max capacity,
 // it truncates the oldest message.
-func (s *InMemorySender) Send(msg message.Composer) {
+func (s *InMemorySender) Send(ctx context.Context, msg message.Composer) {
 	if !s.Level().ShouldLog(msg) {
 		return
 	}

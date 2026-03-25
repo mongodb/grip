@@ -57,7 +57,7 @@ func NewGithubCommentLogger(name string, issueID int, opts *GithubOptions) (Send
 	return s, nil
 }
 
-func (s *githubCommentLogger) Send(m message.Composer) {
+func (s *githubCommentLogger) Send(ctx context.Context, m message.Composer) {
 	if s.Level().ShouldLog(m) {
 		text, err := s.formatter(m)
 		if err != nil {

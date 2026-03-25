@@ -67,7 +67,7 @@ func sendMessages(ctx context.Context, tm TimerManager, iters int, s send.Sender
 			case <-ctx.Done():
 				return ctx.Err()
 			default:
-				s.Send(msg)
+				s.Send(ctx, msg)
 			}
 		}
 	}

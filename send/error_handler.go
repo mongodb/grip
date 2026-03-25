@@ -1,6 +1,7 @@
 package send
 
 import (
+	"context"
 	"io"
 	"log"
 	"net/http"
@@ -31,7 +32,7 @@ func ErrorHandlerFromSender(s Sender) ErrorHandler {
 			return
 		}
 
-		s.Send(message.WrapError(err, m))
+		s.Send(context.Background(), message.WrapError(err, m))
 	}
 }
 

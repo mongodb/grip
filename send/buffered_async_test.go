@@ -22,7 +22,7 @@ const (
 
 func TestBufferedAsyncSend(t *testing.T) {
 	var s *InternalSender
-	ctx, cancel := context.WithTimeout(context.Background(), contextTimeout)
+	ctx, cancel := context.WithTimeout(t.Context(), contextTimeout)
 	defer cancel()
 
 	newBufferedAsyncSender := func(interval time.Duration, size int) *bufferedAsyncSender {
@@ -42,7 +42,7 @@ func TestBufferedAsyncSend(t *testing.T) {
 		"RespectsPriority": func(t *testing.T) {
 			bs := newBufferedAsyncSender(time.Minute, 1)
 
-			bs.Send(message.ConvertToComposer(level.Trace, "should not send"))
+			bs.Send(t.Context(), message.ConvertToComposer(level.Trace, "should not send"))
 			assert.False(t, checkMessageSent(bs, s))
 		},
 		"FlushesAtCapacity": func(t *testing.T) {
@@ -50,7 +50,7 @@ func TestBufferedAsyncSend(t *testing.T) {
 			bs := newBufferedAsyncSender(time.Minute, bufferSize)
 
 			for i := 0; i < bufferSize; i++ {
-				bs.Send(message.ConvertToComposer(level.Debug, fmt.Sprintf("message %d", i+1)))
+				bs.Send(t.Context(), message.ConvertToComposer(level.Debug, fmt.Sprintf("message %d", i+1)))
 			}
 
 			require.True(t, checkMessageSent(bs, s))
@@ -65,7 +65,7 @@ func TestBufferedAsyncSend(t *testing.T) {
 			interval := maxProcessingDuration / 2
 			bs := newBufferedAsyncSender(interval, 10)
 
-			bs.Send(message.ConvertToComposer(level.Debug, "should flush"))
+			bs.Send(t.Context(), message.ConvertToComposer(level.Debug, "should flush"))
 			require.True(t, checkMessageSent(bs, s))
 			msg := s.GetMessage()
 			assert.Equal(t, "should flush", msg.Message.String())
@@ -76,10 +76,10 @@ func TestBufferedAsyncSend(t *testing.T) {
 			assert.NoError(t, bs.SetErrorHandler(func(err error, _ message.Composer) { capturedErr = err }))
 
 			for x := 0; x < defaultIncomingBufferFactor*10; x++ {
-				bs.Send(message.ConvertToComposer(level.Debug, "message"))
+				bs.Send(t.Context(), message.ConvertToComposer(level.Debug, "message"))
 			}
 
-			bs.Send(message.ConvertToComposer(level.Debug, "over the limit"))
+			bs.Send(t.Context(), message.ConvertToComposer(level.Debug, "over the limit"))
 			require.True(t, checkMessageSent(bs, s))
 			msg := s.GetMessage()
 			msgString := msg.Message.String()
@@ -110,8 +110,8 @@ func TestBufferedAsyncSend(t *testing.T) {
 		"ForceFlush": func(t *testing.T) {
 			bs := newBufferedAsyncSender(time.Minute, 10)
 
-			bs.Send(message.ConvertToComposer(level.Debug, "message"))
-			require.NoError(t, bs.Flush(nil))
+			bs.Send(t.Context(), message.ConvertToComposer(level.Debug, "message"))
+			require.NoError(t, bs.Flush(t.Context()))
 			require.True(t, checkMessageSent(bs, s))
 			msg := s.GetMessage()
 			assert.Equal(t, "message", msg.Message.String())
@@ -124,7 +124,7 @@ func TestBufferedAsyncSend(t *testing.T) {
 				message.ConvertToComposer(level.Debug, "message2"),
 				message.ConvertToComposer(level.Debug, "message3"),
 			} {
-				bs.Send(msg)
+				bs.Send(t.Context(), msg)
 			}
 
 			assert.NoError(t, bs.Close())
@@ -144,7 +144,7 @@ func TestBufferedAsyncSend(t *testing.T) {
 			assert.NoError(t, bs.SetErrorHandler(func(err error, _ message.Composer) { capturedErr = err }))
 
 			assert.NoError(t, bs.Close())
-			bs.Send(message.ConvertToComposer(level.Debug, "message"))
+			bs.Send(t.Context(), message.ConvertToComposer(level.Debug, "message"))
 			assert.Error(t, capturedErr)
 			assert.True(t, errors.Cause(capturedErr) == context.Canceled)
 		},

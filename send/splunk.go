@@ -64,7 +64,7 @@ func (info SplunkConnectionInfo) validateFromEnv() error {
 	return nil
 }
 
-func (s *splunkLogger) Send(m message.Composer) {
+func (s *splunkLogger) Send(ctx context.Context, m message.Composer) {
 	lvl := s.Level()
 
 	if lvl.ShouldLog(m) {

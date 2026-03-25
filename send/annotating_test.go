@@ -15,7 +15,7 @@ func TestAnnotatingSender(t *testing.T) {
 
 	annotate := NewAnnotatingSender(insend, map[string]interface{}{"a": "b"})
 
-	annotate.Send(message.NewSimpleFields(level.Notice, message.Fields{"b": "a"}))
+	annotate.Send(t.Context(), message.NewSimpleFields(level.Notice, message.Fields{"b": "a"}))
 	msg, ok := insend.GetMessageSafe()
 	require.True(t, ok)
 	assert.Contains(t, msg.Rendered, "a='b'")

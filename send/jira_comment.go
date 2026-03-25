@@ -66,7 +66,7 @@ func NewJiraCommentLogger(ctx context.Context, id string, opts *JiraOptions, l L
 }
 
 // Send post issues via jiraCommentJournal with information in the message.Composer
-func (j *jiraCommentJournal) Send(m message.Composer) {
+func (j *jiraCommentJournal) Send(ctx context.Context, m message.Composer) {
 	if j.Level().ShouldLog(m) {
 		issue := j.issueID
 		if c, ok := m.Raw().(*message.JIRAComment); ok {

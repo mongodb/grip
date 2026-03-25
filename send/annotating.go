@@ -1,6 +1,7 @@
 package send
 
 import (
+	"context"
 	"errors"
 	"strings"
 
@@ -30,7 +31,7 @@ func NewAnnotatingSender(s Sender, annotations map[string]interface{}) Sender {
 	}
 }
 
-func (s *annotatingSender) Send(m message.Composer) {
+func (s *annotatingSender) Send(ctx context.Context, m message.Composer) {
 	if !s.Sender.Level().ShouldLog(m) {
 		return
 	}
@@ -46,5 +47,5 @@ func (s *annotatingSender) Send(m message.Composer) {
 		s.ErrorHandler()(errors.New(strings.Join(errs, ";\n")), m)
 	}
 
-	s.Sender.Send(m)
+	s.Sender.Send(ctx, m)
 }

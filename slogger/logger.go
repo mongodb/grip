@@ -1,6 +1,7 @@
 package slogger
 
 import (
+	"context"
 	"errors"
 
 	"github.com/mongodb/grip/message"
@@ -28,7 +29,7 @@ func (l *Logger) Logf(level Level, messageFmt string, args ...interface{}) (*Log
 	m := newPrefixedLog(l.Name, message.NewFormattedMessage(level.Priority(), messageFmt, args...))
 
 	for _, send := range l.Appenders {
-		send.Send(m)
+		send.Send(context.Background(), m)
 	}
 
 	return m, []error{}
@@ -48,7 +49,7 @@ func (l *Logger) Errorf(level Level, messageFmt string, args ...interface{}) err
 	log := newPrefixedLog(l.Name, m)
 
 	for _, send := range l.Appenders {
-		send.Send(log)
+		send.Send(context.Background(), log)
 	}
 
 	return errors.New(m.String())
@@ -75,7 +76,7 @@ func (l *Logger) Stackf(level Level, stackErr error, messageFmt string, args ...
 	}
 
 	for _, send := range l.Appenders {
-		send.Send(m)
+		send.Send(context.Background(), m)
 	}
 
 	return m, []error{}

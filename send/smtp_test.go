@@ -246,15 +246,15 @@ func (s *SMTPSuite) TestSendMethod() {
 	s.Equal(mock.numMsgs, 0)
 
 	m := message.NewDefaultMessage(level.Debug, "hello")
-	sender.Send(m)
+	sender.Send(s.T().Context(), m)
 	s.Equal(mock.numMsgs, 0)
 
 	m = message.NewDefaultMessage(level.Alert, "")
-	sender.Send(m)
+	sender.Send(s.T().Context(), m)
 	s.Equal(mock.numMsgs, 0)
 
 	m = message.NewDefaultMessage(level.Alert, "world")
-	sender.Send(m)
+	sender.Send(s.T().Context(), m)
 	s.Equal(mock.numMsgs, 1)
 }
 
@@ -269,11 +269,11 @@ func (s *SMTPSuite) TestSendMethodWithError() {
 	s.False(mock.failData)
 
 	m := message.NewDefaultMessage(level.Alert, "world")
-	sender.Send(m)
+	sender.Send(s.T().Context(), m)
 	s.Equal(mock.numMsgs, 1)
 
 	mock.failData = true
-	sender.Send(m)
+	sender.Send(s.T().Context(), m)
 	s.Equal(mock.numMsgs, 1)
 }
 
@@ -304,7 +304,7 @@ func (s *SMTPSuite) TestSendMethodWithEmailComposerOverridesSMTPOptions() {
 	})
 	s.True(m.Loggable())
 
-	sender.Send(m)
+	sender.Send(s.T().Context(), m)
 	s.Equal(1, mock.numMsgs)
 
 	contains := []string{

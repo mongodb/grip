@@ -67,7 +67,7 @@ func (s *InMemorySuite) TestInvalidCapacityErrors() {
 
 func (s *InMemorySuite) TestSendIgnoresMessagesWithPrioritiesBelowThreshold() {
 	msg := message.NewDefaultMessage(level.Trace, "foo")
-	s.sender.Send(msg)
+	s.sender.Send(s.T().Context(), msg)
 	s.Assert().Equal(0, len(s.sender.buffer))
 }
 
@@ -89,7 +89,7 @@ func (s *InMemorySuite) TestGetCountInvalidCount() {
 
 func (s *InMemorySuite) TestGetCountOne() {
 	for i := 0; i < s.maxCap-1; i++ {
-		s.sender.Send(s.msgs[i])
+		s.sender.Send(s.T().Context(), s.msgs[i])
 	}
 	for i := 0; i < s.maxCap-1; i++ {
 		msgs, n, err := s.sender.GetCount(1)
@@ -98,7 +98,7 @@ func (s *InMemorySuite) TestGetCountOne() {
 		s.Equal(s.msgs[i], msgs[0])
 	}
 
-	s.sender.Send(s.msgs[s.maxCap])
+	s.sender.Send(s.T().Context(), s.msgs[s.maxCap])
 
 	msgs, n, err := s.sender.GetCount(1)
 	s.Require().NoError(err)
@@ -113,7 +113,7 @@ func (s *InMemorySuite) TestGetCountOne() {
 
 func (s *InMemorySuite) TestGetCountMultiple() {
 	for i := 0; i < s.maxCap; i++ {
-		s.sender.Send(s.msgs[i])
+		s.sender.Send(s.T().Context(), s.msgs[i])
 	}
 
 	for count := 1; count <= s.maxCap; count++ {
@@ -140,7 +140,7 @@ func (s *InMemorySuite) TestGetCountMultiple() {
 
 func (s *InMemorySuite) TestGetCountMultipleWithOverflow() {
 	for _, msg := range s.msgs {
-		s.sender.Send(msg)
+		s.sender.Send(s.T().Context(), msg)
 	}
 
 	for count := 1; count <= s.maxCap; count++ {
@@ -166,8 +166,8 @@ func (s *InMemorySuite) TestGetCountMultipleWithOverflow() {
 }
 
 func (s *InMemorySuite) TestGetCountTruncated() {
-	s.sender.Send(s.msgs[0])
-	s.sender.Send(s.msgs[1])
+	s.sender.Send(s.T().Context(), s.msgs[0])
+	s.sender.Send(s.T().Context(), s.msgs[1])
 
 	msgs, n, err := s.sender.GetCount(1)
 	s.Require().NoError(err)
@@ -177,7 +177,7 @@ func (s *InMemorySuite) TestGetCountTruncated() {
 
 	for i := 0; i < s.maxCap; i++ {
 		s.Require().NotEqual(readHeadTruncated, s.sender.readHead)
-		s.sender.Send(s.msgs[i])
+		s.sender.Send(s.T().Context(), s.msgs[i])
 	}
 	s.Require().Equal(readHeadTruncated, s.sender.readHead)
 	_, _, err = s.sender.GetCount(1)
@@ -185,7 +185,7 @@ func (s *InMemorySuite) TestGetCountTruncated() {
 }
 
 func (s *InMemorySuite) TestGetCountWithCatchupTruncated() {
-	s.sender.Send(s.msgs[0])
+	s.sender.Send(s.T().Context(), s.msgs[0])
 	msgs, n, err := s.sender.GetCount(1)
 	s.Require().NoError(err)
 	s.Equal(1, n)
@@ -194,13 +194,13 @@ func (s *InMemorySuite) TestGetCountWithCatchupTruncated() {
 
 	for i := 0; i < s.maxCap; i++ {
 		s.Require().NotEqual(readHeadTruncated, s.sender.readHead)
-		s.sender.Send(s.msgs[i])
+		s.sender.Send(s.T().Context(), s.msgs[i])
 		s.Require().False(s.sender.readHeadCaughtUp)
 	}
 	s.Require().False(s.sender.readHeadCaughtUp)
 	s.Require().NotEqual(readHeadTruncated, s.sender.readHead)
 
-	s.sender.Send(s.msgs[0])
+	s.sender.Send(s.T().Context(), s.msgs[0])
 	s.Require().False(s.sender.readHeadCaughtUp)
 	s.Require().Equal(readHeadTruncated, s.sender.readHead)
 
@@ -210,7 +210,7 @@ func (s *InMemorySuite) TestGetCountWithCatchupTruncated() {
 
 func (s *InMemorySuite) TestGetCountWithCatchupWithOverflowTruncated() {
 	for i := 0; i < s.maxCap; i++ {
-		s.sender.Send(s.msgs[i])
+		s.sender.Send(s.T().Context(), s.msgs[i])
 	}
 	for i := 0; i < s.maxCap; i++ {
 		msgs, n, err := s.sender.GetCount(1)
@@ -222,7 +222,7 @@ func (s *InMemorySuite) TestGetCountWithCatchupWithOverflowTruncated() {
 
 	for i := 0; i < s.maxCap+1; i++ {
 		s.Require().NotEqual(readHeadTruncated, s.sender.readHead)
-		s.sender.Send(s.msgs[i])
+		s.sender.Send(s.T().Context(), s.msgs[i])
 		s.Require().False(s.sender.readHeadCaughtUp)
 	}
 	s.Require().Equal(readHeadTruncated, s.sender.readHead)
@@ -233,7 +233,7 @@ func (s *InMemorySuite) TestGetCountWithCatchupWithOverflowTruncated() {
 
 func (s *InMemorySuite) TestGetCountWithOverflowTruncated() {
 	for i := 0; i < s.maxCap; i++ {
-		s.sender.Send(s.msgs[i])
+		s.sender.Send(s.T().Context(), s.msgs[i])
 	}
 	for i := 0; i < s.maxCap; i++ {
 		msgs, n, err := s.sender.GetCount(1)
@@ -245,7 +245,7 @@ func (s *InMemorySuite) TestGetCountWithOverflowTruncated() {
 
 	for i := 0; i < s.maxCap+1; i++ {
 		s.Require().NotEqual(readHeadTruncated, s.sender.readHead)
-		s.sender.Send(s.msgs[i])
+		s.sender.Send(s.T().Context(), s.msgs[i])
 		s.Require().False(s.sender.readHeadCaughtUp)
 	}
 	s.Require().Equal(readHeadTruncated, s.sender.readHead)
@@ -255,7 +255,7 @@ func (s *InMemorySuite) TestGetCountWithOverflowTruncated() {
 }
 
 func (s *InMemorySuite) TestGetCountWithWritesAfterEOF() {
-	s.sender.Send(s.msgs[0])
+	s.sender.Send(s.T().Context(), s.msgs[0])
 	msgs, n, err := s.sender.GetCount(1)
 	s.Require().NoError(err)
 	s.Equal(1, n)
@@ -264,7 +264,7 @@ func (s *InMemorySuite) TestGetCountWithWritesAfterEOF() {
 	_, _, err = s.sender.GetCount(1)
 	s.Equal(io.EOF, err)
 
-	s.sender.Send(s.msgs[1])
+	s.sender.Send(s.T().Context(), s.msgs[1])
 	s.False(s.sender.readHeadCaughtUp)
 	msgs, n, err = s.sender.GetCount(1)
 	s.Require().NoError(err)
@@ -277,7 +277,7 @@ func (s *InMemorySuite) TestGetCountWithWritesAfterEOF() {
 
 func (s *InMemorySuite) TestResetRead() {
 	for i := 0; i < s.maxCap-1; i++ {
-		s.sender.Send(s.msgs[i])
+		s.sender.Send(s.T().Context(), s.msgs[i])
 	}
 
 	var err error
@@ -318,7 +318,7 @@ func (s *InMemorySuite) TestGetCountEmptyBuffer() {
 
 func (s *InMemorySuite) TestGetWithOverflow() {
 	for i, msg := range s.msgs {
-		s.sender.Send(msg)
+		s.sender.Send(s.T().Context(), msg)
 		found := s.sender.Get()
 
 		if i < s.maxCap {
@@ -341,7 +341,7 @@ func (s *InMemorySuite) TestGetStringEmptyBuffer() {
 
 func (s *InMemorySuite) TestGetStringWithOverflow() {
 	for i, msg := range s.msgs {
-		s.sender.Send(msg)
+		s.sender.Send(s.T().Context(), msg)
 		found, err := s.sender.GetString()
 		s.Require().NoError(err)
 
@@ -367,7 +367,7 @@ func (s *InMemorySuite) TestGetRawEmptyBuffer() {
 
 func (s *InMemorySuite) TestGetRawWithOverflow() {
 	for i, msg := range s.msgs {
-		s.sender.Send(msg)
+		s.sender.Send(s.T().Context(), msg)
 		found := s.sender.GetRaw()
 		var expected []interface{}
 
@@ -389,7 +389,7 @@ func (s *InMemorySuite) TestGetRawWithOverflow() {
 func (s *InMemorySuite) TestTotalBytes() {
 	var totalBytes int64
 	for _, msg := range s.msgs {
-		s.sender.Send(msg)
+		s.sender.Send(s.T().Context(), msg)
 		totalBytes += int64(len(msg.String()))
 		s.Assert().Equal(totalBytes, s.sender.TotalBytesSent())
 	}

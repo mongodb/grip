@@ -93,7 +93,7 @@ func NewGithubIssuesLogger(name string, opts *GithubOptions) (Sender, error) {
 	return s, nil
 }
 
-func (s *githubLogger) Send(m message.Composer) {
+func (s *githubLogger) Send(ctx context.Context, m message.Composer) {
 	if s.Level().ShouldLog(m) {
 		text, err := s.formatter(m)
 		if err != nil {

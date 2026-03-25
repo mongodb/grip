@@ -97,17 +97,17 @@ func (s *SplunkSuite) TestSendMethod() {
 	s.Equal(mock.httpSent, 0)
 
 	m := message.NewDefaultMessage(level.Debug, "hello")
-	s.sender.Send(m)
+	s.sender.Send(s.T().Context(), m)
 	s.Equal(mock.numSent, 0)
 	s.Equal(mock.httpSent, 0)
 
 	m = message.NewDefaultMessage(level.Alert, "")
-	s.sender.Send(m)
+	s.sender.Send(s.T().Context(), m)
 	s.Equal(mock.numSent, 0)
 	s.Equal(mock.httpSent, 0)
 
 	m = message.NewDefaultMessage(level.Alert, "world")
-	s.sender.Send(m)
+	s.sender.Send(s.T().Context(), m)
 	s.Equal(mock.numSent, 1)
 	s.Equal(mock.httpSent, 1)
 }
@@ -120,12 +120,12 @@ func (s *SplunkSuite) TestSendMethodWithError() {
 	s.False(mock.failSend)
 
 	m := message.NewDefaultMessage(level.Alert, "world")
-	s.sender.Send(m)
+	s.sender.Send(s.T().Context(), m)
 	s.Equal(mock.numSent, 1)
 	s.Equal(mock.httpSent, 1)
 
 	mock.failSend = true
-	s.sender.Send(m)
+	s.sender.Send(s.T().Context(), m)
 	s.Equal(mock.numSent, 1)
 	s.Equal(mock.httpSent, 1)
 }
@@ -143,7 +143,7 @@ func (s *SplunkSuite) TestBatchSendMethod() {
 
 	g := message.MakeGroupComposer(m1, m2, m3, m4)
 
-	s.sender.Send(g)
+	s.sender.Send(s.T().Context(), g)
 	s.Equal(mock.numSent, 2)
 	s.Equal(mock.httpSent, 1)
 }
@@ -162,12 +162,12 @@ func (s *SplunkSuite) TestBatchSendMethodWithEror() {
 
 	g := message.MakeGroupComposer(m1, m2, m3, m4)
 
-	s.sender.Send(g)
+	s.sender.Send(s.T().Context(), g)
 	s.Equal(mock.numSent, 2)
 	s.Equal(mock.httpSent, 1)
 
 	mock.failSend = true
-	s.sender.Send(g)
+	s.sender.Send(s.T().Context(), g)
 	s.Equal(mock.numSent, 2)
 	s.Equal(mock.httpSent, 1)
 }

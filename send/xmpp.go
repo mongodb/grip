@@ -132,7 +132,7 @@ func constructXMPPLogger(name, target string, info XMPPConnectionInfo) (Sender, 
 	return s, nil
 }
 
-func (s *xmppLogger) Send(m message.Composer) {
+func (s *xmppLogger) Send(ctx context.Context, m message.Composer) {
 	if s.Level().ShouldLog(m) {
 		text, err := s.formatter(m)
 		if err != nil {
