@@ -10,7 +10,7 @@ func init() {
 }
 
 func getRandNumber() int {
-	return rand.Intn(101)
+	return rand.Intn(100)
 }
 
 // Fifth returns true 20% of the time.
