@@ -13,7 +13,6 @@ import (
 	"github.com/google/go-github/v79/github"
 	"github.com/mongodb/grip/message"
 	"github.com/pkg/errors"
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
@@ -156,7 +155,6 @@ type githubClientImpl struct {
 
 func (c *githubClientImpl) Init(token string, maxAttempts int, minDelay time.Duration) {
 	client := utility.GetHTTPClient()
-	client.Transport = otelhttp.NewTransport(client.Transport)
 
 	client = utility.SetupOauth2CustomHTTPRetryableClient(
 		token,
