@@ -154,7 +154,7 @@ type githubClientImpl struct {
 }
 
 func (c *githubClientImpl) Init(token string, maxAttempts int, minDelay time.Duration) {
-	client := utility.GetHTTPClient()
+	client := utility.WithOTelTracing(utility.GetHTTPClient())
 
 	client = utility.SetupOauth2CustomHTTPRetryableClient(
 		token,
