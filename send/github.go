@@ -47,11 +47,13 @@ type GithubOptions struct {
 	Token       string
 	MaxAttempts int
 	MinDelay    time.Duration
-	// RetryableHTTPStatusCodes defaults to HTTP 502 to preserve existing behavior.
+	// RetryableHTTPStatusCodes configures which HTTP error responses should be
+	// retried. Values must be between 400 and 599. It defaults to HTTP 502 to
+	// preserve existing behavior.
 	RetryableHTTPStatusCodes []int
 }
 
-func (o *GithubOptions) populate() {
+func (o *GithubOptions) populate() error {
 	if o.MaxAttempts <= 0 {
 		o.MaxAttempts = numGithubAttempts
 	}
@@ -68,12 +70,22 @@ func (o *GithubOptions) populate() {
 	if len(o.RetryableHTTPStatusCodes) == 0 {
 		o.RetryableHTTPStatusCodes = []int{http.StatusBadGateway}
 	}
+
+	for _, statusCode := range o.RetryableHTTPStatusCodes {
+		if statusCode < http.StatusBadRequest || statusCode > 599 {
+			return errors.Errorf("retryable HTTP status code must be between 400 and 599, got %d", statusCode)
+		}
+	}
+
+	return nil
 }
 
 // NewGithubIssuesLogger builds a sender implementation that creates a
 // new issue in a Github Project for each log message.
 func NewGithubIssuesLogger(name string, opts *GithubOptions) (Sender, error) {
-	opts.populate()
+	if err := opts.populate(); err != nil {
+		return nil, errors.Wrap(err, "invalid GitHub options")
+	}
 	s := &githubLogger{
 		Base: NewBase(name),
 		opts: opts,

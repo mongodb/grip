@@ -13,10 +13,66 @@ import (
 
 func TestGithubOptionsPopulateDefaultsToBadGateway(t *testing.T) {
 	opts := &GithubOptions{}
-	opts.populate()
+	require.NoError(t, opts.populate())
 
 	assert.Equal(t, numGithubAttempts, opts.MaxAttempts)
 	assert.Equal(t, []int{http.StatusBadGateway}, opts.RetryableHTTPStatusCodes)
+}
+
+func TestGithubOptionsRejectsNonErrorRetryStatuses(t *testing.T) {
+	for _, test := range []struct {
+		name       string
+		statusCode int
+	}{
+		{name: "zero", statusCode: 0},
+		{name: "informational", statusCode: http.StatusContinue},
+		{name: "success", statusCode: http.StatusCreated},
+		{name: "redirect", statusCode: http.StatusPermanentRedirect},
+		{name: "above valid range", statusCode: 600},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			opts := &GithubOptions{RetryableHTTPStatusCodes: []int{test.statusCode}}
+			err := opts.populate()
+
+			require.Error(t, err)
+			assert.Contains(t, err.Error(), "must be between 400 and 599")
+		})
+	}
+}
+
+func TestGithubOptionsAllowsHTTPErrorRetryStatuses(t *testing.T) {
+	opts := &GithubOptions{RetryableHTTPStatusCodes: []int{
+		http.StatusBadRequest,
+		http.StatusTooManyRequests,
+		http.StatusInternalServerError,
+		599,
+	}}
+
+	require.NoError(t, opts.populate())
+}
+
+func TestGitHubSenderConstructorsRejectNonErrorRetryStatuses(t *testing.T) {
+	constructors := map[string]func(*GithubOptions) (Sender, error){
+		"issues": func(opts *GithubOptions) (Sender, error) {
+			return NewGithubIssuesLogger("issues", opts)
+		},
+		"comments": func(opts *GithubOptions) (Sender, error) {
+			return NewGithubCommentLogger("comments", 1, opts)
+		},
+		"statuses": func(opts *GithubOptions) (Sender, error) {
+			return NewGithubStatusLogger("statuses", opts, "ref")
+		},
+	}
+
+	for name, constructor := range constructors {
+		t.Run(name, func(t *testing.T) {
+			sender, err := constructor(&GithubOptions{RetryableHTTPStatusCodes: []int{http.StatusCreated}})
+
+			require.Error(t, err)
+			assert.Nil(t, sender)
+			assert.Contains(t, err.Error(), "invalid GitHub options")
+		})
+	}
 }
 
 func TestGitHubShouldRetryConfiguredStatusesWithinAttemptLimit(t *testing.T) {
