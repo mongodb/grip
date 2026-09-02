@@ -38,7 +38,7 @@ func NewGithubCommentLogger(name string, issueID int, opts *GithubOptions) (Send
 		gh:    &githubClientImpl{},
 	}
 
-	s.gh.Init(opts.Token, opts.MaxAttempts, opts.MinDelay)
+	s.gh.Init(opts.Token, opts.MaxAttempts, opts.MinDelay, opts.RetryableHTTPStatusCodes)
 
 	fallback := log.New(os.Stdout, "", log.LstdFlags)
 	if err := s.SetErrorHandler(ErrorHandlerFromLogger(fallback)); err != nil {
@@ -58,11 +58,14 @@ func NewGithubCommentLogger(name string, issueID int, opts *GithubOptions) (Send
 }
 
 func (s *githubCommentLogger) Send(ctx context.Context, m message.Composer) {
+	s.ErrorHandler()(ctx, s.SendWithError(ctx, m), m)
+}
+
+func (s *githubCommentLogger) SendWithError(ctx context.Context, m message.Composer) error {
 	if s.Level().ShouldLog(m) {
 		text, err := s.formatter(m)
 		if err != nil {
-			s.ErrorHandler()(ctx, err, m)
-			return
+			return err
 		}
 
 		comment := &github.IssueComment{Body: &text}
@@ -70,6 +73,7 @@ func (s *githubCommentLogger) Send(ctx context.Context, m message.Composer) {
 		ctx, cancel := context.WithTimeout(ctx, time.Minute)
 		defer cancel()
 
+		ctx, attempts := withGitHubAttemptTracker(ctx)
 		ctx, span := tracer.Start(ctx, "CreateComment", trace.WithAttributes(
 			attribute.String(githubEndpointAttribute, "CreateComment"),
 			attribute.String(githubOwnerAttribute, s.opts.Account),
@@ -78,17 +82,16 @@ func (s *githubCommentLogger) Send(ctx context.Context, m message.Composer) {
 		defer span.End()
 
 		if _, resp, err := s.gh.CreateComment(ctx, s.opts.Account, s.opts.Repo, s.issue, comment); err != nil {
-			s.ErrorHandler()(ctx, errors.Wrap(err, "sending GitHub create comment request"), m)
-
 			span.RecordError(err)
 			span.SetStatus(codes.Error, "sending comment")
-		} else if err = handleHTTPResponseError(resp.Response); err != nil {
-			s.ErrorHandler()(ctx, errors.Wrap(err, "creating GitHub comment"), m)
-
+			return newGitHubSendError(errors.Wrap(err, "sending GitHub create comment request"), resp, attempts.count, isRetryableGitHubError(githubHTTPResponse(resp), err, s.opts.RetryableHTTPStatusCodes))
+		} else if err = handleGitHubResponseError(resp); err != nil {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, "sending comment")
+			return newGitHubSendError(errors.Wrap(err, "creating GitHub comment"), resp, attempts.count, isRetryableGitHubError(githubHTTPResponse(resp), nil, s.opts.RetryableHTTPStatusCodes))
 		}
 	}
+	return nil
 }
 
 func (s *githubCommentLogger) Flush(_ context.Context) error { return nil }
