@@ -47,9 +47,13 @@ type GithubOptions struct {
 	Token       string
 	MaxAttempts int
 	MinDelay    time.Duration
+	// RetryableHTTPStatusCodes configures which HTTP error responses should be
+	// retried. Values must be between 400 and 599. It defaults to HTTP 502 to
+	// preserve existing behavior.
+	RetryableHTTPStatusCodes []int
 }
 
-func (o *GithubOptions) populate() {
+func (o *GithubOptions) populate() error {
 	if o.MaxAttempts <= 0 {
 		o.MaxAttempts = numGithubAttempts
 	}
@@ -62,19 +66,33 @@ func (o *GithubOptions) populate() {
 	if o.MinDelay < floor {
 		o.MinDelay = floor
 	}
+
+	if len(o.RetryableHTTPStatusCodes) == 0 {
+		o.RetryableHTTPStatusCodes = []int{http.StatusBadGateway}
+	}
+
+	for _, statusCode := range o.RetryableHTTPStatusCodes {
+		if statusCode < http.StatusBadRequest || statusCode > 599 {
+			return errors.Errorf("retryable HTTP status code must be between 400 and 599, got %d", statusCode)
+		}
+	}
+
+	return nil
 }
 
 // NewGithubIssuesLogger builds a sender implementation that creates a
 // new issue in a Github Project for each log message.
 func NewGithubIssuesLogger(name string, opts *GithubOptions) (Sender, error) {
-	opts.populate()
+	if err := opts.populate(); err != nil {
+		return nil, errors.Wrap(err, "invalid GitHub options")
+	}
 	s := &githubLogger{
 		Base: NewBase(name),
 		opts: opts,
 		gh:   &githubClientImpl{},
 	}
 
-	s.gh.Init(opts.Token, opts.MaxAttempts, opts.MinDelay)
+	s.gh.Init(opts.Token, opts.MaxAttempts, opts.MinDelay, opts.RetryableHTTPStatusCodes)
 
 	fallback := log.New(os.Stdout, "", log.LstdFlags)
 	if err := s.SetErrorHandler(ErrorHandlerFromLogger(fallback)); err != nil {
@@ -93,11 +111,14 @@ func NewGithubIssuesLogger(name string, opts *GithubOptions) (Sender, error) {
 }
 
 func (s *githubLogger) Send(ctx context.Context, m message.Composer) {
+	s.ErrorHandler()(ctx, s.SendWithError(ctx, m), m)
+}
+
+func (s *githubLogger) SendWithError(ctx context.Context, m message.Composer) error {
 	if s.Level().ShouldLog(m) {
 		text, err := s.formatter(m)
 		if err != nil {
-			s.ErrorHandler()(ctx, err, m)
-			return
+			return err
 		}
 
 		title := fmt.Sprintf("[%s]: %s", s.Name(), m.String())
@@ -109,6 +130,7 @@ func (s *githubLogger) Send(ctx context.Context, m message.Composer) {
 		ctx, cancel := context.WithTimeout(ctx, time.Minute)
 		defer cancel()
 
+		ctx, attempts := withGitHubAttemptTracker(ctx)
 		ctx, span := tracer.Start(ctx, "CreateIssue", trace.WithAttributes(
 			attribute.String(githubEndpointAttribute, "CreateIssue"),
 			attribute.String(githubOwnerAttribute, s.opts.Account),
@@ -117,17 +139,16 @@ func (s *githubLogger) Send(ctx context.Context, m message.Composer) {
 		defer span.End()
 
 		if _, resp, err := s.gh.Create(ctx, s.opts.Account, s.opts.Repo, issue); err != nil {
-			s.ErrorHandler()(ctx, errors.Wrap(err, "sending GitHub create issue request"), m)
-
 			span.RecordError(err)
 			span.SetStatus(codes.Error, "creating issue")
-		} else if err = handleHTTPResponseError(resp.Response); err != nil {
-			s.ErrorHandler()(ctx, errors.Wrap(err, "creating GitHub issue"), m)
-
+			return newGitHubSendError(errors.Wrap(err, "sending GitHub create issue request"), resp, attempts.count, isRetryableGitHubError(githubHTTPResponse(resp), err, s.opts.RetryableHTTPStatusCodes))
+		} else if err = handleGitHubResponseError(resp); err != nil {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, "creating issue")
+			return newGitHubSendError(errors.Wrap(err, "creating GitHub issue"), resp, attempts.count, isRetryableGitHubError(githubHTTPResponse(resp), nil, s.opts.RetryableHTTPStatusCodes))
 		}
 	}
+	return nil
 }
 
 func (s *githubLogger) Flush(_ context.Context) error { return nil }
@@ -139,7 +160,7 @@ func (s *githubLogger) Flush(_ context.Context) error { return nil }
 //////////////////////////////////////////////////////////////////////////
 
 type githubClient interface {
-	Init(token string, maxAttempts int, minDelay time.Duration)
+	Init(token string, maxAttempts int, minDelay time.Duration, retryableHTTPStatusCodes []int)
 	// Issues
 	Create(context.Context, string, string, *github.IssueRequest) (*github.Issue, *github.Response, error)
 	CreateComment(context.Context, string, string, int, *github.IssueComment) (*github.IssueComment, *github.Response, error)
@@ -153,12 +174,12 @@ type githubClientImpl struct {
 	repos *github.RepositoriesService
 }
 
-func (c *githubClientImpl) Init(token string, maxAttempts int, minDelay time.Duration) {
+func (c *githubClientImpl) Init(token string, maxAttempts int, minDelay time.Duration, retryableHTTPStatusCodes []int) {
 	client := utility.WithOTelTracing(utility.GetHTTPClient())
 
 	client = utility.SetupOauth2CustomHTTPRetryableClient(
 		token,
-		githubShouldRetry(),
+		githubShouldRetry(maxAttempts, retryableHTTPStatusCodes),
 		utility.RetryHTTPDelay(utility.RetryOptions{
 			MaxAttempts: maxAttempts,
 			MinDelay:    minDelay,
@@ -169,29 +190,97 @@ func (c *githubClientImpl) Init(token string, maxAttempts int, minDelay time.Dur
 	c.repos = githubClient.Repositories
 }
 
-func githubShouldRetry() utility.HTTPRetryFunction {
+type githubAttemptTrackerKey struct{}
+
+type githubAttemptTracker struct {
+	count int
+}
+
+func withGitHubAttemptTracker(ctx context.Context) (context.Context, *githubAttemptTracker) {
+	attempts := &githubAttemptTracker{}
+	return context.WithValue(ctx, githubAttemptTrackerKey{}, attempts), attempts
+}
+
+func githubShouldRetry(maxAttempts int, retryableHTTPStatusCodes []int) utility.HTTPRetryFunction {
 	return func(index int, req *http.Request, resp *http.Response, err error) bool {
 		trace.SpanFromContext(req.Context()).SetAttributes(attribute.Int(githubRetriesAttribute, index))
+		if attempts, ok := req.Context().Value(githubAttemptTrackerKey{}).(*githubAttemptTracker); ok {
+			attempts.count = index + 1
+		}
 
-		if err != nil {
-			if strings.Contains(err.Error(), "connection reset by peer") {
-				// This has happened in the past when GitHub was having an
-				// outage, so it's worth retrying.
+		if index+1 >= maxAttempts {
+			return false
+		}
+
+		return isRetryableGitHubError(resp, err, retryableHTTPStatusCodes)
+	}
+}
+
+func isRetryableGitHubError(resp *http.Response, err error, retryableHTTPStatusCodes []int) bool {
+	if resp != nil {
+		for _, statusCode := range retryableHTTPStatusCodes {
+			if resp.StatusCode == statusCode {
 				return true
 			}
-
-			return utility.IsTemporaryError(err)
 		}
-
-		if resp == nil {
-			return true
-		}
-
-		if resp.StatusCode == http.StatusBadGateway {
-			return true
-		}
-
 		return false
+	}
+
+	if err != nil {
+		if strings.Contains(err.Error(), "connection reset by peer") {
+			// This has happened in the past when GitHub was having an
+			// outage, so it's worth retrying.
+			return true
+		}
+		return utility.IsTemporaryError(err)
+	}
+
+	return true
+}
+
+// GitHubSendError describes a failed GitHub delivery.
+type GitHubSendError struct {
+	StatusCode int
+	Attempts   int
+	Retryable  bool
+	Err        error
+}
+
+func (e *GitHubSendError) Error() string {
+	return fmt.Sprintf("%s after %d attempt(s)", e.Err.Error(), e.Attempts)
+}
+
+func (e *GitHubSendError) Unwrap() error { return e.Err }
+
+func githubHTTPResponse(resp *github.Response) *http.Response {
+	if resp == nil {
+		return nil
+	}
+	return resp.Response
+}
+
+func handleGitHubResponseError(resp *github.Response) error {
+	httpResp := githubHTTPResponse(resp)
+	if httpResp == nil {
+		return errors.New("received nil HTTP response")
+	}
+	return handleHTTPResponseError(httpResp)
+}
+
+func newGitHubSendError(err error, resp *github.Response, attempts int, retryable bool) error {
+	statusCode := 0
+	httpResp := githubHTTPResponse(resp)
+	if httpResp != nil {
+		statusCode = httpResp.StatusCode
+	}
+	if attempts == 0 {
+		attempts = 1
+	}
+	return &GitHubSendError{
+		StatusCode: statusCode,
+		Attempts:   attempts,
+		Retryable:  retryable,
+		Err:        err,
 	}
 }
 
