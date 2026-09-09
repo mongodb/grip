@@ -26,6 +26,16 @@ func TestGithubOptionsPopulateDefaultsToBadGateway(t *testing.T) {
 	assert.Equal(t, []int{http.StatusBadGateway}, opts.RetryableHTTPStatusCodes)
 }
 
+func TestGitHubSendErrorIncludesStatusCode(t *testing.T) {
+	err := &GitHubSendError{
+		StatusCode: http.StatusInternalServerError,
+		Attempts:   3,
+		Err:        errors.New("sending request"),
+	}
+
+	assert.Equal(t, "sending request (HTTP status 500) after 3 attempt(s)", err.Error())
+}
+
 func TestGithubOptionsRejectsNonErrorRetryStatuses(t *testing.T) {
 	for _, test := range []struct {
 		name       string

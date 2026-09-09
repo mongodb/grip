@@ -235,6 +235,8 @@ func isRetryableGitHubError(resp *http.Response, err error, retryableHTTPStatusC
 		return utility.IsTemporaryError(err)
 	}
 
+	// rehttp should always return either a response or an error.
+	// If neither is returned, retry defensively.
 	return true
 }
 
@@ -247,6 +249,9 @@ type GitHubSendError struct {
 }
 
 func (e *GitHubSendError) Error() string {
+	if e.StatusCode != 0 {
+		return fmt.Sprintf("%s (HTTP status %d) after %d attempt(s)", e.Err.Error(), e.StatusCode, e.Attempts)
+	}
 	return fmt.Sprintf("%s after %d attempt(s)", e.Err.Error(), e.Attempts)
 }
 
