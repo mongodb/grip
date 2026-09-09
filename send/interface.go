@@ -62,6 +62,24 @@ type Sender interface {
 	Close() error
 }
 
+// ErrorSender is a Sender that can report whether a message was delivered.
+// SendWithError does not invoke the sender's error handler.
+type ErrorSender interface {
+	Sender
+	SendWithError(context.Context, message.Composer) error
+}
+
+// SendWithError sends a message and returns any synchronous delivery error
+// exposed by the sender. Senders that do not implement ErrorSender retain the
+// behavior of Sender.Send.
+func SendWithError(ctx context.Context, sender Sender, m message.Composer) error {
+	if errorSender, ok := sender.(ErrorSender); ok {
+		return errorSender.SendWithError(ctx, m)
+	}
+	sender.Send(ctx, m)
+	return nil
+}
+
 // LevelInfo provides a sender-independent structure for storing information
 // about a sender's configured log levels.
 type LevelInfo struct {

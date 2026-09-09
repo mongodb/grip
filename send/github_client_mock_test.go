@@ -20,7 +20,7 @@ type githubClientMock struct {
 	lastRepo string
 }
 
-func (g *githubClientMock) Init(_ string, _ int, _ time.Duration) {}
+func (g *githubClientMock) Init(_ string, _ int, _ time.Duration, _ []int) {}
 
 func (g *githubClientMock) Create(_ context.Context, _ string, _ string, _ *github.IssueRequest) (*github.Issue, *github.Response, error) {
 	if g.failSend {

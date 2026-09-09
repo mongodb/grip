@@ -24,6 +24,10 @@ type githubStatusMessageLogger struct {
 }
 
 func (s *githubStatusMessageLogger) Send(ctx context.Context, m message.Composer) {
+	s.ErrorHandler()(ctx, s.SendWithError(ctx, m), m)
+}
+
+func (s *githubStatusMessageLogger) SendWithError(ctx context.Context, m message.Composer) error {
 	if s.Level().ShouldLog(m) {
 		var status *github.RepoStatus
 		owner := ""
@@ -55,19 +59,19 @@ func (s *githubStatusMessageLogger) Send(ctx context.Context, m message.Composer
 			owner = s.opts.Account
 		}
 		if len(repo) == 0 {
-			owner = s.opts.Repo
+			repo = s.opts.Repo
 		}
 		if len(ref) == 0 {
-			owner = s.ref
+			ref = s.ref
 		}
 		if status == nil {
-			s.ErrorHandler()(ctx, errors.New("composer cannot be converted to GitHub status"), m)
-			return
+			return errors.New("composer cannot be converted to GitHub status")
 		}
 
 		ctx, cancel := context.WithTimeout(ctx, time.Minute)
 		defer cancel()
 
+		ctx, attempts := withGitHubAttemptTracker(ctx)
 		ctx, span := tracer.Start(ctx, "CreateStatus", trace.WithAttributes(
 			attribute.String(githubEndpointAttribute, "CreateStatus"),
 			attribute.String(githubOwnerAttribute, owner),
@@ -77,17 +81,16 @@ func (s *githubStatusMessageLogger) Send(ctx context.Context, m message.Composer
 		defer span.End()
 
 		if _, resp, err := s.gh.CreateStatus(ctx, owner, repo, ref, *status); err != nil {
-			s.ErrorHandler()(ctx, errors.Wrap(err, "sending GitHub create status request"), m)
-
 			span.RecordError(err)
 			span.SetStatus(codes.Error, "sending status")
-		} else if err = handleHTTPResponseError(resp.Response); err != nil {
-			s.ErrorHandler()(ctx, errors.Wrap(err, "creating GitHub status"), m)
-
+			return newGitHubSendError(errors.Wrap(err, "sending GitHub create status request"), resp, attempts.count, isRetryableGitHubError(githubHTTPResponse(resp), err, s.opts.RetryableHTTPStatusCodes))
+		} else if err = handleGitHubResponseError(resp); err != nil {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, "sending status")
+			return newGitHubSendError(errors.Wrap(err, "creating GitHub status"), resp, attempts.count, isRetryableGitHubError(githubHTTPResponse(resp), nil, s.opts.RetryableHTTPStatusCodes))
 		}
 	}
+	return nil
 }
 
 func (s *githubStatusMessageLogger) Flush(_ context.Context) error { return nil }
@@ -95,14 +98,17 @@ func (s *githubStatusMessageLogger) Flush(_ context.Context) error { return nil 
 // NewGithubStatusLogger returns a Sender to send payloads to the Github Status
 // API. Statuses will be attached to the given ref.
 func NewGithubStatusLogger(name string, opts *GithubOptions, ref string) (Sender, error) {
-	opts.populate()
+	if err := opts.populate(); err != nil {
+		return nil, errors.Wrap(err, "invalid GitHub options")
+	}
 	s := &githubStatusMessageLogger{
 		Base: NewBase(name),
+		opts: opts,
 		gh:   &githubClientImpl{},
 		ref:  ref,
 	}
 
-	s.gh.Init(opts.Token, opts.MaxAttempts, opts.MinDelay)
+	s.gh.Init(opts.Token, opts.MaxAttempts, opts.MinDelay, opts.RetryableHTTPStatusCodes)
 
 	fallback := log.New(os.Stdout, "", log.LstdFlags)
 	if err := s.SetErrorHandler(ErrorHandlerFromLogger(fallback)); err != nil {
